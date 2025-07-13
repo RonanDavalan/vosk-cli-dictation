@@ -1,0 +1,12 @@
+# requirements.in
+#
+# This file lists the direct, high-level dependencies of the project.
+# Use 'pip-compile' to generate the full, pinned 'requirements.txt'.
+
+vosk
+pyaudio
+pynput
+colorama
+pyperclip
+pyyaml
+babel

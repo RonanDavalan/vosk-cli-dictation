@@ -1,0 +1,225 @@
+# French translations for Projet Vosk.
+# Copyright (C) 2025
+# This file is distributed under the same license as the Projet Vosk project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Projet Vosk\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-08 10:00+0000\n"
+"PO-Revision-Date: 2025-07-08 10:00+0000\n"
+"Last-Translator: Ron\n"
+"Language: fr\n"
+"Language-Team: French\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: src/audio_capture.py:23
+msgid "Critical error during audio initialization:"
+msgstr "Erreur critique lors de l'initialisation de l'audio :"
+
+#: src/audio_capture.py:25
+msgid "TIP: This can happen if no microphone is connected or selected."
+msgstr "CONSEIL : Ceci peut arriver si aucun microphone n'est branché ou sélectionné."
+
+#: src/audio_capture.py:26
+msgid "Check your system audio settings (e.g., with pavucontrol)."
+msgstr "Vérifiez les paramètres audio de votre système (ex: avec pavucontrol)."
+
+#: src/audio_capture.py:38
+msgid "Audio read error (IOError):"
+msgstr "Erreur de lecture audio (IOError) :"
+
+#: src/audio_capture.py:42
+msgid "Unexpected error in audio capture:"
+msgstr "Erreur inattendue dans la capture audio :"
+
+#: src/i18n.py:70
+msgid "i18n"
+msgstr "i18n"
+
+#: src/i18n.py:70
+msgid "Language set to"
+msgstr "Langue définie sur"
+
+#: src/i18n.py:70
+msgid "source"
+msgstr "source"
+
+#: src/main.py:34
+msgid "Checking external dependencies..."
+msgstr "Vérification des dépendances externes..."
+
+#: src/main.py:36
+msgid "'xdotool' is a critical dependency and is not installed."
+msgstr "'xdotool' est une dépendance critique et n'est pas installé."
+
+#: src/main.py:37
+msgid "Please install it (e.g., 'sudo apt-get install xdotool')."
+msgstr "Veuillez l'installer (ex: 'sudo apt-get install xdotool')."
+
+#: src/main.py:39
+msgid "'paplay' not found. Sound notifications will be disabled."
+msgstr "'paplay' n'a pas été trouvé. Les notifications sonores seront désactivées."
+
+#: src/main.py:40
+msgid "Dependencies checked."
+msgstr "Dépendances vérifiées."
+
+#: src/main.py:46
+#, python-brace-format
+msgid "Attempting to load model for language: {lang}"
+msgstr "Tentative de chargement du modèle pour la langue : {lang}"
+
+#: src/main.py:50
+#, python-brace-format
+msgid "Failed. Attempting to load default model: {model_name}"
+msgstr "Échec. Tentative de chargement du modèle par défaut : {model_name}"
+
+#: src/main.py:55
+msgid "Default model failed. Trying any other available models..."
+msgstr "Le modèle par défaut a échoué. Essai des autres modèles disponibles..."
+
+#: src/main.py:64
+msgid "FATAL: No speech recognition model could be loaded."
+msgstr "FATAL : Aucun modèle de reconnaissance vocale n'a pu être chargé."
+
+#: src/main.py:65
+msgid "Please check the model paths and integrity in your config.yaml file."
+msgstr "Veuillez vérifier les chemins et l'intégrité des modèles dans votre fichier config.yaml."
+
+#: src/main.py:84
+#, python-brace-format
+msgid "The script is ready. Current model: {model_name}"
+msgstr "Le script est prêt. Modèle actuel : {model_name}"
+
+#: src/main.py:87
+#, python-brace-format
+msgid "  - Say '{start_word}' or press [Ctrl+R] to start/stop."
+msgstr "  - Dites '{start_word}' ou appuyez sur [Ctrl+R] pour commencer/arrêter."
+
+#: src/main.py:88
+#, python-brace-format
+msgid "  - Say '{stop_word}' or press [F2] for a final stop and copy."
+msgstr "  - Dites '{stop_word}' ou appuyez sur [F2] pour un arrêt final et copie."
+
+#: src/main.py:89
+msgid "\n  Manual commands to type in this console:"
+msgstr "\n  Commandes manuelles à taper dans cette console :"
+
+#: src/main.py:90
+msgid "  - '/cancel', '/delete-word', '/nl'"
+msgstr "  - '/annuler', '/effacer-mot', '/nl'"
+
+#: src/main.py:91
+msgid "  - '/change_language <lang_name>' (e.g., /change_language en)"
+msgstr "  - '/changer_langue <nom_langue>' (ex: /changer_langue en)"
+
+#: src/main.py:93
+msgid "Press Ctrl+C to exit the program."
+msgstr "Appuyez sur Ctrl+C pour quitter le programme."
+
+#: src/main.py:108
+#, python-brace-format
+msgid "Model '{model_name}' is already loaded."
+msgstr "Le modèle '{model_name}' est déjà chargé."
+
+#: src/main.py:112
+#, python-brace-format
+msgid "Changing model to '{model_name}'..."
+msgstr "Changement de modèle vers '{model_name}'..."
+
+#: src/main.py:120
+#, python-brace-format
+msgid "Model changed successfully: {model_name}"
+msgstr "Modèle changé avec succès : {model_name}"
+
+#: src/main.py:122
+#, python-brace-format
+msgid "Error: Could not load model '{model_name}'. Reverting to {loaded_model_name}."
+msgstr "Erreur : Impossible de charger le modèle '{model_name}'. Le modèle actuel ({loaded_model_name}) est conservé."
+
+#: src/main.py:124
+msgid "Invalid command. Usage: /change_language <lang_name>"
+msgstr "Commande invalide. Utilisation : /change_language <nom_langue>"
+
+#: src/main.py:133
+msgid "\nStop request received. Shutting down..."
+msgstr "\nDemande d'arrêt reçue. Fermeture en cours..."
+
+#: src/main.py:141
+msgid "Program stopped cleanly."
+msgstr "Programme arrêté proprement."
+
+#: src/recognition.py:27
+msgid "Error: Model folder not found:"
+msgstr "Erreur : Dossier du modèle introuvable :"
+
+#: src/recognition.py:28
+msgid "Please check your config.yaml and ensure the model is unzipped."
+msgstr "Veuillez vérifier votre config.yaml et vous assurer que le modèle est décompressé."
+
+#: src/recognition.py:33
+msgid "Attempting to load model:"
+msgstr "Tentative de chargement du modèle :"
+
+#: src/recognition.py:38
+msgid "Model loaded successfully:"
+msgstr "Modèle chargé avec succès :"
+
+#: src/recognition.py:42
+#, python-brace-format
+msgid "Fatal error while loading model '{model_name}': {error}"
+msgstr "Erreur fatale lors du chargement du modèle '{model_name}' : {error}"
+
+#: src/system_control.py:34
+msgid "Error: Could not find an active window to type into."
+msgstr "Erreur : Impossible de trouver une fenêtre active pour la saisie."
+
+#: src/system_control.py:49
+msgid "An error occurred with xdotool paste method:"
+msgstr "Une erreur est survenue avec la méthode de collage xdotool :"
+
+#: src/system_control.py:59
+msgid "Error: Could not find an active window to press a key."
+msgstr "Erreur : Impossible de trouver une fenêtre active pour la pression de touche."
+
+#: src/system_control.py:71
+msgid "An error occurred with xdotool key press:"
+msgstr "Une erreur est survenue avec la pression de touche xdotool :"
+
+#: src/ui.py:41
+msgid "Command not recognized:"
+msgstr "Commande non reconnue :"
+
+#: src/ui.py:91
+msgid "Recording started."
+msgstr "Enregistrement commencé."
+
+#: src/ui.py:97
+msgid "Recording paused."
+msgstr "Enregistrement en pause."
+
+#: src/ui.py:104
+msgid "Recording finished. Text copied."
+msgstr "Enregistrement terminé. Texte copié."
+
+#: src/ui.py:155
+#: src/ui.py:180
+msgid "Typed:"
+msgstr "Tapé :"
+
+#: src/ui.py:168
+msgid "Warning: xdotool failed. Switching to log-only mode."
+msgstr "Avertissement : xdotool a échoué. Passage en mode journal seul."
+
+#: src/ui.py:182
+msgid "[Degraded Mode] Added:"
+msgstr "[Mode Dégradé] Ajouté :"
+
+#: src/ui.py:189
+msgid "Stopping user interface..."
+msgstr "Arrêt de l'interface utilisateur..."

@@ -1,0 +1,123 @@
+vosk_models:
+  - name: "en"
+    path_relative: "vosk-model/vosk-model-small-en-us-0.15"
+  - name: "fr"
+    path_relative: "vosk-model/vosk-model-small-fr-0.22"
+
+default_model: "fr"
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  frames_per_buffer: 4096
+  buffer_size: 2048
+
+recognition:
+  confidence_threshold: 0.85
+
+language_settings:
+  en:
+    voice_commands:
+      start_word: "start"
+      stop_word: "oops"
+    punctuation:
+      simple:
+        "comma": ","
+        "period": "."
+      double:
+        "question mark": "?"
+        "exclamation mark": "!"
+        "colon": ":"
+        "semicolon": ";"
+      layout:
+        "new line": "\n"
+        "new paragraph": "\n\n"
+      special:
+        "open parenthesis": "("
+        "close parenthesis": ")"
+        "open bracket": "["
+        "close bracket": "]"
+        "dash": "–"
+        "ellipsis": "…"
+        "open quote": "\""
+        "close quote": "\""
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
+      "py audio": "PyAudio"
+
+  fr:
+    voice_commands:
+      start_word: "démarre"
+      stop_word: "zut"
+    punctuation:
+      simple:
+        "virgule": ","
+        "point": "."
+      double:
+        "point d'interrogation": "?"
+        "point d'exclamation": "!"
+        "deux points": ":"
+        "point virgule": ";"
+        "point-virgule": ";"
+      layout:
+        "nouvelle ligne": "\n"
+        "à la ligne": "\n"
+        "nouveau paragraphe": "\n\n"
+      special:
+        "ouvrez la parenthèse": "("
+        "fermez la parenthèse": ")"
+        "ouvrez le crochet": "["
+        "fermez le crochet": "]"
+        "tiret": "–"
+        "trois petits points": "…"
+        "ouvrez les guillemets": "« "
+        "fermez les guillemets": "»"
+    recognition_aliases:
+      "fermer la parenthèse": "fermez la parenthèse"
+      "fermer le crochet": "fermez le crochet"
+      "fermer les guimet": "fermez les guillemets"
+      "fermer les guillemets": "fermez les guillemets"
+      "de points": "deux points"
+      "sauna": "sonna"
+      "tirez": "tiret"
+      "tirée": "tiret"
+      "tirait": "tiret"
+      "tirer": "tiret"
+      "maigre efforts": "maigre effort"
+      "antoine lui": "Antoine, lui,"
+      "antoine": "Antoine"
+      "un neuf": "œuf"
+      "bougez pas": "bougeait pas"
+      "il est relu": "il relut"
+      "il se murmure murmura": "il se murmura"
+      "blanc cassé": "blanc-cassé"
+      "ils se mirent murat": "il se murmura"
+      "elle soupira": "et soupira"
+      "scénique": "cynique"
+      "a quoi": "à quoi"
+      "demain un": "demain"
+    custom_vocabulary:
+      "vosk": "Vosk"
+      "gemini": "Gemini"
+      "ia": "IA"
+      "à quoi": "À quoi"
+
+hotkeys:
+  toggle_recording:
+    pynput_keys: ["alt_l", "h"]
+    display_name: "[Alt+H]"
+  finalize_session:
+    pynput_keys: ["alt_l", "s"]
+    display_name: "[Alt+S]"
+
+sound_file: "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
+
+theme:
+  ready_message: "GREEN"
+  help_text: "BLUE"
+  help_title: "CYAN"
+  info: "BLUE"
+  success: "GREEN"
+  warning: "YELLOW"
+  error: "RED"

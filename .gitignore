@@ -1,0 +1,48 @@
+# Fichiers compilés
+*.o
+*.out
+
+# Dossiers
+node_modules/
+dist/
+page-html/*
+
+
+# Python
+__pycache__/
+*.pyc
+
+vosk-env/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# Fichiers de configuration locaux
+config.local.json
+
+# Fichiers temporaires
+*.tmp
+*.log
+GEMINI.md
+# Environnements virtuels Python
+vosk-env/
+venv/
+
+# Fichiers de cache et temporaires Python
+__pycache__/
+*.py[co]
+*.pyd
+
+# Fichiers IDE et système
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Ignorer TOUT le contenu du dossier des modèles...
+vosk-model/*
+
+# ...MAIS faire une exception pour conserver le fichier .gitkeep.
+!vosk-model/.gitkeep

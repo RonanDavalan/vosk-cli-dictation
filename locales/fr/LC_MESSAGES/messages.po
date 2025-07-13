@@ -1,0 +1,207 @@
+# French translations for Projet Vosk.
+# Copyright (C) 2025
+# This file is distributed under the same license as the Projet Vosk project.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Projet Vosk\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-08 12:00+0000\n"
+"PO-Revision-Date: 2025-07-09 10:00+0000\n"
+"Last-Translator: Ron & Gemini\n"
+"Language: fr\n"
+"Language-Team: French\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: src/main.py:91
+msgid "A Vosk-based command-line dictation tool."
+msgstr "Outil de dictée en ligne de commande basé sur Vosk."
+
+#: src/main.py:92
+msgid "Force the interface and model language."
+msgstr "Forcer la langue de l'interface et du modèle."
+
+#: src/main.py:44
+#, python-brace-format
+msgid "  - Say '{start_word}' or press {hotkey} to start/stop."
+msgstr "  - Dites '{start_word}' ou appuyez sur {hotkey} pour démarrer/arrêter."
+
+#: src/main.py:45
+#, python-brace-format
+msgid "  - Say '{stop_word}' or press {hotkey} to stop and copy."
+msgstr "  - Dites '{stop_word}' ou appuyez sur {hotkey} pour arrêter et copier."
+
+#: src/main.py:47
+#, python-brace-format
+msgid "\n{style}  Manual commands:{reset}"
+msgstr "\n{style}  Commandes manuelles :{reset}"
+
+#: src/main.py:48
+msgid "  - '/cancel', '/delete-word', '/nl'"
+msgstr "  - '/cancel', '/delete-word', '/nl'"
+
+#: src/main.py:49
+msgid "  - '/change_language <lang_name>' (e.g., /change_language en)"
+msgstr "  - '/change_language <lang_name>' (ex: /change_language en)"
+
+#: src/main.py:61
+#, python-brace-format
+msgid "\n{style}  Punctuation commands:{reset}"
+msgstr "\n{style}  Commandes de ponctuation :{reset}"
+
+#: src/main.py:76
+msgid "Press Ctrl+C to exit the program."
+msgstr "Appuyez sur Ctrl+C pour quitter le programme."
+
+#: src/main.py:82
+msgid "\nProgram stopped cleanly."
+msgstr "\nProgramme arrêté proprement."
+
+#: src/main.py:97
+msgid "Checking external dependencies..."
+msgstr "Vérification des dépendances externes..."
+
+#: src/main.py:99
+msgid "'xdotool' is a critical dependency and is not installed."
+msgstr "'xdotool' est une dépendance critique et n'est pas installé."
+
+#: src/main.py:100
+msgid "Please install it (e.g., 'sudo apt-get install xdotool')."
+msgstr "Veuillez l'installer (ex: 'sudo apt-get install xdotool')."
+
+#: src/main.py:102
+msgid "'paplay' not found. Sound notifications will be disabled."
+msgstr "'paplay' non trouvé. Les notifications sonores seront désactivées."
+
+#: src/main.py:103
+msgid "Dependencies checked."
+msgstr "Dépendances vérifiées."
+
+#: src/main.py:105
+#, python-brace-format
+msgid "Attempting to load model for language: {lang}"
+msgstr "Tentative de chargement du modèle pour la langue : {lang}"
+
+#: src/main.py:109
+#, python-brace-format
+msgid "Failed. Attempting to load default model: {model_name}"
+msgstr "Échec. Tentative de chargement du modèle par défaut : {model_name}"
+
+#: src/main.py:113
+msgid "FATAL: No speech recognition model could be loaded."
+msgstr "FATAL : Aucun modèle de reconnaissance vocale n'a pu être chargé."
+
+#: src/main.py:114
+msgid "Please check the model paths and integrity in your config.yaml file."
+msgstr "Veuillez vérifier les chemins et l'intégrité des modèles dans votre fichier config.yaml."
+
+#: src/main.py:140
+#, python-brace-format
+msgid "The script is ready. Current model: {model_name}"
+msgstr "Le script est prêt. Modèle actuel : {model_name}"
+
+#: src/main.py:157
+msgid "\nStop request received. Shutting down..."
+msgstr "\nDemande d'arrêt reçue. Arrêt en cours..."
+
+#: src/recognition.py:29
+msgid "Error: Model folder not found:"
+msgstr "Erreur : Dossier du modèle introuvable :"
+
+#: src/recognition.py:30
+msgid "Please check your config.yaml and ensure the model is unzipped."
+msgstr "Veuillez vérifier votre config.yaml et vous assurer que le modèle est décompressé."
+
+#: src/recognition.py:35
+msgid "Attempting to load model:"
+msgstr "Tentative de chargement du modèle :"
+
+#: src/recognition.py:40
+msgid "Model loaded successfully:"
+msgstr "Modèle chargé avec succès :"
+
+#: src/recognition.py:44
+#, python-brace-format
+msgid "Fatal error while loading model '{model_name}': {error}"
+msgstr "Erreur fatale lors du chargement du modèle '{model_name}' : {error}"
+
+#: src/recognition.py:64
+msgid "[In progress]"
+msgstr "[En cours]"
+
+#: src/recognition.py:90
+msgid "Error in recognition thread:"
+msgstr "Erreur dans le thread de reconnaissance :"
+
+#: src/ui.py:27
+msgid "Recording started."
+msgstr "Enregistrement démarré."
+
+#: src/ui.py:34
+msgid "Recording paused."
+msgstr "Enregistrement en pause."
+
+#: src/ui.py:48
+msgid "Recording finished. Text copied."
+msgstr "Enregistrement terminé. Texte copié."
+
+#: src/ui.py:73
+msgid "Session canceled."
+msgstr "Session annulée."
+
+#: src/ui.py:82
+msgid "Last word deleted (simulation)."
+msgstr "Dernier mot supprimé (simulation)."
+
+#: src/ui.py:84
+msgid "No text to modify."
+msgstr "Aucun texte à modifier."
+
+#: src/ui.py:89
+msgid "New paragraph inserted."
+msgstr "Nouveau paragraphe inséré."
+
+#: src/ui.py:92
+msgid "New paragraph added to buffer."
+msgstr "Nouveau paragraphe ajouté au tampon."
+
+#: src/ui.py:101
+msgid "UI language changed to:"
+msgstr "Langue de l'interface changée vers :"
+
+#: src/ui.py:104
+#, python-brace-format
+msgid "To change the recognition language, please restart the program with -l {lang}"
+msgstr "Pour changer la langue de reconnaissance, veuillez redémarrer le programme avec -l {lang}"
+
+#: src/ui.py:108
+msgid "Language not available. Available languages:"
+msgstr "Langue non disponible. Langues disponibles :"
+
+#: src/ui.py:111
+msgid "Usage: /change_language <lang_code>"
+msgstr "Usage : /change_language <code_langue>"
+
+#: src/ui.py:113
+msgid "Unknown command:"
+msgstr "Commande inconnue :"
+
+#: src/ui.py:136
+msgid "Warning: xdotool failed. Switching to log-only mode."
+msgstr "Attention : xdotool a échoué. Passage en mode journal uniquement."
+
+#: src/ui.py:141
+msgid "Typed:"
+msgstr "Tapé :"
+
+#: src/ui.py:144
+msgid "[Degraded Mode] Added:"
+msgstr "[Mode Dégradé] Ajouté :"
+
+#: src/ui.py:207
+msgid "Stopping user interface..."
+msgstr "Arrêt de l'interface utilisateur..."
