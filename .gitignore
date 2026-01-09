@@ -1,48 +1,64 @@
-# Fichiers compilés
-*.o
-*.out
-
-# Dossiers
-node_modules/
-dist/
-page-html/*
-
-
-# Python
+# --- PYTHON ---
 __pycache__/
-*.pyc
-
-vosk-env/
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
 .Python
-env/
-venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Fichiers de configuration locaux
-config.local.json
-
-# Fichiers temporaires
-*.tmp
-*.log
-GEMINI.md
-# Environnements virtuels Python
+# --- ENVIRONNEMENTS VIRTUELS ---
+# Liste exhaustive pour éviter les erreurs
 vosk-env/
 venv/
+env/
+ENV/
+.env
+.venv
 
-# Fichiers de cache et temporaires Python
-__pycache__/
-*.py[co]
-*.pyd
-
-# Fichiers IDE et système
-.idea/
+# --- IDE & ÉDITEURS ---
+# Vim (Important pour toi)
+*.swp
+*.swo
+*~
+# VS Code & JetBrains (Au cas où)
 .vscode/
+.idea/
+
+# --- OS (Fichiers système) ---
 .DS_Store
 Thumbs.db
 
-# Ignorer TOUT le contenu du dossier des modèles...
+# --- PROJET VOSK ---
+# Modèles (lourds)
 vosk-model/*
-
-# ...MAIS faire une exception pour conserver le fichier .gitkeep.
 !vosk-model/.gitkeep
+
+# Fichiers audio temporaires (tests d'enregistrement)
+*.wav
+*.mp3
+*.raw
+
+# Logs et fichiers temporaires
+*.log
+*.tmp
+GEMINI.md
+
+# --- CONFIGURATION LOCALE ---
+# Si tu crées un fichier spécifique pour tes tests
+config_local.yaml
+check_mic.py
