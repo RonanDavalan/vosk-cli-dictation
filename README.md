@@ -138,6 +138,8 @@ All settings can be modified in the `config/config.yaml` file. This includes hot
 
 This project is open source and contributions are highly encouraged! Please check out our **[Contribution Guide](CONTRIBUTING.md)** and feel free to open an issue on the [issues page](https://github.com/RonanDavalan/vosk-cli-dictation/issues).
 
+This project is built through an asymmetric human-LLM collaboration — see [CONTRIBUTORS.md](CONTRIBUTORS.md) for the roles involved.
+
 ## 📄 License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.

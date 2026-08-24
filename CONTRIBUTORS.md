@@ -16,9 +16,12 @@ This software relies entirely on the following open-source projects. A big thank
 
 ## Design and Development Support
 
-I also want to thank the entities and individuals who helped me structure my ideas, solve complex problems, and improve the quality of the project.
+This project was developed using an asymmetric human-LLM collaboration model. Roles are documented formally here to reflect the actual work performed, rather than listing "AI assistance" as a single vague category.
 
-*   **[Gemini & ChatGPT](https://gemini.google.com/)**: For their assistance as tools for brainstorming, code generation, and debugging. Their ability to provide quick answers and different perspectives has been a valuable accelerator throughout development.
+*   **Architect & Arbiter: Ronan Davalan.** Product vision, security requirements, project direction, validation and testing. All architectural decisions are validated by him.
+*   **Systems Engineer & Lead Developer: Claude Code (Anthropic).** Principal author of the source code — thread architecture, state management, configuration system, session persistence.
+*   **Synthesizer & Strategic Advisor: Gemini (Google DeepMind).** Independent architectural analysis, logical conflict resolution, cross-validation of technical decisions.
+*   **Auditor: DeepSeek V4 Flash, via OpenCode.** Ponctual review of translated documentation and web copy — never commits, never decides architecture.
 
 ## Code and Documentation Contributors
 
