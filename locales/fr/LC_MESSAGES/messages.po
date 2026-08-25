@@ -66,12 +66,12 @@ msgid "Checking external dependencies..."
 msgstr "Vérification des dépendances externes..."
 
 #: src/main.py:99
-msgid "'xdotool' is a critical dependency and is not installed."
-msgstr "'xdotool' est une dépendance critique et n'est pas installé."
+msgid "Neither 'ydotool' nor 'xdotool' is available; at least one is required."
+msgstr "Ni 'ydotool' ni 'xdotool' n'est disponible ; l'un des deux est requis."
 
 #: src/main.py:100
-msgid "Please install it (e.g., 'sudo apt-get install xdotool')."
-msgstr "Veuillez l'installer (ex: 'sudo apt-get install xdotool')."
+msgid "Please install one (e.g., 'sudo apt-get install xdotool', or 'ydotool' via backports)."
+msgstr "Veuillez en installer un (ex : 'sudo apt-get install xdotool', ou 'ydotool' via les backports)."
 
 #: src/main.py:102
 msgid "'paplay' not found. Sound notifications will be disabled."

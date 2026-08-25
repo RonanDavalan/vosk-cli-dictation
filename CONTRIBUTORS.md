@@ -8,7 +8,8 @@ This software relies entirely on the following open-source projects. A big thank
 
 *   **[Vosk-API](https://alphacephei.com/vosk/)**: For providing the robust and high-performance offline speech recognition engine that is the heart of this application.
 *   **[Python](https://www.python.org/)**: For a versatile programming language and an incredible community.
-*   **[xdotool](https://github.com/jordansissel/xdotool)**: For the essential tool that allows simulating keyboard input and controlling windows under Linux.
+*   **[xdotool](https://github.com/jordansissel/xdotool)**: For the essential tool that allows simulating keyboard input and controlling windows under Linux (X11).
+*   **[ydotool](https://github.com/ReimuNotMoe/ydotool)**: For enabling keyboard input simulation on Wayland, via the `/dev/uinput` interface.
 *   **[pactl (PulseAudio)](https://www.freedesktop.org/wiki/Software/PulseAudio/)**: For the commands to manage the system's audio sources.
 *   **[PyYAML](https://pyyaml.org/)**: For handling YAML configuration files.
 *   **[Pynput](https://pynput.readthedocs.io/en/latest/)**: For managing keyboard and mouse events.

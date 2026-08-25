@@ -13,7 +13,7 @@ sys.path.insert(0, PROJECT_ROOT)
 
 from config.config import config
 from src.i18n import set_ui_language, get_translation
-from src.system_control import check_command_exists
+from src.system_control import check_command_exists, ydotool_disponible
 from src.audio_capture import initialize_audio, audio_capture_thread
 from src.recognition import load_model, recognition_thread
 from src.ui import ui_thread
@@ -107,9 +107,9 @@ def main():
     atexit.register(exit_cleanup)
 
     print_status(_("Checking external dependencies..."), config.color_info)
-    if not check_command_exists("xdotool"):
-        print_status(_("'xdotool' is a critical dependency and is not installed."), config.color_error)
-        print_status(_("Please install it (e.g., 'sudo apt-get install xdotool')."), config.color_error)
+    if not ydotool_disponible() and not check_command_exists("xdotool"):
+        print_status(_("Neither 'ydotool' nor 'xdotool' is available; at least one is required."), config.color_error)
+        print_status(_("Please install one (e.g., 'sudo apt-get install xdotool', or 'ydotool' via backports)."), config.color_error)
         return
     if not check_command_exists("paplay"):
         print_status(_("'paplay' not found. Sound notifications will be disabled."), config.color_warning)

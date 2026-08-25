@@ -33,9 +33,9 @@ This tool was born from the need for a robust, locally-run dictation system on G
 *   **Full Punctuation:** Dictate a complete range of punctuation with natural voice commands.
 *   **Private and Offline:** Runs entirely on your machine. Your voice data never leaves your computer.
 
-> [!WARNING]
+> [!NOTE]
 > 
-> **Compatibility Note: X11 vs. Wayland** This application uses `xdotool` for keyboard simulation, which is primarily designed for the **X11 display server**. While it may **not work natively** on systems running **Wayland** by default (such as recent versions of Fedora or Ubuntu), some compatibility can be achieved through **XWayland**, which provides X11 compatibility layer on Wayland systems. For full compatibility, ensure you have an X11 session, though basic functionality might work under Wayland with XWayland.
+> **X11 and Wayland support.** This application uses `ydotool` for keyboard simulation when available (native support for both **Wayland** and **X11**, via the `/dev/uinput` interface), and falls back to `xdotool` (**X11** only, or **Wayland** through XWayland) otherwise. `ydotool` requires the `ydotoold` daemon to be running and your user to have access to `/dev/uinput` (typically via membership in the `input` group — `sudo usermod -aG input $USER`, then log out and back in). On Debian, `ydotool` is currently packaged in `trixie-backports`, not in stable.
 
 ## ⚙️ Getting Started
 
@@ -45,6 +45,13 @@ This project was developed and tested on **Debian 12 (Bookworm)**. You will need
 
 ```bash
 sudo apt-get update && sudo apt-get install python3-pip python3-venv portaudio19-dev gettext xdotool pulseaudio-utils
+```
+
+For Wayland support, also install `ydotool` (enable `trixie-backports` first if on Debian Trixie), then add your user to the `input` group:
+
+```bash
+sudo apt-get install ydotool
+sudo usermod -aG input $USER   # log out and back in for this to take effect
 ```
 
 ### 2. Project Setup
