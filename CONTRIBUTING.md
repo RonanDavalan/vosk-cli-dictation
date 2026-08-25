@@ -6,7 +6,7 @@ A huge thank you for your interest in this project! Every contribution, whether 
 
 This project was born from a unique partnership: it was **architected and driven by a human**, but its execution was greatly accelerated by the **power of several Large Language Models (LLMs)**.
 
-Roles are asymmetric, not interchangeable: Ronan Davalan is the architect and arbiter of every decision; Claude Code (Anthropic) is the systems engineer and principal author of the source code; Gemini (Google DeepMind) is a synthesizer and strategic advisor; DeepSeek V4 Flash, via OpenCode, is called in as an auditor for ponctual review of documentation and web copy. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for the full breakdown.
+Roles are asymmetric, not interchangeable: Ronan Davalan is the architect and arbiter of every decision; Claude Code (Anthropic) is the systems engineer and principal author of the source code; Gemini (Google DeepMind) is a synthesizer and strategic advisor; DeepSeek V4 Flash, via OpenCode, is called in as an auditor for occasional review of documentation and web copy. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for the full breakdown.
 
 We see this not as mere assistance, but as a modern development model where human vision guides the efficiency of AI. We encourage contributions that share this spirit of innovation, experimentation, and effectiveness.
 

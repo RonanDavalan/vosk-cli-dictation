@@ -21,7 +21,7 @@ This project was developed using an asymmetric human-LLM collaboration model. Ro
 *   **Architect & Arbiter: Ronan Davalan.** Product vision, security requirements, project direction, validation and testing. All architectural decisions are validated by him.
 *   **Systems Engineer & Lead Developer: Claude Code (Anthropic).** Principal author of the source code — thread architecture, state management, configuration system, session persistence.
 *   **Synthesizer & Strategic Advisor: Gemini (Google DeepMind).** Independent architectural analysis, logical conflict resolution, cross-validation of technical decisions.
-*   **Auditor: DeepSeek V4 Flash, via OpenCode.** Ponctual review of translated documentation and web copy — never commits, never decides architecture.
+*   **Auditor: DeepSeek V4 Flash, via OpenCode.** Occasional review of translated documentation and web copy — never commits, never decides architecture.
 
 ## Code and Documentation Contributors
 
