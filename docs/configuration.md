@@ -126,7 +126,30 @@ hotkeys:
   finalize_session:
     pynput_keys: ["alt_l", "s"]
     display_name: "[Alt+S]"
+  sleep_toggle:
+    pynput_keys: ["alt_l", "w"]
+    display_name: "[Alt+W]"
 ```
+
+-   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
+    paused, the microphone stays active and the voice wake word still works.
+-   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
+    text to the clipboard.
+-   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
+    the two above. In sleep mode, audio capture and speech recognition are fully suspended —
+    the CPU cost of the recognition engine drops to near zero — but this also means the voice
+    wake word (`start_word`) cannot be heard until sleep mode is toggled off again. Only the
+    `Alt+W` hotkey itself keeps working while asleep, since it does not depend on audio.
+    Triggering sleep mode while a dictation is in progress stops it cleanly first (as if
+    `Alt+H` had been pressed), so no audio is lost mid-sentence.
+
+    ```bash
+    # How to test / how to run
+    cd ~/git/vosk-cli-dictation/vosk-cli-dictation
+    source vosk-env/bin/activate
+    python3 src/main.py
+    # Alt+W toggles sleep mode; Alt+H toggles dictation; Alt+S finalizes and copies.
+    ```
 
 ### `sound_file`
 

@@ -143,14 +143,15 @@ def main():
     control_queue = queue.Queue()
     stop_event = threading.Event()
     display_partials_event = threading.Event()
+    sleep_event = threading.Event()
 
     processor = TextProcessor(config.current_lang)
 
     threads = [
         threading.Thread(target=recognition_thread, args=(recognizer, audio_queue, text_queue, stop_event, display_partials_event)),
-        threading.Thread(target=audio_capture_thread, args=(stream, audio_queue, stop_event)),
+        threading.Thread(target=audio_capture_thread, args=(stream, audio_queue, stop_event, sleep_event)),
         threading.Thread(target=keyboard_listener_thread, args=(control_queue, stop_event)),
-        threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event))
+        threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event, sleep_event))
     ]
 
     for t in threads:

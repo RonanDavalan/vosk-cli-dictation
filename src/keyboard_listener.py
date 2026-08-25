@@ -21,10 +21,15 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         """Callback for the finalize session hotkey."""
         control_queue.put('FINALIZE_SESSION')
 
+    def on_sleep_toggle():
+        """Callback for the sleep mode toggle hotkey."""
+        control_queue.put('TOGGLE_SLEEP')
+
     # Map action names from the config file to their callback functions.
     actions = {
         'toggle_recording': on_toggle,
         'finalize_session': on_finalize,
+        'sleep_toggle': on_sleep_toggle,
     }
 
     def format_hotkey_string(keys: list) -> str:

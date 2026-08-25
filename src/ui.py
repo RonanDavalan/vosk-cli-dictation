@@ -1,6 +1,7 @@
 # src/ui.py
 
 import queue
+import time
 import pyperclip
 
 from config.config import config
@@ -8,7 +9,7 @@ from src.system_control import type_text, press_key, play_sound
 from src.i18n import get_translation, set_ui_language
 from src.text_processing import TextProcessor
 
-def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event):
+def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event):
     recording = False
     full_text_log = ""
     xdotool_failed_once = False
@@ -51,6 +52,19 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         print(f"\n{config.color_error}{msg}{config.RESET}")
         full_text_log = ""
         processor.reset_state()
+        play_sound()
+
+    def toggle_sleep():
+        nonlocal recording
+        _ = get_translation()
+        if sleep_event.is_set():
+            sleep_event.clear()
+            print(f"\n{config.color_success}{_('Sleep mode disabled — listening resumed.')}{config.RESET}")
+        else:
+            if recording:
+                stop_recording()
+            sleep_event.set()
+            print(f"\n{config.color_warning}{_('Sleep mode enabled — voice wake word unavailable.')}{config.RESET}")
         play_sound()
 
     def execute_manual_command(command: str):
@@ -129,6 +143,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     else: start_recording()
                 elif command == 'FINALIZE_SESSION':
                     finalize_session()
+                elif command == 'TOGGLE_SLEEP':
+                    toggle_sleep()
                 elif command.startswith('/'):
                     execute_manual_command(command)
             except queue.Empty: pass
@@ -147,7 +163,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     continue
                 if raw_text:
                     process_and_type(raw_text)
-            except queue.Empty: continue
+            except queue.Empty:
+                time.sleep(0.01)
+                continue
     except KeyboardInterrupt: pass
     finally:
         if not stop_event.is_set(): stop_event.set()

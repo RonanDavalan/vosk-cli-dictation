@@ -110,6 +110,9 @@ hotkeys:
   finalize_session:
     pynput_keys: ["alt_l", "s"]
     display_name: "[Alt+S]"
+  sleep_toggle:
+    pynput_keys: ["alt_l", "w"]
+    display_name: "[Alt+W]"
 
 sound_file: "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
 

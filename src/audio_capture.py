@@ -1,5 +1,6 @@
 # src/audio_capture.py
 
+import time
 import pyaudio
 from config.config import config
 from src.i18n import get_translation
@@ -27,7 +28,7 @@ def initialize_audio():
             print(f"{config.color_info}{_('Check your system audio settings (e.g., with pavucontrol).')}{config.RESET}")
         return None, None
 
-def audio_capture_thread(stream, audio_queue, stop_event):
+def audio_capture_thread(stream, audio_queue, stop_event, sleep_event):
     """
     A thread that continuously captures audio data from the stream and puts
     it into a queue for the recognition thread to process.
@@ -35,6 +36,9 @@ def audio_capture_thread(stream, audio_queue, stop_event):
     _ = get_translation()
     while not stop_event.is_set():
         try:
+            if sleep_event.is_set():
+                time.sleep(0.1)
+                continue
             data = stream.read(config.audio['buffer_size'], exception_on_overflow=False)
             audio_queue.put(data)
         except IOError as e:

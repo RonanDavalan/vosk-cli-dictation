@@ -205,3 +205,11 @@ msgstr "[Mode Dégradé] Ajouté :"
 #: src/ui.py:207
 msgid "Stopping user interface..."
 msgstr "Arrêt de l'interface utilisateur..."
+
+#: src/ui.py:62
+msgid "Sleep mode disabled — listening resumed."
+msgstr "Veille désactivée — écoute reprise."
+
+#: src/ui.py:67
+msgid "Sleep mode enabled — voice wake word unavailable."
+msgstr "Veille activée — mot d'activation vocal indisponible."
