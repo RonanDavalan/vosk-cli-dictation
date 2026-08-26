@@ -78,7 +78,8 @@ Parameters for the Vosk recognition engine.
 
 ```yaml
 recognition:
-  confidence_threshold: 0.85```
+  confidence_threshold: 0.85
+```
 
 ### `language_settings`
 
