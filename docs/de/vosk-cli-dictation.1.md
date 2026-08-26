@@ -53,10 +53,14 @@ Globale Hotkeys funktionieren unabhängig davon, welches Fenster gerade den Foku
 Werkseinstellungen definieren:
 
 **Alt+H**
-:   Aktiviert oder deaktiviert die Diktierfunktion (entspricht den Aktivierungs-/Stoppwörtern). Während die Diktierfunktion pausiert ist, bleibt das Mikrofon aktiv und die Sprachaktivierung funktioniert weiterhin.
+:   Aktiviert oder deaktiviert die Diktierfunktion. Schaltet nur zwischen Pause und
+    Fortsetzung um; kopiert **niemals** in die Zwischenablage, im Unterschied zu **Alt+S**
+    und dem Stoppwort unten. Während der Pause bleibt das Mikrofon aktiv, und das
+    Aktivierungswort funktioniert weiterhin.
 
 **Alt+S**
-:   Stoppt die aktuelle Diktierfunktion und kopiert den erfassten Text in die Zwischenablage.
+:   Stoppt die aktuelle Diktierfunktion und kopiert den erfassten Text in die
+    Zwischenablage — entspricht dem Stoppwort.
 
 **Alt+W**
 :   Aktiviert/Deaktiviert den Energiesparmodus, einen dritten Zustand, der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus werden Audioaufnahme und Spracherkennung vollständig unterbrochen – die CPU-Auslastung sinkt auf nahezu Null – aber das akustische Auslöswort kann erst wieder erkannt werden, wenn der Energiesparmodus erneut deaktiviert wird. Der Tastenkürzel **Alt+W** selbst funktioniert weiterhin im Energiesparmodus, da er nicht von Audio abhängt. Das Aktivieren des Energiesparmodus während einer Diktierfunktion beendet diese sauber, sodass kein Audio während eines Satzes verloren geht.

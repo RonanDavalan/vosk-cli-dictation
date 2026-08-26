@@ -47,10 +47,13 @@ La ponctuation et la mise en forme sont également dictées par la voix ; la lis
 Les touches de raccourci globales fonctionnent quel que soit le programme qui a le focus. La configuration par défaut définit :
 
 **Alt+H**
-:   Activez ou désactivez la dictée (équivalent aux mots de veille/d'arrêt).  Lorsque la dictée est en pause, le microphone reste actif et le mot de veille vocal fonctionne toujours.
+:   Active ou désactive la dictée. Bascule seulement une pause/reprise ; ne copie **jamais**
+    dans le presse-papiers, contrairement à **Alt+S** et au mot d'arrêt ci-dessous. Pendant
+    la pause, le microphone reste actif et le mot de réveil vocal fonctionne toujours.
 
 **Alt+S**
-:   Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers.
+:   Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers — équivalent
+    au mot d'arrêt.
 
 **Alt+W**
 :   Active/désactive le mode veille, un troisième état distinct des deux précédents. En mode veille, l'acquisition audio et la reconnaissance vocale sont complètement suspendues - l'utilisation du processeur diminue presque à zéro - mais le mot de réveil vocal ne peut être détecté tant que le mode veille n'est pas désactivé. Le raccourci clavier **Alt+W** lui-même continue de fonctionner en mode veille, car il ne dépend pas de l'audio. L'activation du mode veille pendant une dictée la stoppe proprement, ce qui évite toute perte de données au milieu d'une phrase.

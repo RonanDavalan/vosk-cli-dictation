@@ -47,10 +47,14 @@ La puntuación y el formato también se dictan mediante la voz; la lista complet
 Las teclas de acceso global funcionan independientemente de la ventana que tenga el foco. La configuración predeterminada define:
 
 **Alt+H**
-:   Activar o desactivar la dictado (equivalente a las palabras de activación/parada).  Mientras está pausado, el micrófono permanece activo y la palabra de activación por voz sigue funcionando.
+:   Activa o desactiva el dictado. Solo alterna pausa/reanudación; **nunca** copia al
+    portapapeles, a diferencia de **Alt+S** y de la palabra de parada más abajo. Mientras
+    está en pausa, el micrófono permanece activo y la palabra de activación por voz sigue
+    funcionando.
 
 **Alt+S**
-: Detiene la dictación actual y copia el texto acumulado al portapapeles.
+:   Detiene la dictación actual y copia el texto acumulado al portapapeles — equivalente a
+    la palabra de parada.
 
 **Alt+W**
 :   Alterna el modo de suspensión, un tercer estado distinto de los dos anteriores. En modo de suspensión, la captura de audio y el reconocimiento de voz se suspenden completamente; el uso de la CPU disminuye casi a cero, pero la palabra de activación de voz no se puede escuchar hasta que se vuelve a desactivar el modo de suspensión. El atajo de teclado **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión mientras se está realizando una dictado la detiene de forma limpia, evitando así la pérdida de audio en medio de una frase.

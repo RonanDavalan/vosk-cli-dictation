@@ -64,13 +64,14 @@ Global hotkeys work regardless of which window currently has focus. The
 factory configuration defines:
 
 **Alt+H**
-:   Toggle dictation on or off (equivalent to the wake/stop words). While
-    paused, the microphone stays active and the voice wake word still
+:   Toggle dictation on or off. This only pauses or resumes; it does **not**
+    copy anything to the clipboard, unlike **Alt+S** and the stop word below.
+    While paused, the microphone stays active and the voice wake word still
     works.
 
 **Alt+S**
 :   Stop the current dictation and copy the accumulated text to the
-    clipboard.
+    clipboard — equivalent to the stop word.
 
 **Alt+W**
 :   Toggle sleep mode, a third state distinct from the two above. In sleep
