@@ -16,6 +16,15 @@ def load_model(model_name: str):
     model_path = config.get_model_path_by_name(model_name)
 
     if not model_path:
+        for model in config.data.get('vosk_models', []):
+            if model['name'] != model_name or os.path.isabs(model['path_relative']):
+                continue
+            print(f"{config.color_error}{_('No model found for')} '{model_name}'.{config.RESET}")
+            print(f"{config.color_info}{_('Searched:')}{config.RESET}")
+            for racine in config.model_search_roots(model['path_relative']):
+                print(f"  - {racine}")
+            print(f"{config.color_info}{_('Download Vosk models from:')} https://alphacephei.com/vosk/models{config.RESET}")
+            break
         return None, None
 
     model_name_on_disk = os.path.basename(model_path)

@@ -2,6 +2,7 @@
 
 import yaml
 import os
+import shutil
 from colorama import Fore, Style, init as colorama_init
 
 colorama_init(autoreset=True)
@@ -25,10 +26,37 @@ class Config:
         self.set_language(self.current_lang)
 
     def _get_config_path(self):
-        """Finds the absolute path of the config.yaml file."""
+        """Finds the config.yaml file via the XDG cascade (DOCUMENTATION_MULTILINGUE.md §10.2).
+
+        First matching level wins: VOSK_CONFIG env var (as-is, never
+        auto-created) > project-relative config in a git checkout (dev mode
+        primes over a stale XDG file) > per-user XDG config, auto-created
+        from the factory template on first run > the factory template
+        itself (fallback, e.g. dev mode with no XDG file yet).
+        """
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        config_file = os.path.join(project_root, 'config', 'config.yaml')
-        return config_file if os.path.exists(config_file) else None
+
+        env_path = os.environ.get('VOSK_CONFIG')
+        if env_path:
+            return env_path
+
+        dev_config = os.path.join(project_root, 'config', 'config.yaml')
+        if os.path.isdir(os.path.join(project_root, '.git')) and os.path.exists(dev_config):
+            return dev_config
+
+        xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
+        user_config = os.path.join(xdg_config_home, 'vosk-cli-dictation', 'config.yaml')
+        if os.path.exists(user_config):
+            return user_config
+
+        factory_config = '/usr/share/vosk-cli-dictation/config.yaml'
+        if os.path.exists(factory_config):
+            os.makedirs(os.path.dirname(user_config), exist_ok=True)
+            shutil.copy(factory_config, user_config)
+            print(f"Created default configuration at {user_config}")
+            return user_config
+
+        return None
 
     def _load_config(self):
         """Loads the YAML configuration file."""
@@ -72,14 +100,35 @@ class Config:
         self.START_WORD = voice_commands.get('start_word', 'start')
         self.STOP_WORD = voice_commands.get('stop_word', 'stop')
 
+    def model_search_roots(self, path_relative: str) -> list[str]:
+        """Ordered list of roots searched for a model folder (§10.3), for error messages."""
+        nom_dossier = os.path.basename(path_relative)
+        xdg_data_home = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        return [
+            os.path.join(xdg_data_home, 'vosk-models', nom_dossier),
+            os.path.join('/usr/share/vosk-models', nom_dossier),
+            os.path.join(project_root, path_relative),
+        ]
+
     def get_model_path_by_name(self, model_name: str) -> str | None:
         """
-        Gets the full path to a Vosk model directory.
+        Resolves the full path to a Vosk model directory via the multi-root
+        cascade (DOCUMENTATION_MULTILINGUE.md §10.3): an explicit absolute
+        path in config.yaml wins outright; otherwise the first existing
+        directory among $XDG_DATA_HOME/vosk-models/, /usr/share/vosk-models/,
+        and the dev-mode ./vosk-model/ of a git clone.
         """
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         for model in self.data.get('vosk_models', []):
-            if model['name'] == model_name:
-                return os.path.join(project_root, model['path_relative'])
+            if model['name'] != model_name:
+                continue
+            path_relative = model['path_relative']
+            if os.path.isabs(path_relative):
+                return path_relative if os.path.isdir(path_relative) else None
+            for candidat in self.model_search_roots(path_relative):
+                if os.path.isdir(candidat):
+                    return candidat
+            return None
         return None
 
     def get_lang_from_model_name(self, model_name_on_disk: str) -> str | None:
