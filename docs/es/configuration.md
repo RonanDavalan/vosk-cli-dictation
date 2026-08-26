@@ -45,15 +45,11 @@ vosk_models:
     path_relative: "vosk-model/vosk-model-small-fr-0.22"
 ```
 
-Traduce a español. Solo la traducción, mantener los tokens como "`default_model`".
-
 El nombre del modelo de Vosk que se cargará al inicio. Debe coincidir con un `name` en la lista de `vosk_models`.
 
 ```yaml
 default_model: "en"
 ```
-
-Traduce a español. Solo muestra la traducción, mantén los tokens como "`audio`" sin cambios.
 
 Parámetros para tu micrófono.
 
@@ -131,17 +127,17 @@ hotkeys:
     display_name: "[Alt+W]"
 ```
 
--   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
-    paused, the microphone stays active and the voice wake word still works.
--   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
-    text to the clipboard.
--   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
-    the two above. In sleep mode, audio capture and speech recognition are fully suspended —
-    the CPU cost of the recognition engine drops to near zero — but this also means the voice
-    wake word (`start_word`) cannot be heard until sleep mode is toggled off again. Only the
-    `Alt+W` hotkey itself keeps working while asleep, since it does not depend on audio.
-    Triggering sleep mode while a dictation is in progress stops it cleanly first (as if
-    `Alt+H` had been pressed), so no audio is lost mid-sentence.
+-   **`toggle_recording`** (por defecto `Alt+H`): inicia o pausa la dictado en curso. Mientras
+    está en pausa, el micrófono permanece activo y la palabra de activación por voz sigue funcionando.
+-   **`finalize_session`** (por defecto `Alt+S`): detiene la dictado y copia el texto acumulado
+    al portapapeles.
+-   **`sleep_toggle`** (por defecto `Alt+W`): activa/desactiva el **modo de suspensión**, un tercer estado distinto
+    de los dos anteriores. En modo de suspensión, la captura de audio y el reconocimiento de voz están completamente
+    suspendidos — el uso de CPU del motor de reconocimiento cae casi a cero — pero esto también significa que la
+    palabra de activación (`start_word`) no puede ser escuchada hasta que el modo de suspensión se desactive de nuevo. Solo
+    el atajo `Alt+W` sigue funcionando mientras está en suspensión, ya que no depende del audio.
+    Activar el modo de suspensión mientras una dictado está en curso la detiene de forma limpia primero (como si
+    se hubiera pulsado `Alt+H`), de modo que no se pierde audio a mitad de una frase.
 
     ```bash
     # How to test / how to run

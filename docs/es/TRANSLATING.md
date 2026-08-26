@@ -79,13 +79,11 @@ Esto crea una nueva carpeta y archivo, por ejemplo: `locales/es/LC_MESSAGES/mess
 
 Una vez que hayas terminado de traducir, necesitas compilar tu `.po` archivo en un `.mo` archivo.
 
-Ejecuta el comando de compilación desde la raíz del proyecto:
-
+1.  Ejecuta el comando de compilación desde la raíz del proyecto:
     ```bash
     ./manage_translations.sh compile
     ```
-
-Ahora, puedes probar tus cambios ejecutando la aplicación y forzando tu idioma:
+2.  Ahora, puedes probar tus cambios ejecutando la aplicación y forzando tu idioma:
 
     ```bash
     python src/main.py --lang [lang]
@@ -97,14 +95,12 @@ Deberías ver tus mensajes traducidos en la consola.
 
 Una vez que estés satisfecho con tu traducción, por favor, envíala a través de una solicitud de extracción (Pull Request) en GitHub para que todos puedan beneficiarse de tu trabajo.
 
-Guarda tus cambios en el archivo `.po`.
-
+1.  Confirma (`commit`) tus cambios en el archivo `.po`.
     ```bash
     git add locales/[lang]/LC_MESSAGES/messages.po
     git commit -m "i18n: add/update [Language Name] translation"
     ```
-
-(e.g., `i18n: add Spanish translation`)
-2.  Sube tu rama y abre una solicitud de extracción.
+    (p. ej., `i18n: add Spanish translation`)
+2.  Sube tu rama y abre una solicitud de extracción (Pull Request).
 
 ¡Muchas gracias de nuevo por tu contribución!

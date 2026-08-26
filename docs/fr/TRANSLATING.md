@@ -79,12 +79,10 @@ Cela crée un nouveau dossier et un nouveau fichier, par exemple : `locales/es/L
 
 Une fois que vous avez terminé de traduire, vous devez compiler votre `.po` en un fichier `.mo`.
 
-Exécutez la commande de compilation depuis la racine du projet :
-
+1.  Exécutez la commande de compilation depuis la racine du projet :
     ```bash
     ./manage_translations.sh compile
     ```
-
 2.  Maintenant, vous pouvez tester vos modifications en exécutant l'application et en forçant votre langue :
 
     ```bash
@@ -97,13 +95,12 @@ Vous devriez voir vos messages traduits dans la console.
 
 Une fois que vous êtes satisfait de votre traduction, veuillez la soumettre via une demande de tirage (Pull Request) sur GitHub afin que tout le monde puisse en bénéficier !
 
-Enregistrez vos modifications dans le fichier `.po`.
-
+1.  Validez vos modifications (`commit`) dans le fichier `.po`.
     ```bash
     git add locales/[lang]/LC_MESSAGES/messages.po
     git commit -m "i18n: add/update [Language Name] translation"
     ```
-
-2.  Poussez votre branche et ouvrez une requête de tirage. `i18n: add Spanish translation`
+    (par exemple : `i18n: add Spanish translation`)
+2.  Poussez votre branche et ouvrez une demande de tirage (Pull Request).
 
 Merci encore pour votre contribution !

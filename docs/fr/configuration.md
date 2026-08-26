@@ -47,7 +47,7 @@ vosk_models:
 
 ### `default_model`
 
-The name of the Vosk model to load at startup. Must match a `name` in the `vosk_models` list.
+Le nom du modèle Vosk à charger au démarrage. Doit correspondre à un `name` dans la liste `vosk_models`.
 
 ```yaml
 default_model: "en"

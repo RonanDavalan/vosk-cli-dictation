@@ -4,7 +4,7 @@ Vielen Dank für Ihr Interesse, dieses Projekt für mehr Menschen zugänglich zu
 
 Dieser Leitfaden führt Sie durch den Prozess des Hinzufügens einer neuen Sprache oder der Verbesserung einer bestehenden Sprache.
 
-## Übersichtsartikel zum Übersetzungsprozess
+## Überblick über den Übersetzungsprozess
 
 Das Projekt verwendet das Standard-`gettext` System für die Internationalisierung. Der Prozess ist wie folgt:
 1.  **Extrahieren:** Quelltexte (in Englisch) werden aus dem Python-Code in eine Vorlagendatei (`messages.pot`) extrahiert.
@@ -18,7 +18,7 @@ Ein Hilfsskript, `manage_translations.sh`, automatisiert die meisten dieser Schr
 
 ### Voraussetzungen
 
--   Ein lokales Klond des Projekt-Repositories.
+-   Ein lokaler Klon des Projekt-Repositories.
 -   Die für das Projekt eingerichtete virtuelle Umgebung (siehe `README.md`).
 -   Ein Texteditor, der UTF-8-Kodierung unterstützt (z. B. VS Code, Kate, Gedit usw.).
 
@@ -79,13 +79,11 @@ Dies erstellt einen neuen Ordner und eine neue Datei, zum Beispiel: `locales/es/
 
 Sobald Sie die Übersetzung abgeschlossen haben, müssen Sie Ihre `.po` Datei in eine `.mo` Datei kompilieren.
 
-Führen Sie den Kompilierungsbefehl vom Projektstammverzeichnis aus:
-
+1.  Führen Sie den Kompilierungsbefehl vom Projektstammverzeichnis aus:
     ```bash
     ./manage_translations.sh compile
     ```
-
-2. Jetzt können Sie Ihre Änderungen testen, indem Sie die Anwendung ausführen und Ihre bevorzugte Sprache erzwingen:
+2.  Jetzt können Sie Ihre Änderungen testen, indem Sie die Anwendung ausführen und Ihre bevorzugte Sprache erzwingen:
 
     ```bash
     python src/main.py --lang [lang]
@@ -97,14 +95,12 @@ Sie sollten Ihre übersetzten Nachrichten in der Konsole sehen.
 
 Sobald Sie mit Ihrer Übersetzung zufrieden sind, reichen Sie diese bitte über einen Pull Request auf GitHub ein, damit jeder davon profitieren kann!
 
-Speichern Sie Ihre Änderungen in der `.po` Datei.
-
+1.  Committen Sie Ihre Änderungen an der `.po`-Datei.
     ```bash
     git add locales/[lang]/LC_MESSAGES/messages.po
     git commit -m "i18n: add/update [Language Name] translation"
     ```
-
-    (e.g., `i18n: add Spanish translation`)
-2.  Push your branch and open a Pull Request.
+    (z. B. `i18n: add Spanish translation`)
+2.  Pushen Sie Ihren Branch und eröffnen Sie einen Pull Request.
 
 Vielen Dank noch einmal für Ihren Beitrag!
