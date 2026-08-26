@@ -58,7 +58,7 @@ Les touches de raccourci globales fonctionnent quel que soit le programme qui a 
 **Ctrl+C**
 :   Quitter le programme.
 
-Les trois raccourcis clavier peuvent être configurés dans la section `hotkeys` du fichier de configuration.
+Les trois premiers raccourcis clavier peuvent être configurés dans la section `hotkeys` du fichier de configuration. **Ctrl+C** ne l'est pas : c'est le signal d'interruption standard, toujours actif, jamais reconfigurable.
 
 # COMMANDES MANUELLES
 

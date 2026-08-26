@@ -35,7 +35,7 @@ theme: [...]
 Eine Liste, die die verfügbaren Vosk-Spracherkennungsmodelle definiert.
 
 -   **`name`** (String): Ein eindeutiger, kurzer Name für das Modell (z.B. `fr`, `en`).
--   **`path_relative`** (String): Der relative Pfad zum entpackten Vosk-Modellordner, relativ zum Projektstammverzeichnis.
+-   **`path_relative`** (String): Der relative Pfad zum entpackten Vosk-Modellordner. Wird der Reihe nach gegen `$XDG_DATA_HOME/vosk-models/` (Standard `~/.local/share/vosk-models/`), `/usr/share/vosk-models/` und dann das Projektstammverzeichnis (bei Ausführung aus einem Git-Checkout) aufgelöst — das erste Verzeichnis, das den Ordner tatsächlich enthält, gewinnt. Kann auch als absoluter Pfad angegeben werden, der stets Vorrang hat. Siehe die Manpage, Abschnitt KONFIGURATION, für die vollständige Kaskade.
 
 ```yaml
 vosk_models:

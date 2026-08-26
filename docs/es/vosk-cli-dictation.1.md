@@ -58,7 +58,7 @@ Las teclas de acceso global funcionan independientemente de la ventana que tenga
 **Ctrl+C**
 :   Salir del programa.
 
-Las tres combinaciones de teclas son configurables en la sección `hotkeys` del archivo de configuración.
+Las tres primeras combinaciones de teclas son configurables en la sección `hotkeys` del archivo de configuración. **Ctrl+C** no lo es: es la señal de interrupción estándar, siempre activa, nunca reasignable mediante configuración.
 
 # COMANDOS MANUALES
 

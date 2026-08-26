@@ -84,8 +84,9 @@ factory configuration defines:
 **Ctrl+C**
 :   Quit the program.
 
-All three hotkeys are configurable under the `hotkeys` section of the
-configuration file.
+The first three hotkeys are configurable under the `hotkeys` section of the
+configuration file. **Ctrl+C** is not: it is the standard interrupt signal, always active,
+never remapped through configuration.
 
 # MANUAL COMMANDS
 

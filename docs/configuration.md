@@ -35,7 +35,12 @@ theme: [...]
 A list that defines the available Vosk speech recognition models.
 
 -   **`name`** (string): A unique, short name for the model (e.g., `fr`, `en`).
--   **`path_relative`** (string): The relative path to the unzipped Vosk model folder, from the project root.
+-   **`path_relative`** (string): The relative path to the unzipped Vosk model folder. Resolved
+    against, in order, `$XDG_DATA_HOME/vosk-models/` (default `~/.local/share/vosk-models/`),
+    `/usr/share/vosk-models/`, then the project root when running from a Git checkout — the
+    first of these that actually contains the folder wins. Can also be given as an absolute
+    path, which always takes priority. See the manpage, CONFIGURATION section, for the full
+    cascade.
 
 ```yaml
 vosk_models:

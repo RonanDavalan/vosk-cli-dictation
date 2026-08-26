@@ -35,7 +35,7 @@ Sections de configuration détaillées.
 Une liste qui définit les modèles de reconnaissance vocale Vosk disponibles.
 
 -   **`name`** (chaîne de caractères) : Un nom unique et court pour le modèle (par exemple, `fr`, `en`).
--   **`path_relative`** (chaîne de caractères) : Le chemin relatif vers le dossier du modèle Vosk décompressé, à partir de la racine du projet.
+-   **`path_relative`** (chaîne de caractères) : Le chemin relatif vers le dossier du modèle Vosk décompressé. Résolu, dans l'ordre, contre `$XDG_DATA_HOME/vosk-models/` (par défaut `~/.local/share/vosk-models/`), `/usr/share/vosk-models/`, puis la racine du projet lors d'une exécution depuis un dépôt Git — le premier de ces répertoires qui contient réellement le dossier l'emporte. Peut aussi être donné en chemin absolu, qui prime toujours. Voir la manpage, section CONFIGURATION, pour la cascade complète.
 
 ```yaml
 vosk_models:

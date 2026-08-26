@@ -35,7 +35,7 @@ theme: [...]
 Una lista que define los modelos de reconocimiento de voz disponibles de Vosk.
 
 -   **`name`** (cadena de texto): Un nombre único y corto para el modelo (por ejemplo, `fr`, `en`).
--   **`path_relative`** (cadena de texto): La ruta relativa a la carpeta del modelo Vosk descomprimida, desde la raíz del proyecto.
+-   **`path_relative`** (cadena de texto): La ruta relativa a la carpeta del modelo Vosk descomprimida. Se resuelve, en orden, contra `$XDG_DATA_HOME/vosk-models/` (por defecto `~/.local/share/vosk-models/`), `/usr/share/vosk-models/`, y luego la raíz del proyecto al ejecutar desde un repositorio Git — el primero de estos directorios que realmente contiene la carpeta gana. También puede indicarse como ruta absoluta, que siempre tiene prioridad. Consulte la página de manual, sección CONFIGURACIÓN, para la cascada completa.
 
 ```yaml
 vosk_models:

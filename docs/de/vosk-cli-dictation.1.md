@@ -64,7 +64,7 @@ Werkseinstellungen definieren:
 **Strg+C**
 :   Das Programm beenden.
 
-Alle drei Tastenkombinationen können im Abschnitt `hotkeys` der Konfigurationsdatei konfiguriert werden.
+Die ersten drei Tastenkombinationen können im Abschnitt `hotkeys` der Konfigurationsdatei konfiguriert werden. **Strg+C** ist es nicht: es ist das Standard-Interrupt-Signal, immer aktiv, niemals über die Konfiguration neu belegbar.
 
 # MANUELLE BEDIENUNGSANWEISUNGEN
 
