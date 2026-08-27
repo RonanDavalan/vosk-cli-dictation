@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.0.4--alpha-yellow.svg" alt="Version: v0.0.4-alpha"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.0--alpha-yellow.svg" alt="Version: v0.5.0-alpha"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
   <a href="#"><img src="https://img.shields.io/badge/OS-Debian_12-D70A53.svg" alt="Tested on Debian 12"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
