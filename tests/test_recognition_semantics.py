@@ -14,9 +14,28 @@ import pytest
 
 import src.recognition as rec
 from config.config import config
+from src.recognition import _target_mode, MODE_FULL, MODE_LISTENING
 from src.runtime_state import (
-    runtime_state, STATE_DICTATING, STATE_LISTENING,
+    runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
 )
+
+
+def test_target_mode_restricted_grammar_is_per_language():
+    # Global défaut true, es le désactive (banc du 28/08).
+    config.set_language("fr")
+    assert _target_mode(STATE_LISTENING) == MODE_LISTENING
+    config.set_language("en")
+    assert _target_mode(STATE_LISTENING) == MODE_LISTENING
+    config.set_language("de")
+    assert _target_mode(STATE_LISTENING) == MODE_LISTENING
+    config.set_language("es")
+    assert _target_mode(STATE_LISTENING) == MODE_FULL
+    # DICTÉE et VEILLE : toujours grammaire complète.
+    for lang in ("fr", "es"):
+        config.set_language(lang)
+        assert _target_mode(STATE_DICTATING) == MODE_FULL
+        assert _target_mode(STATE_SLEEPING) == MODE_FULL
+    config.set_language("fr")
 
 
 class FakeRec:
@@ -128,7 +147,9 @@ def test_dictating_final_forwards_text_and_words(monkeypatch):
 
 def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
     # grammaire complète en ÉCOUTE -> le garde de confiance s'applique.
+    # On force le mode complet global ET pour fr (surcharge par langue).
     monkeypatch.setitem(config.data["recognition"], "restricted_grammar_in_listening", False)
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_grammar_in_listening", False)
     low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
     script = [("final", {"text": "active dictée", "result": low})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)

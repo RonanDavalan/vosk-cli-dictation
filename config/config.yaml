@@ -73,6 +73,9 @@ injection:
 # et adapter par l'utilisateur.
 language_settings:
   en:
+    # Grammaire Kaldi restreinte en ÉCOUTE (chantier 7 volet E). Surcharge la
+    # clé globale recognition.restricted_grammar_in_listening pour cette langue.
+    restricted_grammar_in_listening: true
     voice_commands:
       wake_phrase: "start dictation"
       stop_phrase: "stop dictation"
@@ -110,6 +113,7 @@ language_settings:
       "py audio": "PyAudio"
 
   fr:
+    restricted_grammar_in_listening: true
     voice_commands:
       wake_phrase: "active dictée"
       stop_phrase: "stop dictée"
@@ -154,6 +158,7 @@ language_settings:
       "ia": "IA"
 
   de:
+    restricted_grammar_in_listening: true
     voice_commands:
       wake_phrase: "diktat starten"
       stop_phrase: "diktat stoppen"
@@ -193,6 +198,12 @@ language_settings:
       "vosk": "Vosk"
 
   es:
+    # false : sur trois machines de test (station x86, Raspberry Pi 4, x86
+    # modeste), la grammaire restreinte avec vosk-model-small-es-0.42 décode
+    # ~2× plus lentement que la grammaire complète (RTF ×0,5). On garde le
+    # recognizer complet en ÉCOUTE pour cette langue ; le réveil se fait alors
+    # sur les finaux avec le garde de confiance.
+    restricted_grammar_in_listening: false
     voice_commands:
       wake_phrase: "iniciar dictado"
       stop_phrase: "terminar dictado"

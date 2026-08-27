@@ -84,12 +84,23 @@ def build_recognizer(model, mode: str):
 
 
 def _target_mode(state: str) -> str:
-    """Which recognizer mode a given state wants."""
-    if state == STATE_LISTENING and config.data.get('recognition', {}).get(
+    """Which recognizer mode a given state wants.
+
+    The restricted grammar in ÉCOUTE is opt-out per language: a
+    `restricted_grammar_in_listening` key under `language_settings.<lang>`
+    overrides the global `recognition.restricted_grammar_in_listening`.
+    Disabled for `es` (chantier 7, banc du 28/08 : la grammaire restreinte y
+    décode plus lentement que la grammaire complète).
+    """
+    if state != STATE_LISTENING:
+        return MODE_FULL
+    global_default = config.data.get('recognition', {}).get(
         'restricted_grammar_in_listening', True
-    ):
-        return MODE_LISTENING
-    return MODE_FULL
+    )
+    per_lang = config.language_settings.get(config.current_lang, {}).get(
+        'restricted_grammar_in_listening', global_default
+    )
+    return MODE_LISTENING if per_lang else MODE_FULL
 
 
 def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: queue.Queue,

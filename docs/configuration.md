@@ -100,7 +100,7 @@ audio:
 Parameters for the Vosk recognition engine.
 
 -   **`confidence_threshold`** (float, 0.0-1.0): A voice trigger phrase (wake or stop) is only acted on when the average confidence of its words reaches this value; below it, the phrase is typed as ordinary text.
--   **`restricted_grammar_in_listening`** (boolean, default `true`): while listening for the wake phrase, decode with a Kaldi grammar restricted to that phrase. CPU at rest drops sharply, at the cost of rebuilding the full recognizer on wake. Set to `false` to keep the full recognizer running in the listening state.
+-   **`restricted_grammar_in_listening`** (boolean, default `true`): while listening for the wake phrase, decode with a Kaldi grammar restricted to that phrase. CPU at rest drops sharply for most models, at the cost of rebuilding the full recognizer on wake. Set to `false` to keep the full recognizer running in the listening state. Can be overridden per language with a key of the same name under `language_settings.<lang>` — the factory config disables it for `es`, where the small model decodes the restricted grammar more slowly than the full one.
 
 ```yaml
 recognition:
