@@ -1,0 +1,51 @@
+# config.example.yaml — corrections de reconnaissance personnelles
+#
+# Le fichier config.yaml livré ne contient que des corrections génériques et
+# indiscutables. Les corrections ci-dessous sont liées à un corpus de prose
+# précis (le texte de lecture utilisé pendant le développement) : elles n'ont
+# aucune raison d'être justes pour votre voix, votre micro ou vos textes, et
+# certaines sont même risquées en usage général (« tirez » est un mot français
+# courant, pas seulement un homophone de « tiret »).
+#
+# Comment s'en servir
+# -------------------
+# 1. Ouvrez votre config active. Son emplacement est affiché au lancement de
+#    l'outil, ou par `vosk-cli-dictation --diagnose` (ligne « Config file in
+#    use »). En général :
+#      ~/.config/vosk-cli-dictation/config.yaml
+# 2. Dans la langue voulue, sous `recognition_aliases:`, ajoutez vos propres
+#    paires `"ce que Vosk entend": "ce qu'il faut écrire"`.
+# 3. Un alias est appliqué sur des tokens entiers, insensible à la casse, et les
+#    plus longs sont essayés avant les plus courts. Un alias d'un seul mot est
+#    risqué : il se déclenchera partout où ce mot apparaît.
+#
+# Les corrections de casse (un mot toujours écrit avec une majuscule ou une
+# graphie fixe) vont plutôt dans `custom_vocabulary:`.
+
+language_settings:
+  fr:
+    recognition_aliases:
+      # Homophones de la commande de ponctuation « tiret »
+      "tirez": "tiret"
+      "tirée": "tiret"
+      "tirait": "tiret"
+      "tirer": "tiret"
+      # Mauvaises reconnaissances observées sur un corpus de lecture précis
+      "fermer les guimet": "fermez les guillemets"
+      "sauna": "sonna"
+      "maigre efforts": "maigre effort"
+      "un neuf": "œuf"
+      "bougez pas": "bougeait pas"
+      "il est relu": "il relut"
+      "il se murmure murmura": "il se murmura"
+      "ils se mirent murat": "il se murmura"
+      "blanc cassé": "blanc-cassé"
+      "elle soupira": "et soupira"
+      "scénique": "cynique"
+      "a quoi": "à quoi"
+      "demain un": "demain"
+      # Nom propre du corpus de test
+      "antoine lui": "Antoine, lui,"
+    custom_vocabulary:
+      "antoine": "Antoine"
+      "à quoi": "À quoi"

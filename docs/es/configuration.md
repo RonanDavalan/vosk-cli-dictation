@@ -2,13 +2,13 @@ Guía de configuración del proyecto.
 
 Este documento proporciona una explicación detallada de todas las opciones disponibles en el archivo `config/config.yaml`. Configurar correctamente este archivo es clave para adaptar la aplicación a sus necesidades específicas, idioma y hardware.
 
-## ¿Cómo se determina el idioma?
+¿Cómo se determina el idioma?
 
 La aplicación elige qué idioma usar según el siguiente orden de prioridad:
 
-1.  **Argumento de línea de comandos (mayor prioridad):** El uso de la bandera `-l` o `--lang` (por ejemplo, `python src/main.py -l en`) siempre anulará todas las demás configuraciones.
+1.  **Argumento de línea de comandos (mayor prioridad):** El uso de la opción `-l` o `--lang` (por ejemplo, `python src/main.py -l en`) siempre anulará todas las demás configuraciones.
 
-2. **Idioma del sistema (detección automática):** Si no se proporciona ninguna indicación, la aplicación detecta automáticamente el idioma de tu sistema operativo.
+2. **Idioma del sistema (Detección automática):** Si no se proporciona ninguna configuración, la aplicación detecta automáticamente el idioma de tu sistema operativo.
 
 3.  **`default_model` Configuración (Respaldo):** Si el idioma de su sistema no puede determinarse, la aplicación utilizará el modelo especificado en la configuración `default_model` como último recurso.
 
@@ -20,8 +20,12 @@ El archivo de configuración está organizado en secciones lógicas:
 # Example of the main sections
 vosk_models: [...]
 default_model: "..."
+control_socket: true
 audio: [...]
 recognition: [...]
+sleep: [...]
+clipboard: [...]
+injection: [...]
 language_settings: [...]
 hotkeys: [...]
 sound_file: "..."
@@ -34,8 +38,9 @@ theme: [...]
 
 Una lista que define los modelos de reconocimiento de voz disponibles de Vosk.
 
--   **`name`** (cadena de texto): Un nombre único y corto para el modelo (por ejemplo, `fr`, `en`).
--   **`path_relative`** (cadena de texto): La ruta relativa a la carpeta del modelo Vosk descomprimida. Se resuelve, en orden, contra `$XDG_DATA_HOME/vosk-models/` (por defecto `~/.local/share/vosk-models/`), `/usr/share/vosk-models/`, y luego la raíz del proyecto al ejecutar desde un repositorio Git — el primero de estos directorios que realmente contiene la carpeta gana. También puede indicarse como ruta absoluta, que siempre tiene prioridad. Consulte la página de manual, sección CONFIGURACIÓN, para la cascada completa.
+-   **`name`** (string): Un nombre único y corto para el modelo (por ejemplo, `fr`, `en`).
+-   **`path_relative`** (string): La ruta relativa a la carpeta del modelo Vosk descomprimido. Se resuelve, en orden, contra `$XDG_DATA_HOME/vosk-models/` (por defecto `~/.local/share/vosk-models/`),
+    `/usr/share/vosk-models/`, y luego la raíz del proyecto al ejecutar desde un repositorio Git; el primero de estos que realmente contenga la carpeta tiene prioridad. También se puede proporcionar como una ruta absoluta, que siempre tiene prioridad. Consulte la página del manual, la sección CONFIGURACIÓN, para ver la secuencia completa.
 
 ```yaml
 vosk_models:
@@ -43,7 +48,15 @@ vosk_models:
     path_relative: "vosk-model/vosk-model-small-en-us-0.15"
   - name: "fr"
     path_relative: "vosk-model/vosk-model-small-fr-0.22"
+  - name: "de"
+    path_relative: "vosk-model/vosk-model-small-de-0.15"
+  - name: "es"
+    path_relative: "vosk-model/vosk-model-small-es-0.42"
 ```
+
+Un modelo que se declara pero no está presente en el disco se informa al inicio y se omite; el inicio solo falla si no se puede cargar ningún modelo.
+
+### `default_model`
 
 El nombre del modelo de Vosk que se cargará al inicio. Debe coincidir con un `name` en la lista de `vosk_models`.
 
@@ -51,12 +64,23 @@ El nombre del modelo de Vosk que se cargará al inicio. Debe coincidir con un `n
 default_model: "en"
 ```
 
+### `control_socket`
+
+Booleano, valor predeterminado `true`. Cuando está habilitado, la sesión en ejecución escucha en un socket Unix en `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (modo `0600`), de modo que los subcomandos de control (`--toggle`, `--sleep-toggle`, `--status`, `--stop`, …) pueden controlarla. Establezca en `false` para deshabilitar completamente el socket; en este caso, la herramienta sigue siendo utilizable de forma interactiva, pero no se puede controlar desde un atajo.
+
+```yaml
+control_socket: true
+```
+
+### `audio`
+
 Parámetros para tu micrófono.
 
--   **`sample_rate`** (entero): La frecuencia de muestreo con la que se entrenó su modelo (normalmente `16000`).
--   **`channels`** (entero): Número de canales de audio (debe ser `1` para mono).
+-   **`sample_rate`** (entero): La tasa de muestreo con la que se entrenó su modelo (generalmente `16000`).
+-   **`channels`** (entero): Número de canales de audio (debería ser `1` para mono).
 -   **`frames_per_buffer`** (entero): `2048` o `4096` son valores comunes.
 -   **`buffer_size`** (entero): El tamaño del búfer de audio.
+-   **`queue_max_chunks`** (entero): Profundidad máxima de la cola de audio, en bloques de `buffer_size`.  `16` ≈ 2 segundos. Cuando el reconocimiento se retrasa, el bloque más antiguo se descarta en lugar de permitir que la latencia se desvíe; un contador de desbordamiento se muestra en `--status` y `--diagnose`.
 
 ```yaml
 audio:
@@ -64,34 +88,76 @@ audio:
   channels: 1
   frames_per_buffer: 4096
   buffer_size: 2048
+  queue_max_chunks: 16
 ```
 
 ### `recognition`
 
 Parámetros para el motor de reconocimiento de Vosk.
 
--   **`confidence_threshold`** (float, 0.0-1.0): Las palabras con una puntuación de confianza inferior a este valor se ignorarán.
+-   **`confidence_threshold`** (flotante, 0.0-1.0): Una frase de activación de voz (activar o detener) solo se procesa cuando la confianza promedio de sus palabras alcanza este valor; si está por debajo, la frase se interpreta como texto normal.
+-   **`restricted_grammar_in_listening`** (booleano, valor predeterminado `true`): mientras se escucha la frase de activación, decodifica utilizando una gramática de Kaldi restringida a esa frase. El consumo de CPU se reduce significativamente, pero a costa de reconstruir el reconocedor completo al activar. Establece en `false` para mantener el reconocedor completo en funcionamiento en el estado de escucha.
 
 ```yaml
 recognition:
   confidence_threshold: 0.85
+  restricted_grammar_in_listening: true
+```
+
+### `sleep`
+
+-   **`releases_device`** (booleano, valor predeterminado `true`): en modo de suspensión, cierra el flujo de audio para liberar completamente el micrófono (su LED se apaga) y permitir que otro programa lo utilice; la reapertura al despertar tarda aproximadamente 200 ms. Establece en `false` para detener solo el flujo sin cerrarlo; el dispositivo permanece bloqueado, pero el tiempo de activación es ligeramente más rápido.
+
+```yaml
+sleep:
+  releases_device: true
+```
+
+### `clipboard`
+
+El texto se inyecta insertándolo en el portapapeles y simulando un pegado.
+
+-   **`restore`** (booleano, valor predeterminado: `true`): Restaura el contenido anterior del portapapeles del usuario después de pegar. Un portapapeles que no contenga texto (por ejemplo, una imagen) nunca se guarda ni se sobrescribe. También se puede desactivar por sesión con `--no-clipboard-restore`.
+-   **`restore_delay_ms`** (entero, valor predeterminado: `250`): Retraso antes de restaurar, para permitir que la aplicación de destino lea el contenido pegado.
+-   **`confirm_timeout_ms`** (entero, valor predeterminado: `500`): Tiempo máximo de espera para confirmar que el portapapeles realmente contiene nuestro texto antes de enviar la pulsación de tecla para pegar.
+
+```yaml
+clipboard:
+  restore: true
+  restore_delay_ms: 250
+  confirm_timeout_ms: 500
+```
+
+### `injection`
+
+-   **`paste_combo`** (cadena, valor predeterminado `ctrl+v`) y **`terminal_paste_combo`** (valor predeterminado `ctrl+shift+v`): la combinación de teclas utilizada para pegar. En X11, se verifica la clase de ventana de la ventana enfocada con respecto a `terminal_window_classes` para seleccionar la correcta automáticamente; en Wayland, no hay una API para la ventana enfocada, por lo que `paste_combo` se utiliza a menos que la anule.
+-   **`terminal_window_classes`** (lista): clases de ventanas que se tratan como terminales (solo en X11).
+-   **`ydotool_keycodes`** (mapeo): códigos de tecla físicos de Linux, utilizados solo en la ruta de respaldo de `ydotool`. Anule estos valores si utiliza una distribución que no es QWERTY y la ruta de respaldo se está utilizando; la ruta de Wayland nominal (`wtype`) funciona con keysym y es independiente de la distribución.
+
+```yaml
+injection:
+  paste_combo: "ctrl+v"
+  terminal_paste_combo: "ctrl+shift+v"
+  terminal_window_classes: ["konsole", "gnome-terminal-server", "xterm", "st", "alacritty", "kitty", "foot"]
+  ydotool_keycodes: {}
 ```
 
 ### `language_settings`
 
-Esta sección contiene configuraciones específicas de un idioma.
+Esta sección contiene configuraciones específicas para un idioma. La configuración de fábrica incluye cuatro: `en`, `fr`, `de`, `es`.
 
--   **`voice_commands`**: Palabras clave para controlar la aplicación.
--   **`punctuation`**: Un diccionario para insertar automáticamente la puntuación. Está organizado en grupos lógicos para mayor claridad.
--   **`recognition_aliases`**: Corrige errores de reconocimiento comunes de Vosk (por ejemplo, `"sauna": "sonna"`).
+-   **`voice_commands`**: Las dos palabras `wake_phrase` y `stop_phrase` para este idioma. Dos palabras para que una oración normal nunca las active. (Las antiguas claves de una sola palabra `start_word` / `stop_word` se siguen leyendo si están presentes, para compatibilidad con versiones anteriores.)
+-   **`punctuation`**: Un diccionario para insertar automáticamente la puntuación, organizado en grupos lógicos. Los signos `¿` y `¡` en español solo se insertan mediante comandos explícitos (`"abrir interrogación"`, `"abrir exclamación"`), nunca automáticamente.
+-   **`typography`**: Reglas de salida específicas para cada idioma; véase más abajo.
+-   **`recognition_aliases`**: Corrige errores de reconocimiento comunes de Vosk. La tabla incluida contiene solo correcciones genéricas y no controvertidas (por ejemplo, `"de points": "deux points"`); las correcciones específicas del corpus se encuentran en `config/config.example.yaml`, para copiar y adaptar.
 -   **`custom_vocabulary`**: Un diccionario para correcciones sensibles a mayúsculas y minúsculas, aplicado después de los alias (por ejemplo, `"ia": "IA"`).
 
 ```yaml
 language_settings:
   fr: # Settings for French
     voice_commands:
-      start_word: "démarre"
-      stop_word: "zut"
+      wake_phrase: "active dictée"
+      stop_phrase: "stop dictée"
     punctuation:
       simple:
         "virgule": ","
@@ -101,21 +167,40 @@ language_settings:
         "nouvelle ligne": "\n"
       special:
         "ouvrez la parenthèse": "("
+    typography:
+      thin_space: true
+      space_before: ["?", "!", ":", ";", "»"]
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "« "
+      quote_close: "»"
     recognition_aliases:
-      "sauna": "sonna"
+      "de points": "deux points"
     custom_vocabulary:
       "ia": "IA"
 ```
 
+#### `typography`
+
+Reemplaza lo que antes era una rama francesa codificada de forma rígida. Por idioma:
+
+-   **`thin_space`** (booleano): inserta un espacio delgado sin ruptura (U+202F) antes de los símbolos listados en `space_before`. Usa `true` para francés, y `false` en otros casos. Desactívalo si el espacio delgado causa problemas en `grep` o en tu terminal.
+-   **`space_before`** (lista): símbolos que tienen un separador al principio (un espacio delgado cuando se usa `thin_space`, de lo contrario, un espacio normal). Vacío para inglés, alemán y español.
+-   **`space_after`** (lista): símbolos seguidos de un espacio.
+-   **`capitalize_sentence_start`** (booleano): capitaliza la primera palabra de cada oración. En alemán, solo se capitalizan los inicios de las oraciones; los sustantivos comunes se dejan como están, ya que la capitalización de sustantivos confiable requeriría un analizador morfológico.
+-   **`quote_open`** / **`quote_close`**: comillas de apertura y cierre (usa `« »` para francés, `„ "` para alemán).
+
 ### `hotkeys`
 
-Atajos de teclado globales para controlar la aplicación.
+Atajos de teclado globales a través de `pynput`. Estos solo se inician en una sesión X11 estándar; en Wayland nativo, vincule los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio en lugar de usar estos.
 
+-   **`pynput_enabled`** (booleano, valor predeterminado `true`): Solo se aplica en X11. Establecer en `false` para que el listener de `pynput` nunca se inicie.
 -   **`pynput_keys`**: Una lista de teclas de Pynput para el atajo.
--   **`display_name`**: Una cadena de texto que se muestra en el mensaje de ayuda.
+-   **`display_name`**: Una cadena que se muestra en el mensaje de ayuda.
 
 ```yaml
 hotkeys:
+  pynput_enabled: true
   toggle_recording:
     pynput_keys: ["alt_l", "h"]
     display_name: "[Alt+H]"
@@ -127,17 +212,17 @@ hotkeys:
     display_name: "[Alt+W]"
 ```
 
--   **`toggle_recording`** (por defecto `Alt+H`): inicia o pausa la dictado en curso. Mientras
-    está en pausa, el micrófono permanece activo y la palabra de activación por voz sigue funcionando.
--   **`finalize_session`** (por defecto `Alt+S`): detiene la dictado y copia el texto acumulado
-    al portapapeles.
--   **`sleep_toggle`** (por defecto `Alt+W`): activa/desactiva el **modo de suspensión**, un tercer estado distinto
-    de los dos anteriores. En modo de suspensión, la captura de audio y el reconocimiento de voz están completamente
-    suspendidos — el uso de CPU del motor de reconocimiento cae casi a cero — pero esto también significa que la
-    palabra de activación (`start_word`) no puede ser escuchada hasta que el modo de suspensión se desactive de nuevo. Solo
-    el atajo `Alt+W` sigue funcionando mientras está en suspensión, ya que no depende del audio.
-    Activar el modo de suspensión mientras una dictado está en curso la detiene de forma limpia primero (como si
-    se hubiera pulsado `Alt+H`), de modo que no se pierde audio a mitad de una frase.
+-   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
+    paused, the microphone stays active and the voice wake phrase still works.
+-   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
+    text to the clipboard.
+-   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
+    the two above. In sleep mode the audio stream is closed (the microphone is released) and
+    recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be
+    heard until sleep mode is toggled off again. Only the `Alt+W` hotkey itself keeps working
+    while asleep, since it does not depend on audio. Triggering sleep mode while a dictation
+    is in progress stops it cleanly first (as if `Alt+H` had been pressed), so no audio is
+    lost mid-sentence.
 
     ```bash
     # How to test / how to run

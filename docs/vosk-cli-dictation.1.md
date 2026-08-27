@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | User Commands
 % Ronan Davalan
-% 2026-08-26
+% 2026-08-28
 
 # NAME
 
@@ -9,6 +9,10 @@ vosk-cli-dictation - offline, system-wide voice dictation for the command line
 # SYNOPSIS
 
 **vosk-cli-dictation** [**-l** *LANG* | **\--lang** *LANG*]
+
+**vosk-cli-dictation** **\--diagnose**
+
+**vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
 
 # DESCRIPTION
 
@@ -22,36 +26,95 @@ single program.
 All speech recognition runs locally: no audio or transcribed text is ever
 sent to a remote service.
 
-Dictation is started and stopped either by voice (a configurable wake word
-and stop word) or by global hotkeys, and can additionally be put to sleep
-to fully suspend audio capture and recognition when not needed, without
-quitting the program.
+Dictation is started and stopped either by voice (a configurable two-word
+wake phrase and stop phrase, per language) or through control subcommands
+that can be bound to a desktop keyboard shortcut, and can additionally be
+put to sleep to fully release the microphone and suspend recognition when
+not needed, without quitting the program.
 
-Text simulation is performed through **ydotool**, when available, or
-**xdotool** as a fallback. **ydotool** supports both Wayland and X11 through
-the `/dev/uinput` interface; **xdotool** supports X11 only (or Wayland
-through XWayland). At least one of the two must be installed.
+Only one session runs per user at a time. It opens a private Unix socket at
+`$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (mode `0600`); the same command
+invoked with a control flag (see CONTROLLING A RUNNING SESSION) connects to
+that socket instead of starting a new session.
+
+Text is injected by placing it on the clipboard and simulating a paste.
+Under Wayland this uses **wtype** and **wl-clipboard**, falling back to
+**ydotool** (which needs the `ydotoold` daemon and access to
+`/dev/uinput`). Under X11 it uses **xdotool**. At least one backend for the
+current session type must be installed. **vosk-cli-dictation \--diagnose**
+reports which tools, audio device and clipboard access are present, then
+exits.
+
+Global hotkeys via `pynput` are only effective under a plain X11 session;
+on native Wayland, bind the control subcommands to your desktop's own
+shortcut settings instead.
 
 # OPTIONS
 
 **-l** *LANG*, **\--lang** *LANG*
 :   Force the interface and speech recognition language for this session
-    (for example `en` or `fr`), overriding the `default_model` value from
+    (`en`, `fr`, `de` or `es`), overriding the `default_model` value from
     the configuration file. *LANG* must match the name of one of the
     models declared under `vosk_models` in the configuration file.
 
+**\--diagnose**
+:   Check the environment (session type, injection backend, tools, models,
+    audio input, clipboard, control socket) and exit. Exit status is `0`
+    when every check passes.
+
+# CONTROLLING A RUNNING SESSION
+
+Each of the following flags connects to the socket of the running session,
+performs the action, prints the resulting state (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE`) or `ERR <reason>`, and exits. They are meant to
+be bound to desktop keyboard shortcuts.
+
+**\--status**
+:   Print the current state without changing it.
+
+**\--toggle**
+:   Toggle dictation between DICTÉE and ÉCOUTE.
+
+**\--dictation-on**, **\--dictation-off**
+:   Force dictation on or off.
+
+**\--finalize**
+:   Stop the dictation and copy the accumulated text — equivalent to the
+    stop phrase.
+
+**\--cancel**
+:   Discard the current session buffer without typing anything.
+
+**\--sleep**, **\--wake**, **\--sleep-toggle**
+:   Enter, leave, or toggle sleep mode (VEILLE).
+
+**\--stop**
+:   Shut the running session down cleanly.
+
 # VOICE COMMANDS
 
-The wake word and stop word are configurable per language. With the
-factory configuration:
+The wake phrase and stop phrase are two words each, configurable per
+language under `language_settings.<lang>.voice_commands`. Two words rather
+than one so an ordinary sentence never triggers them. With the factory
+configuration:
 
 English
-:   Say **"start"** to begin dictating, **"oops"** to stop and copy the
-    result to the clipboard.
+:   Say **"start dictation"** to begin, **"stop dictation"** to finish and
+    copy the result to the clipboard.
 
 French
-:   Say **"démarre"** to begin dictating, **"zut"** to stop and copy the
-    result to the clipboard.
+:   **"active dictée"** / **"stop dictée"**.
+
+German
+:   **"diktat starten"** / **"diktat stoppen"**.
+
+Spanish
+:   **"iniciar dictado"** / **"terminar dictado"**.
+
+A trigger phrase is only acted on when the average recognition confidence
+of its words clears `recognition.confidence_threshold`; a mumbled phrase is
+typed as ordinary text instead. Saying a phrase twice in immediate
+succession types it literally rather than triggering.
 
 Punctuation and layout words (comma, period, new line, and so on) are
 dictated by voice as well; the full, per-language list is defined under
@@ -60,27 +123,29 @@ printed by the program itself at startup.
 
 # HOTKEYS
 
-Global hotkeys work regardless of which window currently has focus. The
-factory configuration defines:
+`pynput` global hotkeys are started only under a plain X11 session and only
+when `hotkeys.pynput_enabled` is true; on native Wayland they are not
+started, and the control subcommands bound to a desktop shortcut take their
+place. The factory configuration defines:
 
 **Alt+H**
 :   Toggle dictation on or off. This only pauses or resumes; it does **not**
-    copy anything to the clipboard, unlike **Alt+S** and the stop word below.
-    While paused, the microphone stays active and the voice wake word still
+    copy anything to the clipboard, unlike **Alt+S** and the stop phrase.
+    While paused, the microphone stays active and the wake phrase still
     works.
 
 **Alt+S**
 :   Stop the current dictation and copy the accumulated text to the
-    clipboard — equivalent to the stop word.
+    clipboard — equivalent to the stop phrase.
 
 **Alt+W**
 :   Toggle sleep mode, a third state distinct from the two above. In sleep
-    mode, audio capture and speech recognition are fully suspended - CPU
-    usage drops to near zero - but the voice wake word cannot be heard
-    until sleep mode is toggled off again. The **Alt+W** hotkey itself
-    keeps working while asleep, since it does not depend on audio.
-    Triggering sleep mode while a dictation is in progress stops it
-    cleanly first, so no audio is lost mid-sentence.
+    mode the audio stream is closed (the microphone is released) and
+    recognition is blocked, so CPU use drops to near zero; the wake phrase
+    cannot be heard until sleep mode is toggled off. **Alt+W** itself keeps
+    working while asleep, since it does not depend on audio. Triggering
+    sleep mode during a dictation stops it cleanly first, so no audio is
+    lost mid-sentence.
 
 **Ctrl+C**
 :   Quit the program.
@@ -148,6 +213,11 @@ reference of every configuration key.
 `vosk-model/`
 :   Default location searched for Vosk acoustic models when running from
     a Git checkout.
+
+`$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
+:   Control socket of the running session (mode `0600`). Removed on a clean
+    exit; a stale socket left by a crash is detected and replaced at the
+    next start.
 
 # EXIT STATUS
 

@@ -90,6 +90,18 @@ class Config:
         self.BRIGHT = Style.BRIGHT
         self.RESET = Style.RESET_ALL
 
+    # Défauts de repli des phrases de déclenchement, par langue (chantier 7
+    # volet E/F). N'entrent en jeu que si la langue n'a pas de bloc
+    # voice_commands dans config.yaml.
+    _WAKE_PHRASE_FALLBACK = {
+        'en': 'start dictation', 'fr': 'active dictée',
+        'de': 'diktat starten', 'es': 'iniciar dictado',
+    }
+    _STOP_PHRASE_FALLBACK = {
+        'en': 'stop dictation', 'fr': 'stop dictée',
+        'de': 'diktat stoppen', 'es': 'terminar dictado',
+    }
+
     def set_language(self, lang_code: str):
         """
         Sets the active language for the application.
@@ -97,8 +109,35 @@ class Config:
         self.current_lang = lang_code
         lang_settings = self.language_settings.get(lang_code, {})
         voice_commands = lang_settings.get('voice_commands', {})
-        self.START_WORD = voice_commands.get('start_word', 'start')
-        self.STOP_WORD = voice_commands.get('stop_word', 'stop')
+        # Chantier 7 volet E/F : phrases de déclenchement à deux mots. Les
+        # anciennes clés mono-mot start_word / stop_word sont encore lues pour
+        # ne pas casser une config utilisateur non migrée.
+        default_wake = self._WAKE_PHRASE_FALLBACK.get(lang_code, 'start dictation')
+        default_stop = self._STOP_PHRASE_FALLBACK.get(lang_code, 'stop dictation')
+        self.WAKE_PHRASE = voice_commands.get(
+            'wake_phrase', voice_commands.get('start_word', default_wake)
+        )
+        self.STOP_PHRASE = voice_commands.get(
+            'stop_phrase', voice_commands.get('stop_word', default_stop)
+        )
+
+    def typography(self, lang_code: str = None) -> dict:
+        """Typography profile for a language (chantier 7 volet F).
+
+        Data-driven replacement for the old hardcoded French branch in
+        text_processing. Missing keys fall back to a neutral profile
+        (no thin space, capitalize sentence starts, ASCII quotes).
+        """
+        lang_code = lang_code or self.current_lang
+        raw = self.language_settings.get(lang_code, {}).get('typography', {})
+        return {
+            'thin_space': raw.get('thin_space', False),
+            'space_before': list(raw.get('space_before', [])),
+            'space_after': list(raw.get('space_after', [',', '.', ';', ':', '?', '!'])),
+            'capitalize_sentence_start': raw.get('capitalize_sentence_start', True),
+            'quote_open': raw.get('quote_open', '"'),
+            'quote_close': raw.get('quote_close', '"'),
+        }
 
     def model_search_roots(self, path_relative: str) -> list[str]:
         """Ordered list of roots searched for a model folder (§10.3), for error messages."""

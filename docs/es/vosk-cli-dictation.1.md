@@ -1,75 +1,131 @@
-% VOSK-CLI-DICTATION(1) vosk-cli-dictation | Comandos para el usuario
+% VOSK-CLI-DICTATION(1) vosk-cli-dictation | Comandos de usuario
 % Ronan Davalan
-% 2026-08-26
+% 2026-08-28
 
 # NOMBRE
 
-vosk-cli-dictation: dictado de voz sin conexión, a nivel de sistema, para la línea de comandos.
+vosk-cli-dictation: dictado de voz sin conexión para la línea de comandos, disponible a nivel de sistema.
 
-# RESUMEN
+# SINOPSIS
 
 **vosk-cli-dictation** [**-l** *LANG* | **--lang** *LANG*]
 
+**vosk-cli-dictation** **\--diagnose**
+
+**vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
+
 # DESCRIPCIÓN
 
-**vosk-cli-dictation** es una herramienta de dictado de línea de comandos para Linux, impulsada por el motor de reconocimiento de voz offline Vosk. Escucha continuamente a través del micrófono y escribe el texto reconocido directamente en la aplicación que actualmente tiene el foco del teclado (terminal, navegador, editor o cualquier otra ventana), lo que permite que se utilice a nivel del sistema en lugar de dentro de un solo programa.
+**vosk-cli-dictation** es una herramienta de dictado de línea de comandos para Linux, impulsada por el motor de reconocimiento de voz offline Vosk. Escucha continuamente a través del micrófono y escribe el texto reconocido directamente en la aplicación que actualmente tiene el foco del teclado (terminal, navegador, editor o cualquier otra ventana), lo que permite que se utilice a nivel de sistema en lugar de dentro de un solo programa.
 
 Todo el reconocimiento de voz se realiza localmente: ni el audio ni el texto transcrito se envían nunca a un servicio remoto.
 
-La dictación se inicia y se detiene mediante la voz (una palabra de activación y una palabra de parada configurables) o mediante atajos de teclado globales, y también se puede poner en modo de suspensión para pausar completamente la captura de audio y el reconocimiento cuando no es necesaria, sin cerrar el programa.
+La función de dictado se inicia y se detiene mediante la voz (una frase de activación y una frase de detención configurables, según el idioma) o a través de subcomandos que se pueden asignar a un atajo de teclado en el escritorio. Además, se puede poner en modo de espera para liberar completamente el micrófono y suspender el reconocimiento cuando no sea necesario, sin tener que cerrar el programa.
 
-La simulación de texto se realiza a través de **ydotool**, cuando esté disponible, o **xdotool** como alternativa. **ydotool** es compatible tanto con Wayland como con X11 a través de la interfaz `/dev/uinput`, mientras que **xdotool** solo es compatible con X11 (o Wayland a través de XWayland). Al menos uno de los dos debe estar instalado.
+Solo una sesión se ejecuta por usuario a la vez. Abre un socket Unix privado en `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (modo `0600`); el mismo comando
+invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN EJECUCIÓN) se conecta a ese socket en lugar de iniciar una nueva sesión.
+
+Se inyecta el texto pegándolo desde el portapapeles.
+Bajo Wayland, esto utiliza **wtype** y **wl-clipboard**, recurriendo a
+**ydotool** (que necesita el demonio `ydotoold` y acceso a
+`/dev/uinput`). Bajo X11, utiliza **xdotool**. Debe estar instalado al menos un backend para el tipo de sesión actual. **vosk-cli-dictation \--diagnose**
+informa qué herramientas, dispositivo de audio y acceso al portapapeles están disponibles, y luego finaliza.
+
+Las combinaciones de teclas globales a través de `pynput` solo son efectivas en una sesión X11 estándar;
+en Wayland nativo, vincule los subcomandos de control a la configuración de acceso directo propia de su escritorio en lugar de eso.
 
 # OPCIONES
 
 **-l** *LANG*, **--lang** *LANG*
 :   Fuerza el idioma de la interfaz y el reconocimiento de voz para esta sesión
-    (por ejemplo, `en` o `fr`), anulando el valor de `default_model`
-    del archivo de configuración. *LANG* debe coincidir con el nombre de uno de
-    los modelos declarados bajo `vosk_models` en el archivo de configuración.
+    (`en`, `fr`, `de` o `es`), sobrescribiendo el valor de `default_model`
+    del archivo de configuración. *LANG* debe coincidir con el nombre de uno de los
+    modelos declarados en `vosk_models` en el archivo de configuración.
+
+**\--diagnose**
+:   Verifique el entorno (tipo de sesión, backend de inyección, herramientas, modelos,
+    entrada de audio, portapapeles, socket de control) y salga. El código de salida es `0`
+    cuando todas las verificaciones se aprueban.
+
+# CONTROLANDO UNA SESIÓN EN CURSO
+
+Cada una de las siguientes opciones de configuración se conecta al socket de la sesión en ejecución,
+realiza la acción, imprime el estado resultante (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE`) o `ERR <reason>`, y finaliza. Están diseñadas para
+ser asignadas a atajos de teclado del escritorio.
+
+**\--status**
+:   Imprimir el estado actual sin modificarlo.
+
+**\--toggle**
+:   Alterna entre el modo de dictado (DICTÉE) y el modo de escucha (ÉCOUTE).
+
+**\--dictation-on**, **\--dictation-off**
+:   Activar o desactivar la dictado por voz.
+
+**\--finalize**
+:   Detenga la dictación y copie el texto acumulado; equivalente a la
+    frase de parada.
+
+**\--cancel**
+:   Descartar el búfer de la sesión actual sin escribir nada.
+
+**\--sleep**, **\--wake**, **\--sleep-toggle**
+:   Entrar, salir o activar/desactivar el modo de suspensión (VEILLE).
+
+**\--stop**
+:   Cerrar la sesión en ejecución de forma limpia.
 
 # COMANDOS DE VOZ
 
-La palabra de activación y la palabra de parada son configurables para cada idioma. Con la configuración predeterminada:
+La frase de activación y la frase de detención constan de dos palabras cada una, y son configurables por idioma en `language_settings.<lang>.voice_commands`. Se utilizan dos palabras en lugar de una para evitar que una oración común las active accidentalmente. Con la configuración de fábrica:
 
-Inglés
-:   Diga **"start"** para comenzar a dictar, **"oops"** para detener y copiar
-    el resultado al portapapeles.
+Para comenzar, diga "**iniciar dictado**". Para finalizar, diga "**detener dictado**" y copie el resultado al portapapeles.
 
-Francés
-:   Diga **"démarre"** para comenzar a dictar, **"zut"** para detener y copiar
-    el resultado al portapapeles.
+"dictado activo" / "detener dictado".
 
-La puntuación y el formato también se dictan mediante la voz; la lista completa, específica para cada idioma, se define en `language_settings.<lang>.punctuation` en el archivo de configuración, y se imprime por el propio programa al iniciarse.
+"comenzar la dictada" / "detener la dictada".
+
+comenzar la dictación / finalizar la dictación
+
+Una frase disparadora solo se activa cuando la confianza promedio de reconocimiento
+de sus palabras supera el umbral `recognition.confidence_threshold`; una frase murmurada se
+transcribe como texto ordinario. Decir una frase dos veces consecutivas
+la transcribe literalmente en lugar de activarla.
+
+La puntuación y la disposición también se dictan mediante la voz; la lista completa, específica para cada idioma, se define en `language_settings.<lang>.punctuation` en el archivo de configuración, y se imprime por el propio programa al iniciarse.
 
 # TECLAS DE ACCESO RÁPIDO
 
-Las teclas de acceso global funcionan independientemente de la ventana que tenga el foco. La configuración predeterminada define:
+Los atajos de teclado globales de `pynput` se inician solo en una sesión X11 estándar y solo
+cuando `hotkeys.pynput_enabled` es verdadero; en Wayland nativo, no se
+inician, y los subcomandos de control asociados a un acceso directo del escritorio los reemplazan. La configuración predeterminada define:
 
 **Alt+H**
-:   Activa o desactiva el dictado. Solo alterna pausa/reanudación; **nunca** copia al
-    portapapeles, a diferencia de **Alt+S** y de la palabra de parada más abajo. Mientras
-    está en pausa, el micrófono permanece activo y la palabra de activación por voz sigue
-    funcionando.
+:   Activa o desactiva la dictado. Esto solo pausa o reanuda; **no**
+    copia nada al portapapeles, a diferencia de **Alt+S** y la frase de parada.
+    Mientras está pausado, el micrófono permanece activo y la frase de activación
+    sigue funcionando.
 
 **Alt+S**
-:   Detiene la dictación actual y copia el texto acumulado al portapapeles — equivalente a
-    la palabra de parada.
+: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada.
 
 **Alt+W**
-:   Alterna el modo de suspensión, un tercer estado distinto de los dos anteriores. En modo de suspensión, la captura de audio y el reconocimiento de voz se suspenden completamente; el uso de la CPU disminuye casi a cero, pero la palabra de activación de voz no se puede escuchar hasta que se vuelve a desactivar el modo de suspensión. El atajo de teclado **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión mientras se está realizando una dictado la detiene de forma limpia, evitando así la pérdida de audio en medio de una frase.
+:   Activa/desactiva el modo de suspensión, un tercer estado distinto de los dos anteriores. En el modo de suspensión, el flujo de audio se cierra (el micrófono se libera) y el reconocimiento se bloquea, por lo que el uso de la CPU disminuye hasta casi cero; la frase de activación no se puede escuchar hasta que el modo de suspensión se desactiva. **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión durante una dictado la detiene limpiamente primero, para que no se pierda audio en medio de una frase.
 
 **Ctrl+C**
 :   Salir del programa.
 
-Las tres primeras combinaciones de teclas son configurables en la sección `hotkeys` del archivo de configuración. **Ctrl+C** no lo es: es la señal de interrupción estándar, siempre activa, nunca reasignable mediante configuración.
+Las tres primeras teclas de acceso directo son configurables en la sección `hotkeys` del
+archivo de configuración. **Ctrl+C** no lo es: es la señal de interrupción estándar, siempre activa y
+nunca remapeada a través de la configuración.
 
 # COMANDOS MANUALES
 
 Mientras el programa se está ejecutando, escribir uno de los siguientes comandos en su ventana de terminal y presionar Enter también le permite controlarlo:
 
 **/cancel**
-:   Detiene la sesión de grabación actual sin generar ninguna salida de texto.
+:   Detener la sesión de grabación actual sin generar ninguna salida de texto.
 
 **/delete-word**
 : Elimina la última palabra que se escribió.
@@ -79,14 +135,15 @@ Mientras el programa se está ejecutando, escribir uno de los siguientes comando
 
 # CONFIGURACIÓN
 
-El comportamiento en tiempo de ejecución está controlado por un archivo de configuración YAML: modelos de voz disponibles, parámetros de audio, umbral de confianza de reconocimiento, comandos de voz y puntuación específicos para cada idioma, atajos de teclado, sonido de notificación y tema de color de la consola.
+El comportamiento en tiempo de ejecución se controla mediante un archivo de configuración YAML: modelos de voz disponibles, parámetros de audio, umbral de confianza de reconocimiento, comandos de voz y puntuación específicos para cada idioma, atajos de teclado, sonido de notificación y tema de color de la consola.
 
 El archivo de configuración se encuentra mediante la primera regla que coincida; una vez que una regla coincide, las reglas restantes no se consultan.
 
 1. La ruta especificada en la variable de entorno **VOSK_CONFIG**, si está definida. Se utiliza tal cual; nunca se crea automáticamente.
-2. `config/config.yaml`, relativo al directorio del proyecto, cuando se ejecuta desde un repositorio Git (modo de desarrollo).
-3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (por defecto `~/.config/vosk-cli-dictation/config.yaml`). Se crea automáticamente en la primera ejecución, a partir de la plantilla predeterminada, cuando se instala desde el paquete Debian.
-4. La plantilla predeterminada que se incluye en el paquete, de solo lectura.
+2. `config/config.yaml`, relativa al directorio del proyecto, cuando se ejecuta desde un repositorio Git (modo de desarrollo).
+3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (predeterminado
+   `~/.config/vosk-cli-dictation/config.yaml`). Se crea automáticamente en la primera ejecución, a partir de la plantilla predeterminada, cuando se instala desde el paquete Debian.
+4. La plantilla predeterminada incluida en el paquete, de solo lectura.
 
 El idioma activo se elige, en el siguiente orden: la opción **--lang**, si se proporciona; de lo contrario, el idioma detectado por el sistema operativo; de lo contrario, el valor **`default_model`** del archivo de configuración.
 
@@ -105,17 +162,22 @@ referencia completa de cada clave de configuración.
 :   Ubicación predeterminada donde se buscan los modelos acústicos de Vosk (instalación del paquete Debian).
 
 `config/config.yaml`
-:   Archivo de configuración que se utiliza al ejecutar desde un repositorio Git.
+:   Archivo de configuración utilizado al ejecutar desde un repositorio Git.
 
 `vosk-model/`
 :   Ubicación predeterminada donde se buscan los modelos acústicos de Vosk cuando se ejecuta desde un repositorio Git.
+
+`$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
+:   Socket de control de la sesión en ejecución (modo `0600`). Se elimina al
+    salir correctamente; un socket obsoleto dejado por un fallo se detecta y
+    se reemplaza al iniciar la próxima vez.
 
 # ESTADO DE SALIDA
 
 **0**
 : El programa finalizó correctamente, incluso después de presionar **Ctrl+C**.
 
-No nulo
+No nulo.
 :   Error al iniciar: ni **ydotool** ni **xdotool** están disponibles, no se pudo cargar ningún modelo de reconocimiento de voz, o no se pudo abrir el dispositivo de audio.
 
 # EJEMPLOS
@@ -134,15 +196,15 @@ vosk-cli-dictation --lang en
 
 # VEA TAMBIÉN
 
-Modelos y descargas de Vosk: *https://alphacephei.com/vosk/models*
+Modelos de Vosk y descargas: *https://alphacephei.com/vosk/models*
 
 Página de inicio del proyecto: *https://vosk.davalan.fr/*
 
 # ERRORES
 
-Reporte los errores en el rastreador de problemas del proyecto:
+Informe los errores en el rastreador de problemas del proyecto:
 *https://github.com/RonanDavalan/vosk-cli-dictation/issues*
 
 # AUTOR
 
-Ronan Davalan, y los colaboradores listados en CONTRIBUTORS.md.
+Ronan Davalan, y los colaboradores mencionados en CONTRIBUTORS.md.

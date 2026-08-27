@@ -20,8 +20,12 @@ The configuration file is organized into logical sections:
 # Example of the main sections
 vosk_models: [...]
 default_model: "..."
+control_socket: true
 audio: [...]
 recognition: [...]
+sleep: [...]
+clipboard: [...]
+injection: [...]
 language_settings: [...]
 hotkeys: [...]
 sound_file: "..."
@@ -48,7 +52,13 @@ vosk_models:
     path_relative: "vosk-model/vosk-model-small-en-us-0.15"
   - name: "fr"
     path_relative: "vosk-model/vosk-model-small-fr-0.22"
+  - name: "de"
+    path_relative: "vosk-model/vosk-model-small-de-0.15"
+  - name: "es"
+    path_relative: "vosk-model/vosk-model-small-es-0.42"
 ```
+
+A model that is declared but not present on disk is reported at startup and skipped; startup only fails if no model at all can be loaded.
 
 ### `default_model`
 
@@ -56,6 +66,14 @@ The name of the Vosk model to load at startup. Must match a `name` in the `vosk_
 
 ```yaml
 default_model: "en"
+```
+
+### `control_socket`
+
+Boolean, default `true`. When enabled, the running session listens on a Unix socket at `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (mode `0600`) so the control subcommands (`--toggle`, `--sleep-toggle`, `--status`, `--stop`, …) can drive it. Set to `false` to disable the socket entirely; the tool then remains usable interactively but cannot be controlled from a bound shortcut.
+
+```yaml
+control_socket: true
 ```
 
 ### `audio`
@@ -66,6 +84,7 @@ Parameters for your microphone.
 -   **`channels`** (integer): Number of audio channels (should be `1` for mono).
 -   **`frames_per_buffer`** (integer): `2048` or `4096` are common values.
 -   **`buffer_size`** (integer): The size of the audio buffer.
+-   **`queue_max_chunks`** (integer): Maximum depth of the audio queue, in `buffer_size` chunks (`16` ≈ 2 s). When recognition falls behind, the oldest chunk is dropped rather than letting latency drift; an overflow counter is surfaced in `--status` and `--diagnose`.
 
 ```yaml
 audio:
@@ -73,34 +92,77 @@ audio:
   channels: 1
   frames_per_buffer: 4096
   buffer_size: 2048
+  queue_max_chunks: 16
 ```
 
 ### `recognition`
 
 Parameters for the Vosk recognition engine.
 
--   **`confidence_threshold`** (float, 0.0-1.0): Words with a confidence score below this value will be ignored.
+-   **`confidence_threshold`** (float, 0.0-1.0): A voice trigger phrase (wake or stop) is only acted on when the average confidence of its words reaches this value; below it, the phrase is typed as ordinary text.
+-   **`restricted_grammar_in_listening`** (boolean, default `true`): while listening for the wake phrase, decode with a Kaldi grammar restricted to that phrase. CPU at rest drops sharply, at the cost of rebuilding the full recognizer on wake. Set to `false` to keep the full recognizer running in the listening state.
 
 ```yaml
 recognition:
   confidence_threshold: 0.85
+  restricted_grammar_in_listening: true
+```
+
+### `sleep`
+
+-   **`releases_device`** (boolean, default `true`): in sleep mode, close the audio stream so the microphone is fully released (its LED goes off) and another program can use it; reopening on wake takes about 200 ms. Set to `false` to only stop the stream without closing it — the device stays claimed but wake is marginally faster.
+
+```yaml
+sleep:
+  releases_device: true
+```
+
+### `clipboard`
+
+Text is injected by placing it on the clipboard and simulating a paste.
+
+-   **`restore`** (boolean, default `true`): put the user's previous clipboard content back after pasting. A non-text clipboard (an image, for instance) is never saved or overwritten. Can also be disabled per run with `--no-clipboard-restore`.
+-   **`restore_delay_ms`** (integer, default `250`): delay before restoring, to let the target application read the paste.
+-   **`confirm_timeout_ms`** (integer, default `500`): maximum time to wait for confirmation that the clipboard actually holds our text before sending the paste keystroke.
+
+```yaml
+clipboard:
+  restore: true
+  restore_delay_ms: 250
+  confirm_timeout_ms: 500
+```
+
+### `injection`
+
+-   **`paste_combo`** (string, default `ctrl+v`) and **`terminal_paste_combo`** (default `ctrl+shift+v`): the key combination used to paste. Under X11 the window class of the focused window is checked against `terminal_window_classes` to pick the right one automatically; under Wayland there is no focused-window API, so `paste_combo` is used unless you override it.
+-   **`terminal_window_classes`** (list): window classes treated as terminals (X11 only).
+-   **`ydotool_keycodes`** (mapping): physical Linux keycodes, used only on the `ydotool` fallback path. Override these under a non-QWERTY layout if that fallback is actually in use; the nominal Wayland path (`wtype`) works by keysym and is layout-independent.
+
+```yaml
+injection:
+  paste_combo: "ctrl+v"
+  terminal_paste_combo: "ctrl+shift+v"
+  terminal_window_classes: ["konsole", "gnome-terminal-server", "xterm", "st", "alacritty", "kitty", "foot"]
+  ydotool_keycodes: {}
 ```
 
 ### `language_settings`
 
-This section contains settings that are specific to a language.
+This section contains settings that are specific to a language. The factory
+configuration ships four: `en`, `fr`, `de`, `es`.
 
--   **`voice_commands`**: Keywords to control the application.
--   **`punctuation`**: A dictionary to automatically insert punctuation. It is organized into logical groups for clarity.
--   **`recognition_aliases`**: Corrects common recognition errors from Vosk (e.g., `"sauna": "sonna"`).
+-   **`voice_commands`**: the two-word `wake_phrase` and `stop_phrase` for this language. Two words so an ordinary sentence never triggers them. (The former single-word `start_word` / `stop_word` keys are still read if present, for backward compatibility.)
+-   **`punctuation`**: A dictionary to automatically insert punctuation, organized into logical groups. Spanish `¿` and `¡` are inserted only by explicit commands (`"abrir interrogación"`, `"abrir exclamación"`), never automatically.
+-   **`typography`**: per-language output rules — see below.
+-   **`recognition_aliases`**: Corrects common recognition errors from Vosk. The shipped table holds only generic, uncontroversial fixes (e.g. `"de points": "deux points"`); corpus-specific corrections live in `config/config.example.yaml`, to copy and adapt.
 -   **`custom_vocabulary`**: A dictionary for case-sensitive corrections, applied after aliases (e.g., `"ia": "IA"`).
 
 ```yaml
 language_settings:
   fr: # Settings for French
     voice_commands:
-      start_word: "démarre"
-      stop_word: "zut"
+      wake_phrase: "active dictée"
+      stop_phrase: "stop dictée"
     punctuation:
       simple:
         "virgule": ","
@@ -110,22 +172,44 @@ language_settings:
         "nouvelle ligne": "\n"
       special:
         "ouvrez la parenthèse": "("
+    typography:
+      thin_space: true
+      space_before: ["?", "!", ":", ";", "»"]
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "« "
+      quote_close: "»"
     recognition_aliases:
-      "sauna": "sonna"
+      "de points": "deux points"
     custom_vocabulary:
       "ia": "IA"
 ```
 
+#### `typography`
+
+Replaces what used to be a hard-coded French branch. Per language:
+
+-   **`thin_space`** (boolean): insert a narrow no-break space (U+202F) before the symbols listed in `space_before`. `true` for French, `false` elsewhere. Disable it if the thin space breaks `grep` or your terminal.
+-   **`space_before`** (list): symbols that take a leading separator (a thin space when `thin_space`, otherwise a plain space). Empty for English, German and Spanish.
+-   **`space_after`** (list): symbols followed by a space.
+-   **`capitalize_sentence_start`** (boolean): capitalize the first word of each sentence. German capitalizes only sentence starts — common nouns are left as recognized, since reliable noun capitalization would need a morphological analyzer.
+-   **`quote_open`** / **`quote_close`**: opening and closing quotation marks (`« »` for French, `„ "` for German).
+
 
 ### `hotkeys`
 
-Global keyboard shortcuts to control the application.
+Global keyboard shortcuts via `pynput`. These are only started under a plain
+X11 session; on native Wayland, bind the control subcommands (`--toggle`,
+`--finalize`, `--sleep-toggle`) to your desktop's own shortcut settings
+instead.
 
+-   **`pynput_enabled`** (boolean, default `true`): honoured only under X11. Set to `false` to never start the `pynput` listener.
 -   **`pynput_keys`**: A list of Pynput keys for the shortcut.
 -   **`display_name`**: A string shown in the help message.
 
 ```yaml
 hotkeys:
+  pynput_enabled: true
   toggle_recording:
     pynput_keys: ["alt_l", "h"]
     display_name: "[Alt+H]"
@@ -138,16 +222,16 @@ hotkeys:
 ```
 
 -   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
-    paused, the microphone stays active and the voice wake word still works.
+    paused, the microphone stays active and the voice wake phrase still works.
 -   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
     text to the clipboard.
 -   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
-    the two above. In sleep mode, audio capture and speech recognition are fully suspended —
-    the CPU cost of the recognition engine drops to near zero — but this also means the voice
-    wake word (`start_word`) cannot be heard until sleep mode is toggled off again. Only the
-    `Alt+W` hotkey itself keeps working while asleep, since it does not depend on audio.
-    Triggering sleep mode while a dictation is in progress stops it cleanly first (as if
-    `Alt+H` had been pressed), so no audio is lost mid-sentence.
+    the two above. In sleep mode the audio stream is closed (the microphone is released) and
+    recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be
+    heard until sleep mode is toggled off again. Only the `Alt+W` hotkey itself keeps working
+    while asleep, since it does not depend on audio. Triggering sleep mode while a dictation
+    is in progress stops it cleanly first (as if `Alt+H` had been pressed), so no audio is
+    lost mid-sentence.
 
     ```bash
     # How to test / how to run

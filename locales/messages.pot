@@ -96,15 +96,15 @@ msgstr "Veuillez vérifier les chemins et l'intégrité des modèles dans votre 
 msgid "The script is ready. Current model: {model_name}"
 msgstr "Le script est prêt. Modèle actuel : {model_name}"
 
-#: src/main.py:87
+#: src/main.py:44
 #, python-brace-format
-msgid "  - Say '{start_word}' or press [Ctrl+R] to start/stop."
-msgstr "  - Dites '{start_word}' ou appuyez sur [Ctrl+R] pour commencer/arrêter."
+msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
+msgstr ""
 
-#: src/main.py:88
+#: src/main.py:45
 #, python-brace-format
-msgid "  - Say '{stop_word}' or press [F2] for a final stop and copy."
-msgstr "  - Dites '{stop_word}' ou appuyez sur [F2] pour un arrêt final et copie."
+msgid "  - Say '{stop_phrase}' or press {hotkey} to stop and copy."
+msgstr ""
 
 #: src/main.py:89
 msgid "\n  Manual commands to type in this console:"

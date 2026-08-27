@@ -1,0 +1,9 @@
+# requirements-dev.txt
+#
+# Development-only dependencies (test suite). Not needed to run the tool.
+#   pip install -r requirements-dev.txt
+#   python -m pytest -q
+#
+# Kept unpinned on purpose: the test suite only uses the stable pytest core.
+
+pytest

@@ -1,0 +1,6 @@
+# requirements-dev.in
+#
+# Development-only dependencies (test suite). Not needed to run the tool.
+# Install with:  pip install -r requirements-dev.txt
+
+pytest

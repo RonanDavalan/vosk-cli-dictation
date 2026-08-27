@@ -1,0 +1,140 @@
+# Chantier 7 volet E/H — sémantique des commandes vocales dans le thread de
+# reconnaissance : réveil sur les partiels sous grammaire restreinte, garde de
+# confiance sur les finaux, anti-rebond, transmission du texte en DICTÉE.
+#
+# Le recognizer Vosk est remplacé par un faux qui rejoue un script de résultats,
+# donc aucun modèle n'est requis.
+
+import json
+import queue
+import threading
+import time
+
+import pytest
+
+import src.recognition as rec
+from config.config import config
+from src.runtime_state import (
+    runtime_state, STATE_DICTATING, STATE_LISTENING,
+)
+
+
+class FakeRec:
+    def __init__(self, script):
+        self.script = list(script)
+        self.i = 0
+        self.step = ("partial", {"partial": ""})
+        self.reset_calls = 0
+
+    def AcceptWaveform(self, data):
+        if self.i < len(self.script):
+            self.step = self.script[self.i]
+            self.i += 1
+        else:
+            self.step = ("partial", {"partial": ""})
+        return self.step[0] == "final"
+
+    def Result(self):
+        return json.dumps(self.step[1])
+
+    def PartialResult(self):
+        return json.dumps(self.step[1])
+
+    def Reset(self):
+        self.reset_calls += 1
+
+    def SetWords(self, flag):
+        pass
+
+
+def _run_thread(script, state, monkeypatch, feed=None):
+    config.set_language("fr")
+    fake = FakeRec(script)
+    monkeypatch.setattr(rec, "build_recognizer", lambda model, mode: fake)
+
+    audio_q = queue.Queue(maxsize=64)
+    text_q = queue.Queue(maxsize=64)
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    display = threading.Event()
+    wake = threading.Event()
+    wake.set()
+    if state == STATE_DICTATING:
+        display.set()
+
+    runtime_state.set_state(state)
+    # neutraliser l'anti-rebond hérité d'un test précédent
+    runtime_state._last_transition = 0.0
+
+    steps = len(script) if feed is None else feed
+    for _ in range(steps + 2):
+        audio_q.put_nowait(b"\x00\x00")
+
+    t = threading.Thread(
+        target=rec.recognition_thread,
+        args=(object(), fake, audio_q, text_q, ctrl_q, stop, display, wake),
+        daemon=True,
+    )
+    t.start()
+    time.sleep(0.4)
+    stop.set()
+    wake.set()
+    t.join(timeout=2.0)
+    return text_q, ctrl_q, fake
+
+
+def _drain(q):
+    out = []
+    try:
+        while True:
+            out.append(q.get_nowait())
+    except queue.Empty:
+        pass
+    return out
+
+
+def test_wake_phrase_on_partial_requests_dictation(monkeypatch):
+    script = [("partial", {"partial": "active dictée"})]
+    _text, ctrl, fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" in _drain(ctrl)
+    assert fake.reset_calls >= 1  # la phrase est retirée du flux
+
+
+def test_isolated_words_do_not_wake(monkeypatch):
+    script = [
+        ("partial", {"partial": "active"}),
+        ("partial", {"partial": "je reprends la dictée"}),
+        ("final", {"text": "active la dictée maintenant", "result": []}),
+    ]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" not in _drain(ctrl)
+
+
+def test_listening_final_swallows_text(monkeypatch):
+    # En ÉCOUTE, un final qui n'est pas la phrase de réveil ne doit pas être tapé.
+    script = [("final", {"text": "bla bla bla", "result": []})]
+    text_q, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert _drain(text_q) == []
+    assert "DICTATION_ON" not in _drain(ctrl)
+
+
+def test_dictating_final_forwards_text_and_words(monkeypatch):
+    words = [{"word": "bonjour", "conf": 0.98}]
+    script = [("final", {"text": "bonjour", "result": words})]
+    text_q, _ctrl, _fake = _run_thread(script, STATE_DICTATING, monkeypatch)
+    items = _drain(text_q)
+    assert items == [("bonjour", words)]
+
+
+def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
+    # grammaire complète en ÉCOUTE -> le garde de confiance s'applique.
+    monkeypatch.setitem(config.data["recognition"], "restricted_grammar_in_listening", False)
+    low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
+    script = [("final", {"text": "active dictée", "result": low})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" not in _drain(ctrl)
+
+    high = [{"word": "active", "conf": 0.97}, {"word": "dictée", "conf": 0.95}]
+    script = [("final", {"text": "active dictée", "result": high})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" in _drain(ctrl)

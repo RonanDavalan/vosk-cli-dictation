@@ -3,23 +3,79 @@ vosk_models:
     path_relative: "vosk-model/vosk-model-small-en-us-0.15"
   - name: "fr"
     path_relative: "vosk-model/vosk-model-small-fr-0.22"
+  - name: "de"
+    path_relative: "vosk-model/vosk-model-small-de-0.15"
+  - name: "es"
+    path_relative: "vosk-model/vosk-model-small-es-0.42"
 
 default_model: "fr"
+
+# Socket de contrôle Unix dans $XDG_RUNTIME_DIR (chantier 7 volet A) : permet de
+# piloter une session en cours via les sous-commandes CLI (--toggle, --sleep,
+# --status…) liées aux raccourcis globaux de n'importe quel bureau.
+control_socket: true
 
 audio:
   sample_rate: 16000
   channels: 1
   frames_per_buffer: 4096
   buffer_size: 2048
+  # Taille max de la file audio, en blocs de buffer_size échantillons.
+  # 16 blocs ≈ 2 s. Au-delà, le bloc le plus ancien est jeté (chantier 7 volet C).
+  queue_max_chunks: 16
 
 recognition:
+  # Un déclenchement vocal (réveil ou arrêt) n'est retenu que si la confiance
+  # moyenne des mots de la phrase-clé atteint ce seuil (chantier 7 volet E).
+  # Garde indépendant de la grammaire restreinte, actif aussi en DICTÉE.
   confidence_threshold: 0.85
+  # En ÉCOUTE, décoder avec une grammaire Kaldi restreinte à la seule phrase de
+  # réveil : le CPU au repos chute, au prix d'une reconstruction du recognizer
+  # complet au réveil (chantier 7 volet E). false = recognizer complet en ÉCOUTE.
+  restricted_grammar_in_listening: true
 
+sleep:
+  # true : en VEILLE, le flux audio est fermé — micro relâché, LED éteinte,
+  #        réouverture ~200 ms au réveil (chantier 7 volet D).
+  # false : le flux est seulement arrêté, périphérique conservé, réveil plus rapide.
+  releases_device: true
+
+clipboard:
+  # Restaurer le presse-papiers de l'utilisateur après le collage (chantier 7 volet B).
+  restore: true
+  # Délai avant restauration, laissé à l'application cible pour lire le presse-papiers.
+  restore_delay_ms: 250
+  # Durée max d'attente de la confirmation que le presse-papiers contient bien
+  # notre texte, avant d'envoyer Ctrl+V.
+  confirm_timeout_ms: 500
+
+injection:
+  # Combo de collage par défaut, et variante utilisée quand la fenêtre active
+  # est un terminal (détection de classe sous X11 seulement).
+  paste_combo: "ctrl+v"
+  terminal_paste_combo: "ctrl+shift+v"
+  terminal_window_classes:
+    - "konsole"
+    - "gnome-terminal-server"
+    - "xterm"
+    - "st"
+    - "alacritty"
+    - "kitty"
+    - "foot"
+  # Repli ydotool uniquement : keycodes physiques Linux. À surcharger sous une
+  # disposition non-QWERTY si le repli ydotool est réellement utilisé.
+  ydotool_keycodes: {}
+
+# Chantier 7 volet E/F : phrases de déclenchement à deux mots (wake_phrase /
+# stop_phrase), typographie pilotée par données (bloc typography), table d'alias
+# d'usine réduite aux corrections génériques et indiscutables. Les corrections
+# liées à un corpus de prose précis vivent dans config.example.yaml, à recopier
+# et adapter par l'utilisateur.
 language_settings:
   en:
     voice_commands:
-      start_word: "start"
-      stop_word: "oops"
+      wake_phrase: "start dictation"
+      stop_phrase: "stop dictation"
     punctuation:
       simple:
         "comma": ","
@@ -41,6 +97,13 @@ language_settings:
         "ellipsis": "…"
         "open quote": "\""
         "close quote": "\""
+    typography:
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "\""
+      quote_close: "\""
     recognition_aliases: {}
     custom_vocabulary:
       "vosk": "Vosk"
@@ -48,8 +111,8 @@ language_settings:
 
   fr:
     voice_commands:
-      start_word: "démarre"
-      stop_word: "zut"
+      wake_phrase: "active dictée"
+      stop_phrase: "stop dictée"
     punctuation:
       simple:
         "virgule": ","
@@ -73,37 +136,107 @@ language_settings:
         "trois petits points": "…"
         "ouvrez les guillemets": "« "
         "fermez les guillemets": "»"
+    typography:
+      thin_space: true
+      space_before: ["?", "!", ":", ";", "»"]
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "« "
+      quote_close: "»"
     recognition_aliases:
       "fermer la parenthèse": "fermez la parenthèse"
       "fermer le crochet": "fermez le crochet"
-      "fermer les guimet": "fermez les guillemets"
       "fermer les guillemets": "fermez les guillemets"
       "de points": "deux points"
-      "sauna": "sonna"
-      "tirez": "tiret"
-      "tirée": "tiret"
-      "tirait": "tiret"
-      "tirer": "tiret"
-      "maigre efforts": "maigre effort"
-      "antoine lui": "Antoine, lui,"
-      "antoine": "Antoine"
-      "un neuf": "œuf"
-      "bougez pas": "bougeait pas"
-      "il est relu": "il relut"
-      "il se murmure murmura": "il se murmura"
-      "blanc cassé": "blanc-cassé"
-      "ils se mirent murat": "il se murmura"
-      "elle soupira": "et soupira"
-      "scénique": "cynique"
-      "a quoi": "à quoi"
-      "demain un": "demain"
     custom_vocabulary:
       "vosk": "Vosk"
       "gemini": "Gemini"
       "ia": "IA"
-      "à quoi": "À quoi"
+
+  de:
+    voice_commands:
+      wake_phrase: "diktat starten"
+      stop_phrase: "diktat stoppen"
+    punctuation:
+      simple:
+        "komma": ","
+        "punkt": "."
+      double:
+        "fragezeichen": "?"
+        "ausrufezeichen": "!"
+        "doppelpunkt": ":"
+        "semikolon": ";"
+      layout:
+        "neue zeile": "\n"
+        "neuer absatz": "\n\n"
+      special:
+        "klammer auf": "("
+        "klammer zu": ")"
+        "eckige klammer auf": "["
+        "eckige klammer zu": "]"
+        "gedankenstrich": "–"
+        "auslassungspunkte": "…"
+        "anführungszeichen auf": "„"
+        "anführungszeichen zu": "“"
+    typography:
+      # Allemand : pas d'espace avant ? ! : ; ; guillemets „ … “ ;
+      # capitalisation en début de phrase seulement (chantier 7 volet F,
+      # décision n°5 : pas d'analyseur morphologique pour les noms communs).
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "„"
+      quote_close: "“"
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
+
+  es:
+    voice_commands:
+      wake_phrase: "iniciar dictado"
+      stop_phrase: "terminar dictado"
+    punctuation:
+      simple:
+        "coma": ","
+        "punto": "."
+      double:
+        "interrogación": "?"
+        "exclamación": "!"
+        "dos puntos": ":"
+        "punto y coma": ";"
+      layout:
+        "nueva línea": "\n"
+        "nuevo párrafo": "\n\n"
+      special:
+        # Ouvrants espagnols par commande explicite (chantier 7 volet F) :
+        # pas d'insertion automatique de ¿ / ¡, qui exigerait l'analyse de
+        # portée de la proposition.
+        "abrir interrogación": "¿"
+        "abrir exclamación": "¡"
+        "abrir paréntesis": "("
+        "cerrar paréntesis": ")"
+        "abrir corchete": "["
+        "cerrar corchete": "]"
+        "raya": "–"
+        "puntos suspensivos": "…"
+        "abrir comillas": "\""
+        "cerrar comillas": "\""
+    typography:
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "\""
+      quote_close: "\""
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
 
 hotkeys:
+  # pynput n'écoute que sous X11 (aveugle sous Wayland natif). Sous Wayland,
+  # utiliser les sous-commandes CLI liées aux raccourcis du bureau.
+  pynput_enabled: true
   toggle_recording:
     pynput_keys: ["alt_l", "h"]
     display_name: "[Alt+H]"

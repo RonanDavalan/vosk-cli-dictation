@@ -88,15 +88,15 @@ msgstr "Please check the model paths and integrity in your config.yaml file."
 msgid "The script is ready. Current model: {model_name}"
 msgstr "The script is ready. Current model: {model_name}"
 
-#: src/main.py:30
+#: src/main.py:44
 #, python-brace-format
-msgid "  - Say '{start_word}' or press [Alt+H] to start/stop."
-msgstr "  - Say '{start_word}' or press [Alt+H] to start/stop."
+msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
+msgstr "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
 
-#: src/main.py:32
+#: src/main.py:45
 #, python-brace-format
-msgid "  - Say '{stop_word}' or press [Alt+S] for a final stop and copy."
-msgstr "  - Say '{stop_word}' or press [Alt+S] for a final stop and copy."
+msgid "  - Say '{stop_phrase}' or press {hotkey} to stop and copy."
+msgstr "  - Say '{stop_phrase}' or press {hotkey} to stop and copy."
 
 #: src/main.py:30
 msgid "\n  Manual commands to type in this console:"

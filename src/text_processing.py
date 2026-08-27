@@ -1,19 +1,27 @@
 import re
 from config.config import config
 
+
 class TextProcessor:
     def __init__(self, language_code: str):
-        self.update_language(language_code)
-        # Define punctuation types for smarter spacing
-        self.no_space_after = {'(', '[', '« '}
-        self.no_space_before = {',', '.', ')', ']', '?', '!', ':', ';', '»', '…'}
+        # Punctuation mechanics that are near-universal (bracket / quote
+        # attachment). The locale-variable parts — thin space, sentence
+        # capitalization, quote glyphs — come from the per-language
+        # `typography` block instead (chantier 7 volet F).
+        self.no_space_after = {'(', '[', '« ', '„', '¿', '¡'}
+        self.no_space_before = {',', '.', ')', ']', '?', '!', ':', ';', '»', '…', '“'}
         # Add state to handle capitalization contextually.
         self.capitalize_next_word = True
+        self.update_language(language_code)
 
     def update_language(self, language_code: str):
         """Updates the processor's settings for a new language."""
         self.lang = language_code
         self.settings = config.language_settings.get(language_code, {})
+        self.typography = config.typography(language_code)
+        self.space_before = set(self.typography['space_before'])
+        self.thin_space = self.typography['thin_space']
+        self.capitalize_sentence_start = self.typography['capitalize_sentence_start']
         # Merge all punctuation commands for easy lookup
         self.all_punctuation_cmds = {}
         punctuation_sections = self.settings.get('punctuation', {})
@@ -22,6 +30,10 @@ class TextProcessor:
                 self.all_punctuation_cmds.update(section)
         # Create a sorted list of punctuation commands for the tokenizer
         self.punctuation_keys = sorted(self.all_punctuation_cmds.keys(), key=len, reverse=True)
+        # Aliases, longest key first: a multi-word alias must win over any of
+        # its own single words (chantier 7 volet F).
+        aliases = self.settings.get('recognition_aliases', {}) or {}
+        self.sorted_aliases = sorted(aliases.items(), key=lambda kv: len(kv[0]), reverse=True)
 
     def reset_state(self):
         """Resets the processor's state, e.g., for a new session."""
@@ -50,8 +62,7 @@ class TextProcessor:
         return final_string
 
     def _apply_aliases(self, text: str) -> str:
-        aliases = self.settings.get('recognition_aliases', {})
-        for alias, correction in aliases.items():
+        for alias, correction in self.sorted_aliases:
             text = re.sub(r'\b' + re.escape(alias) + r'\b', correction, text)
         return text
 
@@ -88,6 +99,10 @@ class TextProcessor:
                 i += 1
         return tokens
 
+    def _lead_separator(self) -> str:
+        """Separator placed before a symbol listed in typography.space_before."""
+        return ' ' if self.thin_space else ' '
+
     def _format_parts(self, parts: list) -> str:
         """Assembles words and punctuation, respecting typographical rules and state."""
         output_str = ""
@@ -95,16 +110,17 @@ class TextProcessor:
             if part in self.all_punctuation_cmds:
                 symbol = self.all_punctuation_cmds[part]
 
-                # Remove space before punctuation that requires it
+                # Remove space before punctuation that attaches to the word.
                 if output_str.endswith(" ") and symbol in self.no_space_before:
                     output_str = output_str.rstrip()
 
-                # Add non-breaking space for French double punctuation
-                if self.lang == 'fr' and symbol in ['?', '!', ':', ';', '»']:
-                    if not output_str.endswith(('\u202f', ' ')):
-                         output_str += '\u202f'  # Narrow no-break space
-                    elif output_str.endswith(' '):
-                         output_str = output_str.rstrip() + '\u202f'
+                # Data-driven leading separator (French thin space, etc.).
+                if symbol in self.space_before:
+                    sep = self._lead_separator()
+                    if output_str.endswith(' '):
+                        output_str = output_str.rstrip()
+                    if output_str and not output_str.endswith((' ', sep)):
+                        output_str += sep
 
                 output_str += symbol
 
@@ -112,14 +128,15 @@ class TextProcessor:
                 if symbol not in self.no_space_after and not symbol.endswith('\n'):
                     output_str += " "
 
-                # --- MODIFICATION CLÉ ---
                 # Set capitalization state if the punctuation marks the end of a sentence.
-                if symbol in ['.', '!', '?', '…', '« ', '\n', '\n\n']:
+                if symbol in ['.', '!', '?', '…', '« ', '„', '\n', '\n\n']:
                     self.capitalize_next_word = True
-            else: # This is a normal word
+            else:  # This is a normal word
                 word = part
-                if self.capitalize_next_word and word:
-                    word = word.capitalize()
+                if self.capitalize_sentence_start and self.capitalize_next_word and word:
+                    # Uppercase the first character only — never lowercase the
+                    # rest (keeps "McDonald", "iPhone" intact).
+                    word = word[:1].upper() + word[1:]
                     self.capitalize_next_word = False
 
                 output_str += word
@@ -127,10 +144,10 @@ class TextProcessor:
                 # Add a space after a word if the next part isn't punctuation that attaches to it.
                 is_last_part = (i == len(parts) - 1)
                 if not is_last_part:
-                    next_part = parts[i+1]
+                    next_part = parts[i + 1]
                     if next_part in self.all_punctuation_cmds:
                         next_symbol = self.all_punctuation_cmds[next_part]
-                        if next_symbol not in self.no_space_before:
+                        if next_symbol not in self.no_space_before and next_symbol not in self.space_before:
                             output_str += " "
                     else:
                         output_str += " "

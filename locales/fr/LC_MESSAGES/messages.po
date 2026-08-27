@@ -27,13 +27,13 @@ msgstr "Forcer la langue de l'interface et du modèle."
 
 #: src/main.py:44
 #, python-brace-format
-msgid "  - Say '{start_word}' or press {hotkey} to start/stop."
-msgstr "  - Dites '{start_word}' ou appuyez sur {hotkey} pour démarrer/arrêter."
+msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
+msgstr "  - Dites « {wake_phrase} » ou appuyez sur {hotkey} pour démarrer/arrêter."
 
 #: src/main.py:45
 #, python-brace-format
-msgid "  - Say '{stop_word}' or press {hotkey} to stop and copy."
-msgstr "  - Dites '{stop_word}' ou appuyez sur {hotkey} pour arrêter et copier."
+msgid "  - Say '{stop_phrase}' or press {hotkey} to stop and copy."
+msgstr "  - Dites « {stop_phrase} » ou appuyez sur {hotkey} pour arrêter et copier."
 
 #: src/main.py:47
 #, python-brace-format
