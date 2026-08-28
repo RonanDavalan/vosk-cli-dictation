@@ -32,6 +32,34 @@ sound_file: "..."
 theme: [...]
 ```
 
+## Local overrides (`config_local.yaml`)
+
+To keep machine-specific tweaks out of version control, create a
+`config_local.yaml` next to the config file actually in use (its path is
+printed at launch, and by `vosk-cli-dictation --diagnose`). Any keys it
+defines are deep-merged on top of the main configuration: nested sections
+merge key by key, so you only repeat the leaves you want to change. The file
+is listed in `.gitignore` and is never created automatically.
+
+```yaml
+# config_local.yaml — merged over config.yaml, this machine only
+language_settings:
+  fr:
+    voice_commands:
+      wake_phrase: "démarre"
+      stop_phrase: "zut"
+```
+
+A one-word wake or stop phrase is convenient but riskier than the two-word
+factory default: a common word is more likely to fire mid-sentence, and a
+short word often decodes below `recognition.confidence_threshold`, in which
+case a stop phrase is swallowed rather than acted on. Lower that threshold
+for the language in the same file if needed.
+
+Set `VOSK_IGNORE_LOCAL_CONFIG=1` to load only `config.yaml` and skip the
+overlay for one run (the test suite does this so it always sees the shipped
+defaults).
+
 ## Configuration Sections in Detail
 
 ### `vosk_models`
@@ -270,6 +298,33 @@ hotkeys:
     python3 src/main.py
     # Alt+W toggles sleep mode; Alt+H toggles dictation; Alt+S finalizes and copies.
     ```
+
+#### Binding shortcuts on KDE Plasma (Wayland)
+
+Under a Plasma Wayland session `pynput` sees no key events, so the `hotkeys`
+section above does nothing. Bind the control subcommands to Plasma's own
+shortcuts instead — this is the supported path on Wayland:
+
+1.  Open **System Settings → Keyboard → Shortcuts → Add New → Command or
+    Script**.
+2.  Add one entry per action:
+    -   `vosk-cli-dictation --toggle` — start or pause dictation
+    -   `vosk-cli-dictation --finalize` — stop and copy the accumulated text
+    -   `vosk-cli-dictation --sleep-toggle` — enter or leave sleep mode
+3.  Assign a key to each — for example `Meta+D`, `Meta+F`, `Meta+W`. Avoid
+    `Alt`-based combinations that applications commonly use.
+4.  Apply. The shortcut runs the command, which connects to the running
+    session through its control socket; no key event reaches the focused
+    window, so nothing leaks into a terminal.
+
+If `vosk-cli-dictation` is not on `PATH` (a git checkout rather than the
+Debian package), point the shortcut at the checkout instead — adapt the path
+to your clone:
+
+```
+~/git/vosk-cli-dictation/vosk-cli-dictation/vosk-env/bin/python3 \
+  ~/git/vosk-cli-dictation/vosk-cli-dictation/src/main.py --toggle
+```
 
 ### `sound_file`
 

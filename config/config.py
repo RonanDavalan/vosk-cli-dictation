@@ -16,6 +16,8 @@ class Config:
         self.config_path = self._get_config_path()
         if not self.config_path:
             raise FileNotFoundError("Could not find config.yaml")
+        # Set by _load_config when a sibling config_local.yaml overlay is applied.
+        self.local_config_path = None
         self.data = self._load_config()
 
         # UPDATE: Initialize theme colors from the config file.
@@ -59,9 +61,42 @@ class Config:
         return None
 
     def _load_config(self):
-        """Loads the YAML configuration file."""
+        """Loads config.yaml, then overlays an optional sibling
+        ``config_local.yaml`` (git-ignored) for machine-local overrides.
+
+        ``config_local.yaml`` sits next to the resolved config file. Its keys
+        are deep-merged over the base: two mappings under the same key merge
+        recursively, every other value (scalar, list) replaces the base one.
+        A missing or empty overlay leaves the base config untouched.
+        """
         with open(self.config_path, 'r', encoding='utf-8') as f:
-            return yaml.safe_load(f)
+            data = yaml.safe_load(f) or {}
+
+        local_path = os.path.join(
+            os.path.dirname(os.path.abspath(self.config_path)), 'config_local.yaml'
+        )
+        if os.path.exists(local_path) and not os.environ.get('VOSK_IGNORE_LOCAL_CONFIG'):
+            with open(local_path, 'r', encoding='utf-8') as f:
+                overrides = yaml.safe_load(f)
+            if overrides:
+                data = self._deep_merge(data, overrides)
+                self.local_config_path = local_path
+        return data
+
+    @staticmethod
+    def _deep_merge(base: dict, override: dict) -> dict:
+        """Recursively merge ``override`` into ``base``; returns ``base``.
+
+        Two mappings under the same key merge recursively; any other value in
+        ``override`` (scalar, list, or a type change) replaces the base value.
+        """
+        for key, value in override.items():
+            base_value = base.get(key)
+            if isinstance(base_value, dict) and isinstance(value, dict):
+                base[key] = Config._deep_merge(base_value, value)
+            else:
+                base[key] = value
+        return base
 
     def _initialize_theme(self):
         """

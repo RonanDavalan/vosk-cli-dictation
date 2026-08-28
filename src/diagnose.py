@@ -100,7 +100,10 @@ def run_diagnose():
     ok_all &= _line(dir_ok, _("Runtime dir writable"), os.path.dirname(path))
 
     print()
-    print(_("Config file in use: {path}").format(path=config.config_path))
+    config_line = _("Config file in use: {path}").format(path=config.config_path)
+    if config.local_config_path:
+        config_line += f"  (+ {os.path.basename(config.local_config_path)})"
+    print(config_line)
     print()
     print(_("All checks passed.") if ok_all else _("Some checks failed (see !! above)."))
     return 0 if ok_all else 1

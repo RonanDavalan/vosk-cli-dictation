@@ -59,6 +59,6 @@ vosk-model/*
 GEMINI.md
 
 # --- CONFIGURATION LOCALE ---
-# Si tu crées un fichier spécifique pour tes tests
+# Surcharges locales fusionnées par-dessus config.yaml (voir docs/configuration.md)
 config_local.yaml
 check_mic.py
