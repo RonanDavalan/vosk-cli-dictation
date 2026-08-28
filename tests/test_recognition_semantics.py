@@ -258,3 +258,52 @@ def test_dictating_text_suppressed_while_stop_pending(monkeypatch):
     )
     assert "FINALIZE_SESSION" in _drain(ctrl)
     assert _drain(text_q) == []
+
+
+# --- chantier 7 ter (T4) : fenêtre d'ignorance après le réveil -----------------
+
+def test_wake_discard_window_drops_audio_buffered_before_transition(monkeypatch):
+    """Après ÉCOUTE->DICTÉE, l'audio déjà en file (fin de « active dictée ») est
+    jeté sans décodage ; aucun mot parasite n'est remonté."""
+    config.set_language("fr")
+    monkeypatch.setitem(config.data["recognition"], "wake_discard_ms", 300)
+
+    # Le faux recognizer complet : chaque bloc produit un final « les » (ce qui,
+    # sans la fenêtre T4, serait remonté au thread UI).
+    full = FakeRec([("final", {"text": "les", "result": []})] * 50)
+    monkeypatch.setattr(rec, "build_recognizer", lambda model, mode: full)
+
+    audio_q = queue.Queue(maxsize=200)
+    text_q = queue.Queue(maxsize=200)
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    display = threading.Event()
+    display.set()
+    wake = threading.Event()
+    wake.set()
+
+    runtime_state.set_state(STATE_LISTENING)
+    runtime_state._last_transition = 0.0
+
+    t = threading.Thread(
+        target=rec.recognition_thread,
+        args=(object(), full, audio_q, text_q, ctrl_q, stop, display, wake),
+        daemon=True,
+    )
+    t.start()
+    time.sleep(0.05)
+    # De l'audio arrive pendant qu'on est encore en ÉCOUTE (fin du réveil).
+    for _ in range(20):
+        audio_q.put_nowait(b"\x00\x00")
+    # Bascule en DICTÉE : le thread doit vider la file et ouvrir la fenêtre.
+    runtime_state.set_state(STATE_DICTATING)
+    runtime_state._last_transition = 0.0
+    # On alimente encore un peu pendant la fenêtre de 300 ms.
+    for _ in range(10):
+        audio_q.put_nowait(b"\x00\x00")
+        time.sleep(0.01)
+    time.sleep(0.15)  # toujours dans la fenêtre
+    stop.set()
+    t.join(timeout=2.0)
+
+    assert _drain(text_q) == []  # rien remonté pendant la fenêtre

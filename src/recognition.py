@@ -126,6 +126,13 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
+    # Chantier 7 ter (T4) : après un réveil ÉCOUTE->DICTÉE, l'audio mis en file
+    # pendant la reconstruction du recognizer contient la fin de « active
+    # dictée » et du silence — décodé, il produisait un mot parasite (« Les »).
+    # On vide la file à la transition et on ignore les résultats du recognizer
+    # complet pendant cette courte fenêtre.
+    wake_discard_ms = config.recognition_setting('wake_discard_ms', 300)
+    discard_until = 0.0
     # Chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
     restricted_stop_enabled = bool(
@@ -249,10 +256,26 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 pending_wake = False
             if state != STATE_DICTATING:
                 pending_stop = False
+            # T4 : entrée en DICTÉE -> jeter l'audio d'avant la transition et
+            # ouvrir une fenêtre d'ignorance des résultats.
+            if state == STATE_DICTATING and last_state == STATE_LISTENING:
+                try:
+                    while True:
+                        audio_queue.get_nowait()
+                except queue.Empty:
+                    pass
+                discard_until = time.monotonic() + wake_discard_ms / 1000.0
             last_state = state
 
         try:
             data = audio_queue.get(timeout=0.1)
+
+            # T4 : fenêtre d'ignorance juste après le réveil — on jette le bloc
+            # sans le décoder, pour que le recognizer complet neuf démarre sur
+            # de l'audio propre (pas la fin de « active dictée »).
+            if state == STATE_DICTATING and time.monotonic() < discard_until:
+                clear_partial()
+                continue
 
             t0 = time.perf_counter()
             is_final = recognizer.AcceptWaveform(data)

@@ -50,6 +50,11 @@ recognition:
   # vocabulaire (confidence_threshold ci-dessus) + absorption sous le seuil (D1).
   # Surchargeable par langue via language_settings.<lang>.restricted_stop_in_dictation.
   restricted_stop_in_dictation: false
+  # Chantier 7 ter : après un réveil (« active dictée »), durée pendant laquelle
+  # l'audio mis en file avant la bascule en DICTÉE est jeté sans être décodé —
+  # il ne contient que la fin de la phrase de réveil et du silence, et
+  # produisait un mot parasite (« Les »). Surchargeable par langue.
+  wake_discard_ms: 300
 
 sleep:
   # true : en VEILLE, le flux audio est fermé — micro relâché, LED éteinte,
