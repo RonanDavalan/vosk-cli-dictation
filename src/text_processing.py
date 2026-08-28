@@ -1,5 +1,15 @@
 import re
+import unicodedata
 from config.config import config
+
+
+def _strip_accents(s: str) -> str:
+    """Minuscule sans diacritiques — pour comparer les commandes de ponctuation
+    quand le modèle Vosk rend « a la ligne » au lieu de « à la ligne » (T5)."""
+    return "".join(
+        c for c in unicodedata.normalize("NFKD", s.lower())
+        if not unicodedata.combining(c)
+    )
 
 
 class TextProcessor:
@@ -34,6 +44,13 @@ class TextProcessor:
                 self.all_punctuation_cmds.update(section)
         # Create a sorted list of punctuation commands for the tokenizer
         self.punctuation_keys = sorted(self.all_punctuation_cmds.keys(), key=len, reverse=True)
+        # T5 : forme normalisée (sans accents) des mots de chaque clé, pour un
+        # appariement tolérant aux diacritiques manquants dans la sortie Vosk.
+        self._key_norm_words = {
+            key: [_strip_accents(w) for w in key.split()]
+            for key in self.punctuation_keys
+        }
+        self._trigger_norm = _strip_accents(self.punctuation_trigger)
         # Aliases, longest key first: a multi-word alias must win over any of
         # its own single words (chantier 7 volet F).
         aliases = self.settings.get('recognition_aliases', {}) or {}
@@ -86,6 +103,7 @@ class TextProcessor:
         words) so a multi-word command wins over its isolated words.
         """
         words = text.split()
+        norm = [_strip_accents(w) for w in words]  # T5 : comparaison sans accents
         # Order keys by number of words, descending: the longest match wins.
         keys_by_len = sorted(self.punctuation_keys, key=lambda k: k.count(' ') + 1, reverse=True)
 
@@ -100,10 +118,13 @@ class TextProcessor:
         while i < len(words):
             matched = False
             for key in keys_by_len:
-                key_words = key.split()
-                if words[i:i + len(key_words)] == key_words:
+                key_norm = self._key_norm_words[key]
+                n = len(key_norm)
+                if norm[i:i + n] == key_norm:
+                    key_words = key.split()
                     if explicit:
-                        if tokens and tokens[-1] == trigger:
+                        if tokens and _strip_accents(str(tokens[-1])) == self._trigger_norm \
+                                and not isinstance(tokens[-1], tuple):
                             tokens[-1] = key
                         else:
                             # Command not triggered: emit the words literally.

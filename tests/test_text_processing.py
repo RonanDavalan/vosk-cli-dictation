@@ -240,3 +240,19 @@ def test_explicit_keeps_trigger_when_not_followed_by_command(monkeypatch):
 def test_explicit_no_dot_inside_plain_words(monkeypatch):
     _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
     assert "." not in fmt("fr", "mettre les points sur les i")
+
+
+# --------------------------------------------------------------------------- #
+# T5 : appariement des commandes de ponctuation insensible aux accents        #
+# (le modèle Vosk rend parfois "a la ligne" pour "à la ligne")                #
+# --------------------------------------------------------------------------- #
+
+def test_command_matches_without_accents():
+    out = TextProcessor("fr").process("va a la ligne puis ecris")
+    assert "\n" in out
+
+
+def test_accent_insensitive_does_not_overmatch():
+    # "tire" (sans accent) ne doit pas être pris pour "tiret".
+    out = TextProcessor("fr").process("il a tire au sort")
+    assert "–" not in out
