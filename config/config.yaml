@@ -178,6 +178,11 @@ language_settings:
       "fermer le crochet": "fermez le crochet"
       "fermer les guillemets": "fermez les guillemets"
       "de points": "deux points"
+      # R2 (28/08 soir) : le modèle fr rend « tirez » pour « tiret » (matrice
+      # Piper 28/08). Alias livré par défaut ; « trait » est volontairement
+      # PAS une commande de ponctuation (« un trait de génie » doit rester
+      # inchangé). Autres homophones (tirée/tirait/tirer) : config.example.yaml.
+      "tirez": "tiret"
     custom_vocabulary:
       "vosk": "Vosk"
       "gemini": "Gemini"

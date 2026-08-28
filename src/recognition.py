@@ -11,7 +11,7 @@ from src.runtime_state import (
     runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
 )
 from src.voice_commands import (
-    normalize_tokens, phrase_tokens, find_phrase, ends_with_phrase, mean_confidence,
+    normalize_tokens, phrase_tokens, find_phrase, mean_confidence,
 )
 
 MODE_FULL = "full"
@@ -110,10 +110,12 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     - In DICTÉE: final results (text + per-word confidence) go to the UI thread,
       which handles the stop phrase and typing.
-    - In ÉCOUTE: the wake phrase is matched on the token sequence — on partial
-      results when the restricted grammar is active (low-latency wake), on final
-      results with a confidence gate otherwise. A match asks the UI thread to
-      switch to DICTÉE and Resets the recognizer so the phrase is not re-emitted.
+    - In ÉCOUTE: the wake phrase is matched on a final result with a
+      confidence gate (R1, 28/08 soir) — the low-latency wake on partial
+      results was removed: under the restricted grammar, partials force the
+      phrase onto ambiguous audio and woke on « active » alone. A match asks
+      the UI thread to switch to DICTÉE and Resets the recognizer so the
+      phrase is not re-emitted.
     - In VEILLE: the thread blocks on wake_event (volet D); on waking it rebuilds
       the recognizer for the current target state.
     """
@@ -317,11 +319,13 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                         tokens = normalize_tokens(text)
                         idx = find_phrase(tokens, wake_tokens)
                         if idx != -1:
-                            ok = True
-                            if current_mode != MODE_LISTENING:
-                                conf = mean_confidence(words, idx, len(wake_tokens))
-                                ok = conf >= conf_threshold
-                            if ok:
+                            # R1 (28/08 soir) : le garde de confiance s'applique
+                            # dans TOUS les modes. Avant, sous grammaire
+                            # restreinte, un final quelconque réveillait sans
+                            # garde — et le chemin des partiels (supprimé
+                            # ci-dessous) réveillait sur « active » seul.
+                            conf = mean_confidence(words, idx, len(wake_tokens))
+                            if conf >= conf_threshold:
                                 try:
                                     recognizer.Reset()
                                 except Exception:
@@ -342,20 +346,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 partial_dict = json.loads(recognizer.PartialResult())
                 partial_text = partial_dict.get("partial", "").strip()
 
-                # Réveil à faible latence sur les partiels, uniquement sous
-                # grammaire restreinte (le décodeur ne peut alors produire que
-                # la phrase de réveil ou "[unk]").
-                if (state == STATE_LISTENING and current_mode == MODE_LISTENING
-                        and partial_text and not pending_wake
-                        and not runtime_state.in_debounce()):
-                    if ends_with_phrase(normalize_tokens(partial_text), wake_tokens):
-                        try:
-                            recognizer.Reset()
-                        except Exception:
-                            pass
-                        clear_partial()
-                        request_wake()
-                        continue
+                # R1 (28/08 soir) : plus de réveil sur les partiels. La
+                # grammaire restreinte force la phrase de réveil sur de l'audio
+                # ambigu (« active » seul réveillait la dictée) et aucun garde
+                # de confiance n'existe sur un partiel. Le réveil se fait
+                # uniquement sur un final avec confiance (bloc ci-dessus).
 
                 if display_partials_event.is_set() and partial_text:
                     print(f"\r{' ' * last_partial_length}\r", end='', flush=True)

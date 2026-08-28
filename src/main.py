@@ -8,6 +8,7 @@ import atexit
 import argparse
 import select
 import signal
+import vosk
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
@@ -53,7 +54,7 @@ def print_help_message():
 
     print_status(_("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey), config.color_help_text)
     print_status(_("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey), config.color_help_text)
-    print_status(_("  - The in-process hotkeys work on X11 only and the key combo also reaches the focused window (in a terminal it inserts an escape sequence). Bind the --toggle / --finalize / --sleep subcommands to a desktop shortcut for a clean stop from any window."), config.color_help_text)
+    print_status(_("  - Hotkeys are X11-only and reach the focused window; use --finalize."), config.color_help_text)
 
     print_status(_("\n{style}  Manual commands:{reset}").format(style=title_style, reset=config.RESET), config.color_help_text)
     print_status(_("  - '/cancel', '/delete-word', '/nl'"), config.color_help_text)
@@ -105,6 +106,10 @@ def exit_cleanup():
 
 def main():
     """Main function"""
+    # R5 (28/08 soir) : coupe les LOG (VoskAPI...) au boot — le bruit de Vosk
+    # s'affichait après « Appuyez sur Ctrl+C pour quitter » (démarrage des
+    # threads après l'aide). --diagnose n'a pas besoin de ces logs.
+    vosk.SetLogLevel(-1)
     set_ui_language(config.default_model)
     _ = get_translation()
 

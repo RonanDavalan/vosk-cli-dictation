@@ -229,5 +229,5 @@ msgid "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --fin
 msgstr "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
 
 #: src/main.py
-msgid "  - The in-process hotkeys work on X11 only and the key combo also reaches the focused window (in a terminal it inserts an escape sequence). Bind the --toggle / --finalize / --sleep subcommands to a desktop shortcut for a clean stop from any window."
-msgstr "  - The in-process hotkeys work on X11 only and the key combo also reaches the focused window (in a terminal it inserts an escape sequence). Bind the --toggle / --finalize / --sleep subcommands to a desktop shortcut for a clean stop from any window."
+msgid "  - Hotkeys are X11-only and reach the focused window; use --finalize."
+msgstr "  - Hotkeys are X11-only and reach the focused window; use --finalize."

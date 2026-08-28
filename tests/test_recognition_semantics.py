@@ -66,7 +66,12 @@ class FakeRec:
         pass
 
 
-def _run_thread(script, state, monkeypatch, feed=None, stop_script=None):
+def _run_thread(script, state, monkeypatch, feed=None, stop_script=None,
+                voice_commands=None):
+    if voice_commands is not None:
+        monkeypatch.setitem(
+            config.language_settings["fr"], "voice_commands", voice_commands
+        )
     config.set_language("fr")
     fake = FakeRec(script)
     fake_stop = FakeRec(stop_script or [])
@@ -117,11 +122,13 @@ def _drain(q):
     return out
 
 
-def test_wake_phrase_on_partial_requests_dictation(monkeypatch):
-    script = [("partial", {"partial": "active dictée"})]
+def test_wake_phrase_on_partial_never_wakes(monkeypatch):
+    # R1 (28/08 soir) : un partiel ne déclenche plus le réveil — c'était la
+    # porte du faux positif « active » seul sous grammaire restreinte.
+    script = [("partial", {"partial": "active dictée"}),
+              ("partial", {"partial": "active dictée"})]
     _text, ctrl, fake = _run_thread(script, STATE_LISTENING, monkeypatch)
-    assert "DICTATION_ON" in _drain(ctrl)
-    assert fake.reset_calls >= 1  # la phrase est retirée du flux
+    assert "DICTATION_ON" not in _drain(ctrl)
 
 
 def test_isolated_words_do_not_wake(monkeypatch):
@@ -164,6 +171,39 @@ def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
     script = [("final", {"text": "active dictée", "result": high})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
     assert "DICTATION_ON" in _drain(ctrl)
+
+
+def test_wake_on_final_needs_confidence_with_restricted_grammar(monkeypatch):
+    # R1 (28/08 soir) : sous grammaire restreinte (défaut fr), le garde de
+    # confiance s'applique aussi — avant, un final quelconque sous restreinte
+    # réveillait sans garde.
+    low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
+    script = [("final", {"text": "active dictée", "result": low})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" not in _drain(ctrl)
+
+    high = [{"word": "active", "conf": 0.97}, {"word": "dictée", "conf": 0.95}]
+    script = [("final", {"text": "active dictée", "result": high})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
+    assert "DICTATION_ON" in _drain(ctrl)
+
+
+def test_single_word_wake_phrase(monkeypatch):
+    # R3 (28/08 soir) : wake_phrase à mot unique (« démarre ») acceptée et
+    # traitée — aucune hypothèse de deux mots dans le chemin de réveil.
+    vc = {"wake_phrase": "démarre", "stop_phrase": "zut"}
+    high = [{"word": "démarre", "conf": 0.96}]
+    script = [("final", {"text": "démarre", "result": high})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
+                                     voice_commands=vc)
+    assert "DICTATION_ON" in _drain(ctrl)
+
+    # Un final hors phrase (bruit ambiant) ne réveille pas.
+    low = [{"word": "demain", "conf": 0.90}]
+    script = [("final", {"text": "demain", "result": low})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
+                                     voice_commands=vc)
+    assert "DICTATION_ON" not in _drain(ctrl)
 
 
 # --- chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE -----
