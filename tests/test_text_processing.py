@@ -190,3 +190,53 @@ def test_final_point_recognized_as_command():
 def test_isolated_point_recognized_as_command():
     out = TextProcessor("fr").process("fin de phrase point")
     assert out.lower().startswith("fin de phrase.")
+
+
+# --------------------------------------------------------------------------- #
+# T1 : mode de saisie de la ponctuation par langue (inline | explicit)         #
+# --------------------------------------------------------------------------- #
+
+def _set_fr_punctuation_mode(monkeypatch, mode, trigger=None):
+    """Force the fr punctuation mode / trigger for a single test."""
+    punct = config.language_settings["fr"]["punctuation"]
+    monkeypatch.setitem(punct, "mode", mode)
+    if trigger is not None:
+        monkeypatch.setitem(punct, "trigger", trigger)
+
+
+def test_inline_mode_converts_command_without_trigger(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "inline")
+    assert ", " in fmt("fr", "phrase virgule suite")
+
+
+def test_explicit_keeps_command_without_trigger(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
+    out = fmt("fr", "phrase virgule suite")
+    assert "virgule" in out
+    assert "," not in out
+
+
+def test_explicit_converts_command_after_trigger(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
+    out = fmt("fr", "phrase ponctuation virgule suite")
+    assert "," in out
+    assert "ponctuation" not in out
+
+
+def test_explicit_converts_multiword_command_after_trigger(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
+    out = fmt("fr", "ponctuation à la ligne")
+    assert "\n" in out
+    assert "ponctuation" not in out
+
+
+def test_explicit_keeps_trigger_when_not_followed_by_command(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
+    out = fmt("fr", "dire ponctuation bonjour")
+    assert "ponctuation" in out
+    assert "bonjour" in out
+
+
+def test_explicit_no_dot_inside_plain_words(monkeypatch):
+    _set_fr_punctuation_mode(monkeypatch, "explicit", trigger="ponctuation")
+    assert "." not in fmt("fr", "mettre les points sur les i")

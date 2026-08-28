@@ -97,6 +97,8 @@ language_settings:
       wake_phrase: "start dictation"
       stop_phrase: "stop dictation"
     punctuation:
+      mode: inline            # inline | explicit
+      trigger: punctuation    # used when mode == explicit
       simple:
         "comma": ","
         "period": "."
@@ -135,6 +137,8 @@ language_settings:
       wake_phrase: "active dictée"
       stop_phrase: "stop dictée"
     punctuation:
+      mode: inline            # inline | explicit
+      trigger: ponctuation    # used when mode == explicit
       simple:
         "virgule": ","
         "point": "."
@@ -180,6 +184,8 @@ language_settings:
       wake_phrase: "diktat starten"
       stop_phrase: "diktat stoppen"
     punctuation:
+      mode: inline            # inline | explicit
+      trigger: satzzeichen    # used when mode == explicit
       simple:
         "komma": ","
         "punkt": "."
@@ -225,6 +231,8 @@ language_settings:
       wake_phrase: "iniciar dictado"
       stop_phrase: "terminar dictado"
     punctuation:
+      mode: inline            # inline | explicit
+      trigger: puntuación     # used when mode == explicit
       simple:
         "coma": ","
         "punto": "."

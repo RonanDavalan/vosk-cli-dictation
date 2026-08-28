@@ -154,7 +154,7 @@ This section contains settings that are specific to a language. The factory
 configuration ships four: `en`, `fr`, `de`, `es`.
 
 -   **`voice_commands`**: the two-word `wake_phrase` and `stop_phrase` for this language. Two words so an ordinary sentence never triggers them. (The former single-word `start_word` / `stop_word` keys are still read if present, for backward compatibility.)
--   **`punctuation`**: A dictionary to automatically insert punctuation, organized into logical groups. Spanish `¿` and `¡` are inserted only by explicit commands (`"abrir interrogación"`, `"abrir exclamación"`), never automatically.
+-   **`punctuation`**: A dictionary to automatically insert punctuation, organized into logical groups. Spanish `¿` and `¡` are inserted only by explicit commands (`"abrir interrogación"`, `"abrir exclamación"`), never automatically. Two optional keys control the recognition mode: **`mode`** (`"inline"` by default, or `"explicit"`) and **`trigger`** (the word that gates punctuation in `explicit` mode, e.g. `"ponctuation"` for French). In `explicit` mode a punctuation command is only converted when the `trigger` immediately precedes it — the trigger is then consumed and never typed; otherwise the words are typed literally (`"ponctuation virgule"` → `,`, but a bare `"virgule"` stays a word).
 -   **`typography`**: per-language output rules — see below.
 -   **`recognition_aliases`**: Corrects common recognition errors from Vosk. The shipped table holds only generic, uncontroversial fixes (e.g. `"de points": "deux points"`); corpus-specific corrections live in `config/config.example.yaml`, to copy and adapt.
 -   **`custom_vocabulary`**: A dictionary for case-sensitive corrections, applied after aliases (e.g., `"ia": "IA"`).
@@ -166,6 +166,8 @@ language_settings:
       wake_phrase: "active dictée"
       stop_phrase: "stop dictée"
     punctuation:
+      mode: inline
+      trigger: ponctuation
       simple:
         "virgule": ","
       double:

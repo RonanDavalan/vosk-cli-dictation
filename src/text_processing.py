@@ -22,11 +22,15 @@ class TextProcessor:
         self.space_before = set(self.typography['space_before'])
         self.thin_space = self.typography['thin_space']
         self.capitalize_sentence_start = self.typography['capitalize_sentence_start']
-        # Merge all punctuation commands for easy lookup
+        # Merge all punctuation commands for easy lookup. The `mode` / `trigger`
+        # keys are scalars, not command maps, so only dict sections contribute
+        # (T1 : mode de saisie de la ponctuation par langue).
         self.all_punctuation_cmds = {}
-        punctuation_sections = self.settings.get('punctuation', {})
-        if punctuation_sections:
-            for section in punctuation_sections.values():
+        punctuation_sections = self.settings.get('punctuation', {}) or {}
+        self.punctuation_mode = punctuation_sections.get('mode', 'inline')
+        self.punctuation_trigger = punctuation_sections.get('trigger', 'ponctuation')
+        for section in punctuation_sections.values():
+            if isinstance(section, dict):
                 self.all_punctuation_cmds.update(section)
         # Create a sorted list of punctuation commands for the tokenizer
         self.punctuation_keys = sorted(self.all_punctuation_cmds.keys(), key=len, reverse=True)
@@ -85,6 +89,12 @@ class TextProcessor:
         # Order keys by number of words, descending: the longest match wins.
         keys_by_len = sorted(self.punctuation_keys, key=lambda k: k.count(' ') + 1, reverse=True)
 
+        # T1 : in `explicit` mode a punctuation command only fires when the
+        # trigger word immediately precedes it; the trigger is then consumed.
+        # Otherwise the words are emitted literally.
+        explicit = self.punctuation_mode == 'explicit'
+        trigger = self.punctuation_trigger
+
         tokens = []
         i = 0
         while i < len(words):
@@ -92,7 +102,17 @@ class TextProcessor:
             for key in keys_by_len:
                 key_words = key.split()
                 if words[i:i + len(key_words)] == key_words:
-                    tokens.append(key)
+                    if explicit:
+                        if tokens and tokens[-1] == trigger:
+                            tokens[-1] = key
+                        else:
+                            # Command not triggered: emit the words literally.
+                            # A word that is also a command key is wrapped so
+                            # _format_parts does not convert it (T1).
+                            for w in key_words:
+                                tokens.append((w,) if w in self.all_punctuation_cmds else w)
+                    else:
+                        tokens.append(key)
                     i += len(key_words)
                     matched = True
                     break
@@ -135,6 +155,10 @@ class TextProcessor:
                     self.capitalize_next_word = True
             else:  # This is a normal word
                 word = part
+                # T1 : in explicit mode a literal word that collides with a
+                # command key is wrapped in a one-item tuple by _tokenize.
+                if isinstance(word, tuple):
+                    word = word[0]
                 if self.capitalize_sentence_start and self.capitalize_next_word and word:
                     # Uppercase the first character only — never lowercase the
                     # rest (keeps "McDonald", "iPhone" intact).

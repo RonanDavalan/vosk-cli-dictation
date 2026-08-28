@@ -65,7 +65,9 @@ def print_help_message():
 
         all_punctuation_cmds = {}
         for section in punctuation_sections.values():
-            all_punctuation_cmds.update(section)
+            # `mode` / `trigger` are scalars, not command maps (T1).
+            if isinstance(section, dict):
+                all_punctuation_cmds.update(section)
 
         # AFFICHE DYNAMIQUEMENT TOUTES les commandes de ponctuation de la config, triées
         # par ordre alphabétique et sur deux colonnes pour la lisibilité.
