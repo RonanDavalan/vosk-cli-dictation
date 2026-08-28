@@ -159,6 +159,28 @@ configuration ships four: `en`, `fr`, `de`, `es`.
 -   **`recognition_aliases`**: Corrects common recognition errors from Vosk. The shipped table holds only generic, uncontroversial fixes (e.g. `"de points": "deux points"`); corpus-specific corrections live in `config/config.example.yaml`, to copy and adapt.
 -   **`custom_vocabulary`**: A dictionary for case-sensitive corrections, applied after aliases (e.g., `"ia": "IA"`).
 
+#### Per-language overrides of `recognition.*`
+
+Any of these keys, normally set once under the global `recognition` block, can
+be overridden for a single language by repeating it under
+`language_settings.<lang>` — the per-language value wins. The factory config
+uses this for `es` (`restricted_grammar_in_listening: false`).
+
+| key | effect when overridden per language |
+|---|---|
+| `confidence_threshold` | trigger-phrase confidence gate for that language |
+| `restricted_grammar_in_listening` | restricted-grammar decoding while listening |
+| `restricted_stop_in_dictation` | experimental second stop recogniser while dictating |
+| `wake_discard_ms` | audio discarded right after a wake, to drop a stray word |
+
+```yaml
+language_settings:
+  es:
+    restricted_grammar_in_listening: false   # per-language override
+    confidence_threshold: 0.5                 # per-language override
+    voice_commands: [...]
+```
+
 ```yaml
 language_settings:
   fr: # Settings for French
