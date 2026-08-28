@@ -178,13 +178,38 @@ def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
     assert fake.reset_calls >= 1  # le recognizer complet est réinitialisé
 
 
-def test_restricted_stop_recognizer_finalizes_on_partial(monkeypatch):
+def test_restricted_stop_recognizer_ignores_partials(monkeypatch):
+    # Conservateur (28/08) : un partiel « stop dictée » ne déclenche PAS —
+    # les partiels sous grammaire restreinte sont instables.
     monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
-    stop_script = [("partial", {"partial": "stop dictée"})]
+    stop_script = [("partial", {"partial": "stop dictée"}),
+                   ("partial", {"partial": "stop dictée"})]
     _text, ctrl, _fake = _run_thread(
         [], STATE_DICTATING, monkeypatch, stop_script=stop_script
     )
-    assert "FINALIZE_SESSION" in _drain(ctrl)
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
+
+
+def test_restricted_stop_recognizer_ignores_low_confidence_final(monkeypatch):
+    # Correspondance exacte mais confiance faible (match « forcé » sur audio
+    # ambigu) -> pas de déclenchement.
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    low = [{"word": "stop", "conf": 0.2}, {"word": "dictée", "conf": 0.2}]
+    stop_script = [("final", {"text": "stop dictée", "result": low})]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
+
+
+def test_restricted_stop_recognizer_ignores_phrase_with_extra_words(monkeypatch):
+    # Le final doit être EXACTEMENT la phrase, pas la contenir.
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    stop_script = [("final", {"text": "voilà stop dictée maintenant", "result": []})]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
 
 
 def test_restricted_stop_recognizer_ignores_unk(monkeypatch):

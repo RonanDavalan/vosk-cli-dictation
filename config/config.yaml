@@ -40,16 +40,16 @@ recognition:
   # complet au réveil (chantier 7 volet E). false = recognizer complet en ÉCOUTE.
   restricted_grammar_in_listening: true
   # Chantier 7 bis : en DICTÉE, un second recognizer léger à grammaire restreinte
-  # à [stop_phrase, "[unk]"] (miroir du réveil) donne un signal d'arrêt de haute
-  # confiance, indépendant du seuil ci-dessus. C'EST le chemin d'arrêt fiable :
-  # validation sur clips Piper fr (Pi 4) — le plein vocabulaire transcrit
-  # « stop dictée » isolé en « cette optique dictée » (aucune correspondance),
-  # tandis que ce recognizer restreint déclenche sur toutes les variantes
-  # testées et rejette « un stop rapide puis je reprends la dictée ».
-  # Coût mesuré (Pi 4, fr, banc 60 s) : RTF DICTÉE 0.73 -> 0.90 (reste < 1.0).
-  # Surchargeable par langue via language_settings.<lang>.restricted_stop_in_dictation ;
-  # mettre false seulement sur un matériel où RTF complet+restreint dépasse 1.0.
-  restricted_stop_in_dictation: true
+  # à [stop_phrase, "[unk]"]. EXPÉRIMENTAL, false par défaut : en usage réel
+  # (voix humaine, micro réel), la grammaire restreinte « force » une
+  # interprétation et déclenche des arrêts intempestifs en pleine phrase
+  # (constaté 28/08 : coupé sur « si je veux dire »). Les clips Piper — voix
+  # propre unique — ne reproduisent pas ce faux positif, donc ils ne suffisent
+  # pas à valider ce mécanisme. Tant qu'un protocole de validation anti-faux-
+  # positif n'est pas en place, l'arrêt vocal repose sur le chemin plein
+  # vocabulaire (confidence_threshold ci-dessus) + absorption sous le seuil (D1).
+  # Surchargeable par langue via language_settings.<lang>.restricted_stop_in_dictation.
+  restricted_stop_in_dictation: false
 
 sleep:
   # true : en VEILLE, le flux audio est fermé — micro relâché, LED éteinte,

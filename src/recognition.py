@@ -201,17 +201,26 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                   f"{config.RESET}")
 
     def stop_rec_hit(data) -> bool:
-        """Alimente le recognizer d'arrivée avec `data` et dit si la phrase
-        d'arrêt vient d'être reconnue (final, ou fin de partiel sous grammaire
-        restreinte — le décodeur ne peut alors produire que la phrase ou
-        « [unk] »)."""
+        """Alimente le recognizer d'arrêt avec `data` et dit si la phrase d'arrêt
+        vient d'être reconnue.
+
+        Conservateur (chantier 7 bis, après le faux positif du 28/08) :
+        - seulement sur un FINAL (les partiels sous grammaire restreinte sont
+          instables et « forcent » la phrase sur de l'audio ambigu) ;
+        - le texte du final doit être EXACTEMENT la phrase d'arrêt, pas la
+          contenir ;
+        - confiance moyenne des mots ≥ conf_threshold (une correspondance
+          forcée sur de l'audio ambigu score bas).
+        """
         try:
-            final = stop_rec.AcceptWaveform(data)
-            if final:
-                txt = json.loads(stop_rec.Result()).get("text", "")
-                return find_phrase(normalize_tokens(txt), stop_tokens) != -1
-            ptxt = json.loads(stop_rec.PartialResult()).get("partial", "").strip()
-            return bool(ptxt) and ends_with_phrase(normalize_tokens(ptxt), stop_tokens)
+            if not stop_rec.AcceptWaveform(data):
+                stop_rec.PartialResult()  # draine le partiel, jamais déclencheur
+                return False
+            res = json.loads(stop_rec.Result())
+            toks = normalize_tokens(res.get("text", ""))
+            if toks != stop_tokens:
+                return False
+            return mean_confidence(res.get("result", []), 0, len(stop_tokens)) >= conf_threshold
         except Exception:
             return False
 

@@ -39,13 +39,11 @@ def test_uses_current_language_when_lang_code_omitted(monkeypatch):
 def test_shipped_defaults():
     # Les valeurs livrées par config.yaml après le chantier 7 bis.
     assert config.data["recognition"]["confidence_threshold"] == 0.55
-    assert config.data["recognition"]["restricted_stop_in_dictation"] is True
+    # restricted_stop_in_dictation : false par défaut (expérimental — faux
+    # positifs sur voix réelle constatés le 28/08).
+    assert config.data["recognition"]["restricted_stop_in_dictation"] is False
 
 
-def test_restricted_stop_shipped_on_for_all_languages():
-    # Chantier 7 bis : true partout. La validation (clips Piper fr, Pi 4) a
-    # montré que le plein vocabulaire ne reconnaît pas « stop dictée » isolé —
-    # le recognizer restreint est le seul chemin d'arrêt fiable, y compris pour
-    # fr (coût Pi 4 : RTF 0,90, reste < 1,0).
+def test_restricted_stop_shipped_off_for_all_languages():
     for lang in ("en", "fr", "de", "es"):
-        assert config.recognition_setting("restricted_stop_in_dictation", None, lang) is True
+        assert config.recognition_setting("restricted_stop_in_dictation", None, lang) is False
