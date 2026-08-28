@@ -256,3 +256,15 @@ def test_accent_insensitive_does_not_overmatch():
     # "tire" (sans accent) ne doit pas être pris pour "tiret".
     out = TextProcessor("fr").process("il a tire au sort")
     assert "–" not in out
+
+
+def test_dash_homophone_aliases_ship_by_default():
+    # R2 (28/08 soir, arbitrage option 1) : les homophones de « tiret »
+    # réellement transcrits par le modèle fr (matrice Piper : « tirer »,
+    # « tirés », « tirait », « tirez ») sont livrés par défaut.
+    for form in ("tirez", "tirés", "tirer", "tirait"):
+        out = TextProcessor("fr").process("voici {} le texte".format(form))
+        assert "–" in out, form
+    # « trait » reste un mot ordinaire (refus R2) : aucun tiret parasite.
+    out = TextProcessor("fr").process("un trait de génie")
+    assert "–" not in out
