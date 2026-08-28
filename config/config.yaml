@@ -28,11 +28,22 @@ recognition:
   # Un déclenchement vocal (réveil ou arrêt) n'est retenu que si la confiance
   # moyenne des mots de la phrase-clé atteint ce seuil (chantier 7 volet E).
   # Garde indépendant de la grammaire restreinte, actif aussi en DICTÉE.
-  confidence_threshold: 0.85
+  # Chantier 7 bis : abaissé 0.85 -> 0.55 (0.85 bloquait chaque « stop dictée »
+  # pourtant net, le modèle fr notant « stop » sous 0.85). Surchargeable par
+  # langue via language_settings.<lang>.confidence_threshold.
+  confidence_threshold: 0.55
   # En ÉCOUTE, décoder avec une grammaire Kaldi restreinte à la seule phrase de
   # réveil : le CPU au repos chute, au prix d'une reconstruction du recognizer
   # complet au réveil (chantier 7 volet E). false = recognizer complet en ÉCOUTE.
   restricted_grammar_in_listening: true
+  # Chantier 7 bis : en DICTÉE, un second recognizer léger à grammaire restreinte
+  # à [stop_phrase, "[unk]"] (miroir du réveil) donne un signal d'arrêt de haute
+  # confiance indépendant du seuil ci-dessus. Surchargeable par langue via
+  # language_settings.<lang>.restricted_stop_in_dictation. Coût : un décodage
+  # restreint supplémentaire par bloc audio en DICTÉE (~5x moins cher que le
+  # décodage complet — voir banc). false = seuls le seuil de confiance et
+  # l'échappatoire de doublement gouvernent l'arrêt vocal.
+  restricted_stop_in_dictation: true
 
 sleep:
   # true : en VEILLE, le flux audio est fermé — micro relâché, LED éteinte,
@@ -114,6 +125,14 @@ language_settings:
 
   fr:
     restricted_grammar_in_listening: true
+    # Chantier 7 bis : false pour fr. Le modèle fr est le plus lourd du parc ;
+    # sur le Raspberry Pi 4 (point bas ARM), complet + arrêt restreint en DICTÉE
+    # mesure RTF 0,90 (marge 0,10 sous le temps réel — trop mince, l'AMD A4-6210
+    # serait à ~0,98). fr s'appuie donc sur le seuil de confiance abaissé (D2) et
+    # l'absorption de la phrase sous le seuil (D1). Repasser à true après un
+    # relevé sur voix réelle si le seuil ne suffit pas et si le surcoût est rendu
+    # acceptable (décodage restreint un bloc sur deux).
+    restricted_stop_in_dictation: false
     voice_commands:
       wake_phrase: "active dictée"
       stop_phrase: "stop dictée"
@@ -204,6 +223,10 @@ language_settings:
     # recognizer complet en ÉCOUTE pour cette langue ; le réveil se fait alors
     # sur les finaux avec le garde de confiance.
     restricted_grammar_in_listening: false
+    # Chantier 7 bis : false pour es aussi. L'anomalie espagnole (grammaire
+    # restreinte ~2× plus lente) touche le même mécanisme ; un recognizer
+    # d'arrêt restreint y serait un mauvais échange. es s'appuie sur D1 + D2.
+    restricted_stop_in_dictation: false
     voice_commands:
       wake_phrase: "iniciar dictado"
       stop_phrase: "terminar dictado"

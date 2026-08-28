@@ -99,13 +99,15 @@ audio:
 
 Parameters for the Vosk recognition engine.
 
--   **`confidence_threshold`** (float, 0.0-1.0): A voice trigger phrase (wake or stop) is only acted on when the average confidence of its words reaches this value; below it, the phrase is typed as ordinary text.
+-   **`confidence_threshold`** (float, 0.0-1.0, default `0.55`): a voice trigger phrase (wake or stop) is only acted on when the average confidence of its words reaches this value. Below it, a wake phrase is treated as ordinary text; a **stop** phrase is swallowed — neither acted on nor typed into the document — and a hint is printed. Can be overridden per language with a key of the same name under `language_settings.<lang>`.
 -   **`restricted_grammar_in_listening`** (boolean, default `true`): while listening for the wake phrase, decode with a Kaldi grammar restricted to that phrase. CPU at rest drops sharply for most models, at the cost of rebuilding the full recognizer on wake. Set to `false` to keep the full recognizer running in the listening state. Can be overridden per language with a key of the same name under `language_settings.<lang>` — the factory config disables it for `es`, where the small model decodes the restricted grammar more slowly than the full one.
+-   **`restricted_stop_in_dictation`** (boolean, default `true`): while dictating, run a second lightweight recognizer restricted to the stop phrase, alongside the full one. It provides a high-confidence stop signal independent of `confidence_threshold` — the same mechanism used for the wake phrase while listening. Overridable per language under `language_settings.<lang>`; set to `false` on hardware where the extra restricted decode per audio block is too costly (it is roughly 5× cheaper than the full decode).
 
 ```yaml
 recognition:
-  confidence_threshold: 0.85
+  confidence_threshold: 0.55
   restricted_grammar_in_listening: true
+  restricted_stop_in_dictation: true
 ```
 
 ### `sleep`
@@ -199,9 +201,12 @@ Replaces what used to be a hard-coded French branch. Per language:
 ### `hotkeys`
 
 Global keyboard shortcuts via `pynput`. These are only started under a plain
-X11 session; on native Wayland, bind the control subcommands (`--toggle`,
-`--finalize`, `--sleep-toggle`) to your desktop's own shortcut settings
-instead.
+X11 session, and even there the `pynput` listener does not consume the key
+event: the combination also reaches the focused window, so pressing it while
+the cursor is in a terminal inserts an escape sequence (`^[s` for `Alt+S`).
+For a clean stop from any window — and for native Wayland, where `pynput`
+sees nothing — bind the control subcommands (`--toggle`, `--finalize`,
+`--sleep-toggle`) to your desktop's own shortcut settings instead.
 
 -   **`pynput_enabled`** (boolean, default `true`): honoured only under X11. Set to `false` to never start the `pynput` listener.
 -   **`pynput_keys`**: A list of Pynput keys for the shortcut.
@@ -224,7 +229,8 @@ hotkeys:
 -   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
     paused, the microphone stays active and the voice wake phrase still works.
 -   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
-    text to the clipboard.
+    text to the clipboard. X11 only, and the chord leaks into the focused window (see above) —
+    prefer `vosk-cli-dictation --finalize` bound to a desktop shortcut.
 -   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
     the two above. In sleep mode the audio stream is closed (the microphone is released) and
     recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be

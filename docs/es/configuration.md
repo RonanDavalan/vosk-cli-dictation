@@ -95,13 +95,15 @@ audio:
 
 Parámetros para el motor de reconocimiento de Vosk.
 
--   **`confidence_threshold`** (flotante, 0.0-1.0): Una frase de activación de voz (activar o detener) solo se procesa cuando la confianza promedio de sus palabras alcanza este valor; si está por debajo, la frase se interpreta como texto normal.
--   **`restricted_grammar_in_listening`** (booleano, valor predeterminado `true`): mientras se escucha la frase de activación, decodifica utilizando una gramática de Kaldi restringida a esa frase. El consumo de CPU se reduce significativamente, pero a costa de reconstruir el reconocedor completo al activar. Establece en `false` para mantener el reconocedor completo en funcionamiento en el estado de escucha.
+-   **`confidence_threshold`** (flotante, 0.0-1.0, valor predeterminado `0.55`): Una frase de activación de voz (activar o detener) solo se procesa cuando la confianza promedio de sus palabras alcanza este valor. Por debajo, una frase de activación se interpreta como texto normal; una frase de **parada** se descarta — ni se ejecuta ni se escribe en el documento — y se muestra una indicación. Redefinible por idioma con una clave del mismo nombre bajo `language_settings.<lang>`.
+-   **`restricted_grammar_in_listening`** (booleano, valor predeterminado `true`): mientras se escucha la frase de activación, decodifica utilizando una gramática de Kaldi restringida a esa frase. El consumo de CPU se reduce significativamente, pero a costa de reconstruir el reconocedor completo al activar. Establece en `false` para mantener el reconocedor completo en funcionamiento en el estado de escucha. Redefinible por idioma bajo `language_settings.<lang>` — la configuración de fábrica lo desactiva para `es`, donde el modelo pequeño decodifica la gramática restringida más despacio que la completa.
+-   **`restricted_stop_in_dictation`** (booleano, valor predeterminado `true`): durante el dictado, ejecuta un segundo reconocedor ligero restringido a la frase de parada, junto al completo. Proporciona una señal de parada de alta confianza independiente de `confidence_threshold` — el mismo mecanismo usado para la frase de activación durante la escucha. Redefinible por idioma bajo `language_settings.<lang>`; ponlo en `false` en hardware donde la decodificación restringida adicional por bloque de audio sea demasiado costosa (es unas 5× más barata que la decodificación completa).
 
 ```yaml
 recognition:
-  confidence_threshold: 0.85
+  confidence_threshold: 0.55
   restricted_grammar_in_listening: true
+  restricted_stop_in_dictation: true
 ```
 
 ### `sleep`
@@ -192,7 +194,7 @@ Reemplaza lo que antes era una rama francesa codificada de forma rígida. Por id
 
 ### `hotkeys`
 
-Atajos de teclado globales a través de `pynput`. Estos solo se inician en una sesión X11 estándar; en Wayland nativo, vincule los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio en lugar de usar estos.
+Atajos de teclado globales a través de `pynput`. Estos solo se inician en una sesión X11 estándar, e incluso ahí el listener de `pynput` no consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (`^[s` para `Alt+S`). Para una parada limpia desde cualquier ventana — y para Wayland nativo, donde `pynput` no ve nada — vincule en su lugar los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio.
 
 -   **`pynput_enabled`** (booleano, valor predeterminado `true`): Solo se aplica en X11. Establecer en `false` para que el listener de `pynput` nunca se inicie.
 -   **`pynput_keys`**: Una lista de teclas de Pynput para el atajo.
@@ -214,8 +216,9 @@ hotkeys:
 
 -   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
     paused, the microphone stays active and the voice wake phrase still works.
--   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
-    text to the clipboard.
+-   **`finalize_session`** (predeterminado `Alt+S`): detiene el dictado y copia el texto
+    acumulado al portapapeles. Solo X11, y la combinación se filtra a la ventana enfocada
+    (véase más arriba) — prefiera `vosk-cli-dictation --finalize` vinculado a un atajo del escritorio.
 -   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
     the two above. In sleep mode the audio stream is closed (the microphone is released) and
     recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be

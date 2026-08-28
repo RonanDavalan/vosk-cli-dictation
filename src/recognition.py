@@ -16,6 +16,10 @@ from src.voice_commands import (
 
 MODE_FULL = "full"
 MODE_LISTENING = "listening"
+# Chantier 7 bis : recognizer secondaire en DICTÉE, grammaire restreinte à la
+# phrase d'arrêt. Détection d'arrêt de haute confiance, indépendante du garde
+# de confiance sur le recognizer complet.
+MODE_STOP = "stop"
 
 
 def load_model(model_name: str):
@@ -71,11 +75,12 @@ def build_recognizer(model, mode: str):
       waking.
     """
     sample_rate = config.audio['sample_rate']
-    if mode == MODE_LISTENING:
+    if mode in (MODE_LISTENING, MODE_STOP):
         # ensure_ascii=False est indispensable : Vosk ne déséchappe pas les
         # \uXXXX dans la grammaire, il traiterait « dictée » comme le mot
         # littéral "dictée" et le déclarerait hors vocabulaire.
-        grammar = json.dumps([config.WAKE_PHRASE, "[unk]"], ensure_ascii=False)
+        phrase = config.WAKE_PHRASE if mode == MODE_LISTENING else config.STOP_PHRASE
+        grammar = json.dumps([phrase, "[unk]"], ensure_ascii=False)
         rec = KaldiRecognizer(model, sample_rate, grammar)
     else:
         rec = KaldiRecognizer(model, sample_rate)
@@ -94,12 +99,7 @@ def _target_mode(state: str) -> str:
     """
     if state != STATE_LISTENING:
         return MODE_FULL
-    global_default = config.data.get('recognition', {}).get(
-        'restricted_grammar_in_listening', True
-    )
-    per_lang = config.language_settings.get(config.current_lang, {}).get(
-        'restricted_grammar_in_listening', global_default
-    )
+    per_lang = config.recognition_setting('restricted_grammar_in_listening', True)
     return MODE_LISTENING if per_lang else MODE_FULL
 
 
@@ -124,8 +124,13 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     chunk_audio_s = config.audio['buffer_size'] / config.audio['sample_rate']
     last_rtf_warning = 0.0
 
-    conf_threshold = config.data.get('recognition', {}).get('confidence_threshold', 0.85)
+    conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
+    # Chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE.
+    stop_tokens = phrase_tokens(config.STOP_PHRASE)
+    restricted_stop_enabled = bool(
+        config.recognition_setting('restricted_stop_in_dictation', True)
+    )
 
     # current_mode volontairement incohérent avec last_state=None : la première
     # itération réconcilie le recognizer avec l'état de départ. Au lancement
@@ -137,6 +142,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # l'état ait réellement changé (évite les demandes en rafale, le temps que
     # le thread UI traite la control_queue).
     pending_wake = False
+    # Chantier 7 bis : recognizer d'arrêt (None hors DICTÉE ou si désactivé) et
+    # verrou anti-rafale symétrique de pending_wake.
+    stop_rec = None
+    pending_stop = False
 
     def clear_partial():
         nonlocal last_partial_length
@@ -166,6 +175,46 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                   f"{_('Control queue full; the UI thread is not responding.')}"
                   f"{config.RESET}")
 
+    def rebuild_stop_rec(state):
+        """Chantier 7 bis : (re)construit le recognizer d'arrêt en DICTÉE, le
+        libère ailleurs. Reset s'il existe déjà pour repartir d'un flux propre."""
+        nonlocal stop_rec
+        if state == STATE_DICTATING and restricted_stop_enabled:
+            if stop_rec is None:
+                stop_rec = build_recognizer(model, MODE_STOP)
+            else:
+                try:
+                    stop_rec.Reset()
+                except Exception:
+                    pass
+        else:
+            stop_rec = None
+
+    def request_stop():
+        nonlocal pending_stop
+        try:
+            control_queue.put_nowait("FINALIZE_SESSION")
+            pending_stop = True
+        except queue.Full:
+            print(f"\n{config.color_error}"
+                  f"{_('Control queue full; the UI thread is not responding.')}"
+                  f"{config.RESET}")
+
+    def stop_rec_hit(data) -> bool:
+        """Alimente le recognizer d'arrivée avec `data` et dit si la phrase
+        d'arrêt vient d'être reconnue (final, ou fin de partiel sous grammaire
+        restreinte — le décodeur ne peut alors produire que la phrase ou
+        « [unk] »)."""
+        try:
+            final = stop_rec.AcceptWaveform(data)
+            if final:
+                txt = json.loads(stop_rec.Result()).get("text", "")
+                return find_phrase(normalize_tokens(txt), stop_tokens) != -1
+            ptxt = json.loads(stop_rec.PartialResult()).get("partial", "").strip()
+            return bool(ptxt) and ends_with_phrase(normalize_tokens(ptxt), stop_tokens)
+        except Exception:
+            return False
+
     while not stop_event.is_set():
         if not wake_event.is_set():
             if wake_event.wait(timeout=1.0):
@@ -173,8 +222,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 # Sortie de VEILLE : reconstruire pour l'état courant.
                 last_state = runtime_state.state
                 pending_wake = False
+                pending_stop = False
                 current_mode = None  # force la reconstruction
                 rebuild_for(last_state)
+                rebuild_stop_rec(last_state)
             continue
 
         # Suivi des transitions d'état pour l'échange de grammaire.
@@ -184,8 +235,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 pass  # géré par wake_event au tour suivant
             else:
                 rebuild_for(state)
+                rebuild_stop_rec(state)
             if state != STATE_LISTENING:
                 pending_wake = False
+            if state != STATE_DICTATING:
+                pending_stop = False
             last_state = state
 
         try:
@@ -203,6 +257,23 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                         print(f"\n{config.color_warning}"
                               f"{_('Decoding is slower than real time (RTF {rtf}); latency may drift.').format(rtf=snap['rtf_mean'])}"
                               f"{config.RESET}")
+
+            # Chantier 7 bis : arrêt vocal de haute confiance via le recognizer
+            # restreint, avant même que le recognizer complet ait finalisé.
+            if (state == STATE_DICTATING and stop_rec is not None
+                    and not pending_stop and not runtime_state.in_debounce()):
+                if stop_rec_hit(data):
+                    try:
+                        recognizer.Reset()
+                    except Exception:
+                        pass
+                    try:
+                        stop_rec.Reset()
+                    except Exception:
+                        pass
+                    clear_partial()
+                    request_stop()
+                    continue
 
             if is_final:
                 result_dict = json.loads(recognizer.Result())
@@ -227,7 +298,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     clear_partial()
                     continue
 
-                if state == STATE_DICTATING and text:
+                if state == STATE_DICTATING and text and not pending_stop:
                     try:
                         text_queue.put_nowait((text, words))
                     except queue.Full:

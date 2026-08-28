@@ -213,3 +213,15 @@ msgstr "Veille désactivée — écoute reprise."
 #: src/ui.py:67
 msgid "Sleep mode enabled — voice wake word unavailable."
 msgstr "Veille activée — mot d'activation vocal indisponible."
+
+#: src/ui.py
+msgid "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
+msgstr "Phrase d'arrêt entendue, mais confiance trop faible. Répétez-la, ou utilisez le raccourci d'arrêt / --finalize."
+
+#: src/main.py
+msgid "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
+msgstr "  - Dites « {stop_phrase} », appuyez sur {hotkey}, ou lancez « vosk-cli-dictation --finalize » pour arrêter et copier."
+
+#: src/main.py
+msgid "  - The in-process hotkeys work on X11 only and the key combo also reaches the focused window (in a terminal it inserts an escape sequence). Bind the --toggle / --finalize / --sleep subcommands to a desktop shortcut for a clean stop from any window."
+msgstr "  - Les raccourcis internes ne fonctionnent que sous X11 et la combinaison de touches atteint aussi la fenêtre active (dans un terminal, elle insère une séquence d'échappement). Liez les sous-commandes --toggle / --finalize / --sleep à un raccourci de bureau pour un arrêt propre depuis n'importe quelle fenêtre."

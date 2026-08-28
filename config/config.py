@@ -121,6 +121,18 @@ class Config:
             'stop_phrase', voice_commands.get('stop_word', default_stop)
         )
 
+    def recognition_setting(self, key: str, default, lang_code: str = None):
+        """Résout un réglage ``recognition.<key>`` avec surcharge par langue
+        (chantier 7 bis).
+
+        ``language_settings.<lang>.<key>`` l'emporte sur ``recognition.<key>``,
+        lui-même sur ``default``. Même motif que ``restricted_grammar_in_listening``
+        dans ``recognition._target_mode``.
+        """
+        lang_code = lang_code or self.current_lang
+        global_value = self.data.get('recognition', {}).get(key, default)
+        return self.language_settings.get(lang_code, {}).get(key, global_value)
+
     def typography(self, lang_code: str = None) -> dict:
         """Typography profile for a language (chantier 7 volet F).
 

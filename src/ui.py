@@ -25,7 +25,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     # (phrase de réveil en ÉCOUTE) est piloté par le thread de reconnaissance,
     # qui a accès aux résultats partiels et à la grammaire restreinte.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
-    conf_threshold = config.data.get('recognition', {}).get('confidence_threshold', 0.85)
+    conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+    last_low_conf_hint = [0.0]  # horodatage du dernier indice, pour le throttle
 
     def start_recording():
         nonlocal recording, full_text_log, xdotool_failed_once
@@ -125,6 +126,17 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         else:
             print(f"{config.color_error}{_('Unknown command:')} {command}{config.RESET}")
 
+    def emit_low_conf_hint():
+        """Chantier 7 bis : indice throttlé quand la phrase d'arrêt est entendue
+        mais sous le seuil de confiance. La phrase est absorbée (pas tapée) ;
+        cet indice dit à l'utilisateur comment arrêter malgré tout."""
+        _ = get_translation()
+        now = time.monotonic()
+        if now - last_low_conf_hint[0] >= 2.0:
+            last_low_conf_hint[0] = now
+            msg = _("Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize.")
+            print(f"\n{config.color_warning}{msg}{config.RESET}")
+
     def process_and_type(raw_text: str):
         nonlocal full_text_log, xdotool_failed_once
         _ = get_translation()
@@ -197,13 +209,20 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                 idx = find_phrase(tokens, stop_tokens)
                 if idx != -1 and not runtime_state.in_debounce():
                     conf = mean_confidence(words, idx, len(stop_tokens))
+                    before = remove_phrase_and_after(raw_text, stop_tokens)
+                    if before:
+                        process_and_type(before)
                     if conf >= conf_threshold:
-                        before = remove_phrase_and_after(raw_text, stop_tokens)
-                        if before:
-                            process_and_type(before)
                         finalize_session()
-                        continue
-                    # Confiance insuffisante : on laisse passer comme du texte.
+                    else:
+                        # Chantier 7 bis : confiance insuffisante -> la phrase et
+                        # ce qui la suit sont ABSORBÉS (ni finalisation, ni
+                        # frappe). L'ancien code la tapait dans le document —
+                        # seul résultat qu'une commande d'arrêt ne doit jamais
+                        # produire. L'utilisateur répète, ou passe par
+                        # --finalize / le raccourci.
+                        emit_low_conf_hint()
+                    continue
 
                 if raw_text:
                     process_and_type(raw_text)

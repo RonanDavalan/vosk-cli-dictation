@@ -85,10 +85,15 @@ Sagen Sie "**start Diktat**", um zu beginnen, "**Stopp Diktat**", um zu beenden,
 "Start des Diktats" / "Ende des Diktats".
 
 Eine Auslösephrase wird nur berücksichtigt, wenn die durchschnittliche
-Erkennungsgenauigkeit ihrer Wörter `recognition.confidence_threshold` überschreitet; eine unverständliche
-Phrase wird stattdessen als normaler Text eingegeben. Wenn eine Phrase zweimal
-hintereinander ausgesprochen wird, wird sie wörtlich eingegeben, anstatt
-einen Auslöser zu aktivieren.
+Erkennungsgenauigkeit ihrer Wörter `recognition.confidence_threshold` überschreitet
+(Standardwert `0.55`, pro Sprache überschreibbar). Eine Stoppphrase, die unter dem
+Schwellenwert erkannt wird, wird verschluckt — weder ausgeführt noch in das Dokument
+eingegeben — und ein Hinweis wird ausgegeben; wiederholen Sie sie oder verwenden Sie
+`--finalize`. Während des Diktierens liefert ein zweiter, auf die Stoppphrase
+beschränkter Erkenner ein Stoppsignal mit hoher Konfidenz, unabhängig von diesem
+Schwellenwert (`recognition.restricted_stop_in_dictation`, standardmäßig aktiv, pro
+Sprache überschreibbar). Wenn eine Phrase zweimal hintereinander ausgesprochen wird,
+wird sie wörtlich eingegeben, anstatt einen Auslöser zu aktivieren.
 
 Die Zeichensetzung und Anordnung von Wörtern (Komma, Punkt, Zeilenumbruch usw.) werden ebenfalls durch Sprache vorgegeben; die vollständige, sprachspezifische Liste ist unter `language_settings.<lang>.punctuation` in der Konfigurationsdatei definiert und wird vom Programm selbst beim Start ausgegeben.
 
@@ -96,7 +101,7 @@ Die Zeichensetzung und Anordnung von Wörtern (Komma, Punkt, Zeilenumbruch usw.)
 
 `pynput` Globale Hotkeys werden nur unter einer reinen X11-Sitzung und nur
 wenn `hotkeys.pynput_enabled` wahr ist, aktiviert; auf nativen Wayland-Systemen werden sie nicht
-aktiviert, und die Kontroll-Unterbefehle, die an eine Desktop-Verknüpfung gebunden sind, übernehmen deren Funktion. Die Werkseinstellungen definieren:
+aktiviert, und die Kontroll-Unterbefehle, die an eine Desktop-Verknüpfung gebunden sind, übernehmen deren Funktion. Selbst unter X11 verbraucht der `pynput`-Listener das Tastenereignis nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (zum Beispiel `^[s` für **Alt+S**). Für einen sauberen Stopp aus einem beliebigen Fenster binden Sie stattdessen **\--finalize** (oder **\--toggle**, **\--sleep-toggle**) an eine Desktop-Tastenkombination. Die Werkseinstellungen definieren:
 
 **Alt+H**
 :   Aktiviert oder deaktiviert die Diktierfunktion. Dies pausiert oder setzt die Diktierfunktion fort; es wird **nichts**
@@ -104,7 +109,7 @@ aktiviert, und die Kontroll-Unterbefehle, die an eine Desktop-Verknüpfung gebun
     Während der Pause bleibt das Mikrofon aktiv und die Aktivierungsphrase funktioniert weiterhin.
 
 **Alt+S:**
-Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase.
+Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase. Nur X11, und die Kombination gelangt in das fokussierte Fenster (siehe oben); bevorzugen Sie **\--finalize**, an eine Desktop-Tastenkombination gebunden.
 
 **Alt+W**
 :   Aktiviert den Energiesparmodus, einen dritten Zustand, der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus wird der Audio-Stream beendet (das Mikrofon wird freigegeben) und die Spracherkennung wird deaktiviert, wodurch die CPU-Auslastung auf nahezu Null sinkt; die Aktivierungsphrase kann erst gehört werden, wenn der Energiesparmodus wieder deaktiviert wird. **Alt+W** selbst funktioniert weiterhin im Energiesparmodus, da es nicht von Audio abhängig ist. Die Aktivierung des Energiesparmodus während einer Diktierfunktion beendet diese sauber, sodass kein Audio während eines Satzes verloren geht.

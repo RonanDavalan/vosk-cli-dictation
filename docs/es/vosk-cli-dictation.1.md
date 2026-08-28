@@ -89,9 +89,14 @@ Para comenzar, diga "**iniciar dictado**". Para finalizar, diga "**detener dicta
 comenzar la dictación / finalizar la dictación
 
 Una frase disparadora solo se activa cuando la confianza promedio de reconocimiento
-de sus palabras supera el umbral `recognition.confidence_threshold`; una frase murmurada se
-transcribe como texto ordinario. Decir una frase dos veces consecutivas
-la transcribe literalmente en lugar de activarla.
+de sus palabras supera el umbral `recognition.confidence_threshold` (valor predeterminado
+`0.55`, redefinible por idioma). Una frase de parada oída por debajo del umbral se
+descarta — ni se ejecuta ni se escribe en el documento — y se muestra una indicación;
+repítala o use `--finalize`. Durante el dictado, un segundo reconocedor ligero
+restringido a la frase de parada proporciona una parada de alta confianza independiente
+de ese umbral (`recognition.restricted_stop_in_dictation`, activo de forma predeterminada,
+redefinible por idioma). Decir una frase dos veces consecutivas la transcribe
+literalmente en lugar de activarla.
 
 La puntuación y la disposición también se dictan mediante la voz; la lista completa, específica para cada idioma, se define en `language_settings.<lang>.punctuation` en el archivo de configuración, y se imprime por el propio programa al iniciarse.
 
@@ -99,7 +104,7 @@ La puntuación y la disposición también se dictan mediante la voz; la lista co
 
 Los atajos de teclado globales de `pynput` se inician solo en una sesión X11 estándar y solo
 cuando `hotkeys.pynput_enabled` es verdadero; en Wayland nativo, no se
-inician, y los subcomandos de control asociados a un acceso directo del escritorio los reemplazan. La configuración predeterminada define:
+inician, y los subcomandos de control asociados a un acceso directo del escritorio los reemplazan. Incluso bajo X11, el listener de `pynput` no consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (por ejemplo `^[s` para **Alt+S**). Para una parada limpia desde cualquier ventana, vincule en su lugar **\--finalize** (o **\--toggle**, **\--sleep-toggle**) a un atajo de teclado del escritorio. La configuración predeterminada define:
 
 **Alt+H**
 :   Activa o desactiva la dictado. Esto solo pausa o reanuda; **no**
@@ -108,7 +113,7 @@ inician, y los subcomandos de control asociados a un acceso directo del escritor
     sigue funcionando.
 
 **Alt+S**
-: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada.
+: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada. Solo X11, y la combinación se filtra a la ventana enfocada (véase más arriba); prefiera **\--finalize** vinculado a un atajo del escritorio.
 
 **Alt+W**
 :   Activa/desactiva el modo de suspensión, un tercer estado distinto de los dos anteriores. En el modo de suspensión, el flujo de audio se cierra (el micrófono se libera) y el reconocimiento se bloquea, por lo que el uso de la CPU disminuye hasta casi cero; la frase de activación no se puede escuchar hasta que el modo de suspensión se desactiva. **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión durante una dictado la detiene limpiamente primero, para que no se pierda audio en medio de una frase.

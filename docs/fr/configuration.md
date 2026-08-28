@@ -96,13 +96,15 @@ audio:
 
 Paramètres pour le moteur de reconnaissance Vosk.
 
--   **`confidence_threshold`** (float, 0.0-1.0) : Une phrase de déclenchement vocal (d'activation ou d'arrêt) n'est prise en compte que lorsque la confiance moyenne de ses mots atteint cette valeur ; en dessous, la phrase est traitée comme du texte ordinaire.
--   **`restricted_grammar_in_listening`** (booléen, valeur par défaut `true`): Pendant l'écoute de la phrase d'activation, utilisez une grammaire Kaldi restreinte à cette phrase. La consommation du processeur est considérablement réduite, mais cela se fait au prix de la reconstruction complète du reconnaisseur lors de l'activation. Définissez sur `false` pour maintenir le reconnaisseur complet en état d'écoute.
+-   **`confidence_threshold`** (float, 0.0-1.0, valeur par défaut `0.55`) : une phrase de déclenchement vocal (d'activation ou d'arrêt) n'est prise en compte que lorsque la confiance moyenne de ses mots atteint cette valeur. En dessous, une phrase d'activation est traitée comme du texte ordinaire ; une phrase d'**arrêt** est absorbée — ni exécutée, ni écrite dans le document — et un indice est affiché. Surchargeable par langue avec une clé du même nom sous `language_settings.<lang>`.
+-   **`restricted_grammar_in_listening`** (booléen, valeur par défaut `true`): Pendant l'écoute de la phrase d'activation, utilisez une grammaire Kaldi restreinte à cette phrase. La consommation du processeur est considérablement réduite, mais cela se fait au prix de la reconstruction complète du reconnaisseur lors de l'activation. Définissez sur `false` pour maintenir le reconnaisseur complet en état d'écoute. Surchargeable par langue sous `language_settings.<lang>` — la config par défaut la désactive pour `es`, où le petit modèle décode la grammaire restreinte plus lentement que la grammaire complète.
+-   **`restricted_stop_in_dictation`** (booléen, valeur par défaut `true`): pendant la dictée, exécute un second reconnaisseur léger restreint à la phrase d'arrêt, en parallèle du reconnaisseur complet. Il fournit un signal d'arrêt de haute confiance indépendant de `confidence_threshold` — le même mécanisme que celui utilisé pour la phrase d'activation pendant l'écoute. Surchargeable par langue sous `language_settings.<lang>` ; mettez `false` sur un matériel où le décodage restreint supplémentaire par bloc audio est trop coûteux (il est environ 5× moins cher que le décodage complet).
 
 ```yaml
 recognition:
-  confidence_threshold: 0.85
+  confidence_threshold: 0.55
   restricted_grammar_in_listening: true
+  restricted_stop_in_dictation: true
 ```
 
 ### `sleep`
@@ -193,7 +195,7 @@ Remplace une branche française codée en dur. Pour chaque langue :
 
 ### `hotkeys`
 
-Raccourcis clavier globaux via `pynput`. Ceux-ci ne fonctionnent que dans une session X11 simple ; sur Wayland natif, associez les sous-commandes de contrôle (`--toggle`, `--finalize`, `--sleep-toggle`) aux propres paramètres de raccourcis de votre bureau.
+Raccourcis clavier globaux via `pynput`. Ceux-ci ne fonctionnent que dans une session X11 simple, et même là l'écouteur `pynput` ne consomme pas l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (`^[s` pour `Alt+S`). Pour un arrêt propre depuis n'importe quelle fenêtre — et pour Wayland natif, où `pynput` ne voit rien — associez plutôt les sous-commandes de contrôle (`--toggle`, `--finalize`, `--sleep-toggle`) aux propres paramètres de raccourcis de votre bureau.
 
 -   **`pynput_enabled`** (booléen, par défaut `true`): activé uniquement sous X11. Définissez-le sur `false` pour empêcher le démarrage du service d'écoute `pynput`.
 -   **`pynput_keys`**: Une liste de touches Pynput pour le raccourci.
@@ -216,7 +218,8 @@ hotkeys:
 -   **`toggle_recording`** (par défaut `Alt+H`): démarre ou met en pause la dictée en cours.
     Pendant la pause, le microphone reste actif et la phrase de réveil vocale continue de fonctionner.
 -   **`finalize_session`** (par défaut `Alt+S`): arrête la dictée et copie le texte accumulé
-    dans le presse-papiers.
+    dans le presse-papiers. X11 uniquement, et la combinaison fuit dans la fenêtre active
+    (voir ci-dessus) — préférez `vosk-cli-dictation --finalize` lié à un raccourci de bureau.
 -   **`sleep_toggle`** (par défaut `Alt+W`): active/désactive le **mode veille**, un troisième état
     distinct des deux précédents. En mode veille, le flux audio est fermé (le microphone est libéré) et
     la reconnaissance est bloquée, ce qui réduit l'utilisation du processeur à presque zéro. Cependant,

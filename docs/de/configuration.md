@@ -95,13 +95,15 @@ audio:
 
 Parameter für die Vosk-Spracherkennungsengine.
 
--   **`confidence_threshold`** (float, 0.0-1.0): Eine Sprachauslösephrase (Start oder Stopp) wird nur berücksichtigt, wenn die durchschnittliche Konfidenz ihrer Wörter diesen Wert erreicht; darunter wird die Phrase als normaler Text behandelt.
--   **`restricted_grammar_in_listening`** (boolean, Standardwert: `true`): Während des Lauschens nach der Startphrase, wird die Spracherkennung mit einer Kaldi-Grammatik durchgeführt, die auf diese Phrase beschränkt ist. Der CPU-Verbrauch sinkt deutlich, allerdings wird beim Start die vollständige Spracherkennung neu aufgebaut. Setzen Sie den Wert auf `false`, um die vollständige Spracherkennung im "Listening"-Modus aktiv zu halten.
+-   **`confidence_threshold`** (float, 0.0-1.0, Standardwert `0.55`): Eine Sprachauslösephrase (Start oder Stopp) wird nur berücksichtigt, wenn die durchschnittliche Konfidenz ihrer Wörter diesen Wert erreicht. Darunter wird eine Startphrase als normaler Text behandelt; eine **Stopp**phrase wird verschluckt — weder ausgeführt noch in das Dokument eingegeben — und ein Hinweis wird ausgegeben. Pro Sprache mit einem gleichnamigen Schlüssel unter `language_settings.<lang>` überschreibbar.
+-   **`restricted_grammar_in_listening`** (boolean, Standardwert: `true`): Während des Lauschens nach der Startphrase, wird die Spracherkennung mit einer Kaldi-Grammatik durchgeführt, die auf diese Phrase beschränkt ist. Der CPU-Verbrauch sinkt deutlich, allerdings wird beim Start die vollständige Spracherkennung neu aufgebaut. Setzen Sie den Wert auf `false`, um die vollständige Spracherkennung im "Listening"-Modus aktiv zu halten. Pro Sprache unter `language_settings.<lang>` überschreibbar — die Werkskonfiguration deaktiviert es für `es`, wo das kleine Modell die beschränkte Grammatik langsamer decodiert als die vollständige.
+-   **`restricted_stop_in_dictation`** (boolean, Standardwert: `true`): Während des Diktierens läuft ein zweiter, auf die Stoppphrase beschränkter Erkenner neben dem vollständigen. Er liefert ein Stoppsignal mit hoher Konfidenz, unabhängig von `confidence_threshold` — derselbe Mechanismus wie für die Startphrase im Lauschzustand. Pro Sprache unter `language_settings.<lang>` überschreibbar; auf `false` setzen auf Hardware, wo die zusätzliche beschränkte Decodierung pro Audioblock zu teuer ist (sie ist etwa 5× günstiger als die vollständige Decodierung).
 
 ```yaml
 recognition:
-  confidence_threshold: 0.85
+  confidence_threshold: 0.55
   restricted_grammar_in_listening: true
+  restricted_stop_in_dictation: true
 ```
 
 ### `sleep`
@@ -192,7 +194,7 @@ Ersetzt eine bisher fest codierte französische Version. Pro Sprache:
 
 ### `hotkeys`
 
-Globale Tastenkombinationen über `pynput`. Diese werden nur unter einer reinen X11-Sitzung gestartet; unter nativem Wayland binden Sie die Kontroll-Unterbefehle (`--toggle`, `--finalize`, `--sleep-toggle`) stattdessen an die eigenen Tastenkombinationseinstellungen Ihres Desktops.
+Globale Tastenkombinationen über `pynput`. Diese werden nur unter einer reinen X11-Sitzung gestartet, und selbst dort verbraucht der `pynput`-Listener das Tastenereignis nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (`^[s` für `Alt+S`). Für einen sauberen Stopp aus einem beliebigen Fenster — und für natives Wayland, wo `pynput` nichts sieht — binden Sie stattdessen die Kontroll-Unterbefehle (`--toggle`, `--finalize`, `--sleep-toggle`) an die eigenen Tastenkombinationseinstellungen Ihres Desktops.
 
 -   **`pynput_enabled`** (boolesch, Standardwert: `true`): Wird nur unter X11 berücksichtigt. Setzen Sie den Wert auf `false`, um den `pynput` Listener nie zu starten.
 -   **`pynput_keys`**: Eine Liste von Pynput-Tasten für die Tastenkombination.
@@ -215,7 +217,9 @@ hotkeys:
 -   **`toggle_recording`** (Standard: `Alt+H`): Startet oder pausiert die aktuelle Diktierfunktion. Während
     der Pause bleibt das Mikrofon aktiv und die Sprachaktivierungsphrase funktioniert weiterhin.
 -   **`finalize_session`** (Standard: `Alt+S`): Stoppt die Diktierfunktion und kopiert den
-    gesammelten Text in die Zwischenablage.
+    gesammelten Text in die Zwischenablage. Nur X11, und die Kombination gelangt in das
+    fokussierte Fenster (siehe oben) — bevorzugen Sie `vosk-cli-dictation --finalize`, an
+    eine Desktop-Tastenkombination gebunden.
 -   **`sleep_toggle`** (Standard: `Alt+W`): Schaltet den **Energiesparmodus** ein, einen dritten Zustand,
     der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus wird der
     Audiostream geschlossen (das Mikrofon wird freigegeben) und die Spracherkennung wird

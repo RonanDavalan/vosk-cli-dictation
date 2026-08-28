@@ -14,7 +14,7 @@ import pytest
 
 import src.recognition as rec
 from config.config import config
-from src.recognition import _target_mode, MODE_FULL, MODE_LISTENING
+from src.recognition import _target_mode, MODE_FULL, MODE_LISTENING, MODE_STOP
 from src.runtime_state import (
     runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
 )
@@ -66,10 +66,15 @@ class FakeRec:
         pass
 
 
-def _run_thread(script, state, monkeypatch, feed=None):
+def _run_thread(script, state, monkeypatch, feed=None, stop_script=None):
     config.set_language("fr")
     fake = FakeRec(script)
-    monkeypatch.setattr(rec, "build_recognizer", lambda model, mode: fake)
+    fake_stop = FakeRec(stop_script or [])
+    fake.stop = fake_stop  # accès pour les tests du recognizer d'arrêt (7 bis)
+    monkeypatch.setattr(
+        rec, "build_recognizer",
+        lambda model, mode: fake_stop if mode == MODE_STOP else fake,
+    )
 
     audio_q = queue.Queue(maxsize=64)
     text_q = queue.Queue(maxsize=64)
@@ -85,7 +90,7 @@ def _run_thread(script, state, monkeypatch, feed=None):
     # neutraliser l'anti-rebond hérité d'un test précédent
     runtime_state._last_transition = 0.0
 
-    steps = len(script) if feed is None else feed
+    steps = feed if feed is not None else max(len(script), len(stop_script or []))
     for _ in range(steps + 2):
         audio_q.put_nowait(b"\x00\x00")
 
@@ -159,3 +164,72 @@ def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
     script = [("final", {"text": "active dictée", "result": high})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
     assert "DICTATION_ON" in _drain(ctrl)
+
+
+# --- chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE -----
+
+def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    stop_script = [("final", {"text": "stop dictée", "result": []})]
+    _text, ctrl, fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" in _drain(ctrl)
+    assert fake.reset_calls >= 1  # le recognizer complet est réinitialisé
+
+
+def test_restricted_stop_recognizer_finalizes_on_partial(monkeypatch):
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    stop_script = [("partial", {"partial": "stop dictée"})]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" in _drain(ctrl)
+
+
+def test_restricted_stop_recognizer_ignores_unk(monkeypatch):
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    stop_script = [
+        ("partial", {"partial": "bla bla"}),
+        ("final", {"text": "", "result": []}),
+    ]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
+
+
+def test_restricted_stop_recognizer_off_per_language(monkeypatch):
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", False
+    )
+    stop_script = [("final", {"text": "stop dictée", "result": []})]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_DICTATING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
+
+
+def test_restricted_stop_recognizer_absent_in_listening(monkeypatch):
+    # En ÉCOUTE, aucun recognizer d'arrêt : « stop dictée » n'y finalise rien.
+    stop_script = [("final", {"text": "stop dictée", "result": []})]
+    _text, ctrl, _fake = _run_thread(
+        [], STATE_LISTENING, monkeypatch, stop_script=stop_script
+    )
+    assert "FINALIZE_SESSION" not in _drain(ctrl)
+
+
+def test_dictating_text_suppressed_while_stop_pending(monkeypatch):
+    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    # Le recognizer d'arrêt matche au 1er bloc ; le final tardif du recognizer
+    # complet contenant encore « stop dictée » ne doit pas être tapé.
+    script = [
+        ("partial", {"partial": "bonjour"}),
+        ("final", {"text": "bonjour stop dictée", "result": []}),
+    ]
+    stop_script = [("final", {"text": "stop dictée", "result": []})]
+    text_q, ctrl, _fake = _run_thread(
+        script, STATE_DICTATING, monkeypatch, stop_script=stop_script, feed=6
+    )
+    assert "FINALIZE_SESSION" in _drain(ctrl)
+    assert _drain(text_q) == []

@@ -37,7 +37,7 @@ This tool was born from the need for a robust, locally-run dictation system on G
 >
 > **X11 and Wayland support.** Text is injected by copying it to the clipboard and simulating a paste. Under Wayland the tool uses `wtype` and `wl-clipboard`, falling back to `ydotool` (which needs the `ydotoold` daemon and access to `/dev/uinput`, typically via the `input` group — `sudo usermod -aG input $USER`, then log out and back in). Under X11 it uses `xdotool`. At least one backend for the current session type must be installed; `vosk-cli-dictation --diagnose` reports what is available.
 >
-> **Global shortcuts.** `pynput` only sees key events under plain X11. On native Wayland, bind your desktop's own shortcut settings to the control subcommands (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`) — see *Controlling a running session* below. On Debian, `ydotool` is packaged in `trixie-backports`, not in stable.
+> **Global shortcuts.** `pynput` only sees key events under plain X11, and even there it does not consume them — the key combination also reaches the focused window, so pressing it while typing into a terminal inserts an escape sequence (`^[s` for `Alt+S`). Bind your desktop's own shortcut settings to the control subcommands (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`) instead — this works on native Wayland too. See *Controlling a running session* below. On Debian, `ydotool` is packaged in `trixie-backports`, not in stable.
 
 ## ⚙️ Getting Started
 
@@ -146,7 +146,7 @@ The language model is chosen based on the following priority:
 
 ### Voice Trigger Phrases
 
-Each language has a two-word **wake phrase** and **stop phrase** (factory defaults: `start dictation` / `stop dictation` in English). Two words rather than one so an ordinary sentence never triggers them by accident. Say the wake phrase to start dictating, the stop phrase to finish and copy the result. Saying a phrase twice in a row (`stop dictation stop dictation`) types it literally instead of triggering. The phrases are configurable per language under `language_settings.<lang>.voice_commands`.
+Each language has a two-word **wake phrase** and **stop phrase** (factory defaults: `start dictation` / `stop dictation` in English). Two words rather than one so an ordinary sentence never triggers them by accident. Say the wake phrase to start dictating, the stop phrase to finish and copy the result. Saying a phrase twice in a row (`stop dictation stop dictation`) types it literally instead of triggering. If the stop phrase is heard but recognition confidence is low, it is swallowed rather than typed into your document — repeat it, or use `--finalize`. The phrases are configurable per language under `language_settings.<lang>.voice_commands`.
 
 ### Controlling a Running Session
 

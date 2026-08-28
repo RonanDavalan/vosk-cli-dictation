@@ -85,8 +85,7 @@ Dites "**démarrer la dictée**" pour commencer, "**arrêter la dictée**" pour 
 
 :   **"commencer l'enregistrement"** / **"arrêter l'enregistrement"**.
 
-Une phrase de déclenchement n'est activée que lorsque la moyenne de la confiance de reconnaissance de ses mots dépasse `recognition.confidence_threshold`; une phrase indistincte est
-transcrite comme du texte ordinaire. Prononcer une phrase deux fois de suite la transcrit littéralement plutôt que de déclencher une action.
+Une phrase de déclenchement n'est activée que lorsque la moyenne de la confiance de reconnaissance de ses mots dépasse `recognition.confidence_threshold` (valeur par défaut `0.55`, surchargeable par langue). Une phrase d'arrêt entendue sous le seuil est absorbée — ni exécutée, ni écrite dans le document — et un indice est affiché ; répétez-la, ou utilisez `--finalize`. Pendant la dictée, un second reconnaisseur léger restreint à la phrase d'arrêt fournit un arrêt de haute confiance indépendant de ce seuil (`recognition.restricted_stop_in_dictation`, actif par défaut, surchargeable par langue). Prononcer une phrase deux fois de suite la transcrit littéralement plutôt que de déclencher une action.
 
 La ponctuation et la mise en forme sont également déterminées par la voix ; la liste complète, spécifique à chaque langue, est définie dans `language_settings.<lang>.punctuation` du fichier de configuration, et est affichée par le programme au démarrage.
 
@@ -94,14 +93,14 @@ La ponctuation et la mise en forme sont également déterminées par la voix ; l
 
 `pynput` Les touches de raccourci globales ne sont activées que dans une session X11 standard et uniquement
 quand `hotkeys.pynput_enabled` est vrai ; elles ne sont pas
-activées dans Wayland natif, et les sous-commandes de contrôle associées à un raccourci de bureau les remplacent. La configuration par défaut définit :
+activées dans Wayland natif, et les sous-commandes de contrôle associées à un raccourci de bureau les remplacent. Même sous X11, l'écouteur `pynput` ne consomme pas l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (par exemple `^[s` pour **Alt+S**). Pour un arrêt propre depuis n'importe quelle fenêtre, liez plutôt **\--finalize** (ou **\--toggle**, **\--sleep-toggle**) à un raccourci clavier de bureau. La configuration par défaut définit :
 
 **Alt+H**
 :   Activez ou désactivez la dictée. Cela met simplement en pause ou reprend la dictée ; cela **ne** copie **rien** dans le presse-papiers, contrairement à **Alt+S** et à la phrase d'arrêt.
     Pendant la pause, le microphone reste actif et la phrase d'activation continue de fonctionner.
 
 **Alt+S**
-: Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers – équivalent à la phrase d'arrêt.
+: Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers – équivalent à la phrase d'arrêt. X11 uniquement, et la combinaison fuit dans la fenêtre active (voir ci-dessus) ; préférez **\--finalize** lié à un raccourci de bureau.
 
 **Alt+W**
 :   Active/désactive le mode veille, un troisième état distinct des deux précédents. En mode veille, le flux audio est interrompu (le microphone est désactivé) et la reconnaissance est bloquée, ce qui réduit l'utilisation du processeur à presque zéro. La phrase de réveil ne peut être entendue tant que le mode veille n'est pas désactivé. La fonction **Alt+W** elle-même continue de fonctionner même en mode veille, car elle ne dépend pas de l'audio. L'activation du mode veille pendant une dictée l'interrompt proprement, ce qui évite toute perte de données au milieu d'une phrase.
