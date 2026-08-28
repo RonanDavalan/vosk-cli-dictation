@@ -42,10 +42,10 @@ def test_shipped_defaults():
     assert config.data["recognition"]["restricted_stop_in_dictation"] is True
 
 
-def test_restricted_stop_shipped_per_language():
-    # en/de : true (marge RTF large). fr/es : false (fr = modèle lourd, marge
-    # 0,10 sur Pi 4 ; es = anomalie de grammaire restreinte). Chantier 7 bis.
-    assert config.recognition_setting("restricted_stop_in_dictation", None, "en") is True
-    assert config.recognition_setting("restricted_stop_in_dictation", None, "de") is True
-    assert config.recognition_setting("restricted_stop_in_dictation", None, "fr") is False
-    assert config.recognition_setting("restricted_stop_in_dictation", None, "es") is False
+def test_restricted_stop_shipped_on_for_all_languages():
+    # Chantier 7 bis : true partout. La validation (clips Piper fr, Pi 4) a
+    # montré que le plein vocabulaire ne reconnaît pas « stop dictée » isolé —
+    # le recognizer restreint est le seul chemin d'arrêt fiable, y compris pour
+    # fr (coût Pi 4 : RTF 0,90, reste < 1,0).
+    for lang in ("en", "fr", "de", "es"):
+        assert config.recognition_setting("restricted_stop_in_dictation", None, lang) is True
