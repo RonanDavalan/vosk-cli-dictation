@@ -74,28 +74,30 @@ class TextProcessor:
         return text
 
     def _tokenize(self, text: str) -> list:
-        """Splits the text into words and recognized punctuation commands."""
-        tokens = []
-        # Use a regex that preserves punctuation commands as whole tokens
-        # It creates a pattern like: (tiret|point virgule|...|word1|word2)
-        punctuation_pattern = '|'.join(re.escape(key) for key in self.punctuation_keys)
-        # Tokenize by finding punctuation commands or sequences of non-space characters
-        pattern = re.compile(f"({punctuation_pattern}|\\S+)")
-        words_and_cmds = pattern.findall(text)
+        """Splits the text into words and recognized punctuation commands.
 
+        A punctuation command only matches when it occupies one or more *whole*
+        tokens of the input (tokens = whitespace-separated sequences), never as
+        a prefix of a longer word. Keys are tried longest-first (by number of
+        words) so a multi-word command wins over its isolated words.
+        """
+        words = text.split()
+        # Order keys by number of words, descending: the longest match wins.
+        keys_by_len = sorted(self.punctuation_keys, key=lambda k: k.count(' ') + 1, reverse=True)
+
+        tokens = []
         i = 0
-        while i < len(words_and_cmds):
-            # Check for multi-word punctuation commands first
+        while i < len(words):
             matched = False
-            for key in self.punctuation_keys:
+            for key in keys_by_len:
                 key_words = key.split()
-                if ' ' in key and words_and_cmds[i:i + len(key_words)] == key_words:
+                if words[i:i + len(key_words)] == key_words:
                     tokens.append(key)
                     i += len(key_words)
                     matched = True
                     break
             if not matched:
-                tokens.append(words_and_cmds[i])
+                tokens.append(words[i])
                 i += 1
         return tokens
 

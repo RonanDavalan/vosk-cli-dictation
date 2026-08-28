@@ -157,3 +157,36 @@ def test_capitalize_does_not_lowercase_rest_of_word():
     assert tp._format_parts(["iPhone", "works"]).startswith("IPhone")
     # et surtout : pas "Iphone"
     assert "Iphone" not in tp._format_parts(["iPhone"])
+
+
+# --------------------------------------------------------------------------- #
+# Tokeniseur : une commande de ponctuation n'est reconnue que sur des jetons   #
+# COMPLETS (jamais comme préfixe d'un mot plus long)                           #
+# --------------------------------------------------------------------------- #
+
+def test_point_inside_longer_word_is_not_a_command():
+    # "points" = mot ordinaire (préfixe "point" ne doit pas être reconnu).
+    out = TextProcessor("fr").process("mettre les points sur les i")
+    assert "." not in out
+    assert "points" in out
+
+
+def test_point_inside_other_words_is_not_a_command():
+    out = TextProcessor("fr").process("pointu et appointer")
+    assert "." not in out
+
+
+def test_multi_word_command_still_recognized():
+    # "à la ligne" (trois mots consécutifs) reste reconnue comme une commande.
+    out = TextProcessor("fr").process("à la ligne")
+    assert "\n" in out
+
+
+def test_final_point_recognized_as_command():
+    out = TextProcessor("fr").process("texte fin point")
+    assert "fin." in out
+
+
+def test_isolated_point_recognized_as_command():
+    out = TextProcessor("fr").process("fin de phrase point")
+    assert out.lower().startswith("fin de phrase.")
