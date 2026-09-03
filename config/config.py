@@ -27,36 +27,52 @@ class Config:
         self.current_lang = self.data.get('default_model', 'en')
         self.set_language(self.current_lang)
 
-    def _get_config_path(self):
+    @staticmethod
+    def _get_config_path(project_root=None,
+                         system_template='/usr/share/vosk-cli-dictation/config.yaml'):
         """Finds the config.yaml file via the XDG cascade (DOCUMENTATION_MULTILINGUE.md §10.2).
 
-        First matching level wins: VOSK_CONFIG env var (as-is, never
-        auto-created) > project-relative config in a git checkout (dev mode
-        primes over a stale XDG file) > per-user XDG config, auto-created
-        from the factory template on first run > the factory template
-        itself (fallback, e.g. dev mode with no XDG file yet).
+        First matching level wins:
+
+        1. ``VOSK_CONFIG`` env var — used as-is, never auto-created.
+        2. Project-relative ``config/config.yaml`` in a git checkout
+           (``PROJECT_ROOT/.git`` present) — used in place, so a developer's
+           edits are not shadowed by a stale XDG file.
+        3. Per-user XDG config
+           ``$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml``.
+        4. Factory template, copied to (3) on first run: the system template
+           dropped by the .deb (``system_template``), or, when that is
+           absent, the ``config/config.yaml`` bundled in the tree. The
+           bundled fallback covers a source-tarball install -- a
+           ``git archive`` has no ``.git`` (level 2 does not fire) and no
+           ``/usr/share`` template, so without it the tool could not start.
+
+        ``project_root`` defaults to the tree holding this file; both it and
+        ``system_template`` are parameters so the cascade can be unit-tested
+        in isolation.
         """
-        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        if project_root is None:
+            project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         env_path = os.environ.get('VOSK_CONFIG')
         if env_path:
             return env_path
 
-        dev_config = os.path.join(project_root, 'config', 'config.yaml')
-        if os.path.isdir(os.path.join(project_root, '.git')) and os.path.exists(dev_config):
-            return dev_config
+        bundled_config = os.path.join(project_root, 'config', 'config.yaml')
+        if os.path.isdir(os.path.join(project_root, '.git')) and os.path.exists(bundled_config):
+            return bundled_config
 
         xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
         user_config = os.path.join(xdg_config_home, 'vosk-cli-dictation', 'config.yaml')
         if os.path.exists(user_config):
             return user_config
 
-        factory_config = '/usr/share/vosk-cli-dictation/config.yaml'
-        if os.path.exists(factory_config):
-            os.makedirs(os.path.dirname(user_config), exist_ok=True)
-            shutil.copy(factory_config, user_config)
-            print(f"Created default configuration at {user_config}")
-            return user_config
+        for template in (system_template, bundled_config):
+            if template and os.path.exists(template):
+                os.makedirs(os.path.dirname(user_config), exist_ok=True)
+                shutil.copy(template, user_config)
+                print(f"Created default configuration at {user_config}")
+                return user_config
 
         return None
 
