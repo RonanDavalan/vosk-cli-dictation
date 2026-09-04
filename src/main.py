@@ -110,7 +110,24 @@ def main():
     # s'affichait après « Appuyez sur Ctrl+C pour quitter » (démarrage des
     # threads après l'aide). --diagnose n'a pas besoin de ces logs.
     vosk.SetLogLevel(-1)
-    set_ui_language(config.default_model)
+
+    # -l/--lang doit s'appliquer à TOUT ce qui peut s'afficher avant la fin de
+    # parse_args() (--help, --diagnose) — pas seulement à la dictée elle-même.
+    # argparse fige le texte d'aide dans la langue de `_` au moment où chaque
+    # add_argument() est appelé, donc trop tard pour agir après coup : on
+    # pré-scanne sys.argv à la main pour connaître la langue demandée avant
+    # de construire le parseur.
+    pre_lang = None
+    argv = sys.argv[1:]
+    for i, token in enumerate(argv):
+        if token in ('-l', '--lang') and i + 1 < len(argv):
+            pre_lang = argv[i + 1]
+            break
+        if token.startswith('--lang='):
+            pre_lang = token.split('=', 1)[1]
+            break
+
+    set_ui_language(pre_lang or config.default_model)
     _ = get_translation()
 
     parser = argparse.ArgumentParser(description=_("A Vosk-based command-line dictation tool."))
