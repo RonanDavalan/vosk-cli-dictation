@@ -127,11 +127,18 @@ def main():
     ctl.add_argument('--status', action='store_true', help=_("print the current state"))
     ctl.add_argument('--stop', action='store_true', help=_("stop the running session"))
     ctl.add_argument('--diagnose', action='store_true', help=_("check the environment and exit"))
+    parser.add_argument('--download-model', nargs='?', const='', default=None, metavar='LANG',
+                        help=_("download the small model for LANG (or the current language) and exit"))
     args = parser.parse_args()
 
     if args.diagnose:
         from src.diagnose import run_diagnose
         sys.exit(run_diagnose())
+
+    if args.download_model is not None:
+        from src.model_download import download_model
+        lang = args.download_model or args.lang or config.default_model
+        sys.exit(0 if download_model(lang) else 1)
 
     for attr, wire in CONTROL_FLAGS:
         if getattr(args, attr, False):
@@ -176,8 +183,16 @@ def main():
             print_status(_("Failed. Attempting to load default model: {model_name}").format(model_name=default_model_name), config.color_info)
             model, recognizer, loaded_model_name = load_model(default_model_name)
 
+    if not recognizer and sys.stdin.isatty():
+        answer = input(_("No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] ").format(lang=ui_lang))
+        if answer.strip().lower() in ("y", "yes", "o", "oui"):
+            from src.model_download import download_model
+            if download_model(ui_lang):
+                model, recognizer, loaded_model_name = load_model(ui_lang)
+
     if not recognizer:
-        print_status(_("FATAL: No speech recognition model could be loaded."), config.color_error)
+        print_status(_("No speech recognition model could be loaded."), config.color_error)
+        print_status(_("Run 'vosk-cli-dictation --download-model {lang}' to download one.").format(lang=ui_lang), config.color_error)
         print_status(_("Please check the model paths and integrity in your config.yaml file."), config.color_error)
         return 1
 

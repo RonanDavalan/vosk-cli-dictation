@@ -43,6 +43,7 @@ def load_model(model_name: str):
             for racine in config.model_search_roots(model['path_relative']):
                 print(f"  - {racine}")
             print(f"{config.color_info}{_('Download Vosk models from:')} https://alphacephei.com/vosk/models{config.RESET}")
+            print(f"{config.color_info}{_('Or run:')} vosk-cli-dictation --download-model {model_name}{config.RESET}")
             break
         return None, None, None
 

@@ -1,225 +1,531 @@
-# French translations for Projet Vosk.
-# Copyright (C) 2025
-# This file is distributed under the same license as the Projet Vosk project.
+# Translations template for PROJECT.
+# Copyright (C) 2026 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2026.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Projet Vosk\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-08 10:00+0000\n"
-"PO-Revision-Date: 2025-07-08 10:00+0000\n"
-"Last-Translator: Ron\n"
-"Language: fr\n"
-"Language-Team: French\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-09-04 23:16+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: src/audio_capture.py:23
+#: src/audio_capture.py:59
 msgid "Critical error during audio initialization:"
-msgstr "Erreur critique lors de l'initialisation de l'audio :"
+msgstr ""
 
-#: src/audio_capture.py:25
+#: src/audio_capture.py:61
 msgid "TIP: This can happen if no microphone is connected or selected."
-msgstr "CONSEIL : Ceci peut arriver si aucun microphone n'est branché ou sélectionné."
+msgstr ""
 
-#: src/audio_capture.py:26
+#: src/audio_capture.py:62
 msgid "Check your system audio settings (e.g., with pavucontrol)."
-msgstr "Vérifiez les paramètres audio de votre système (ex: avec pavucontrol)."
+msgstr ""
 
-#: src/audio_capture.py:38
+#: src/audio_capture.py:116
+msgid "Could not reopen the audio device:"
+msgstr ""
+
+#: src/audio_capture.py:142
+msgid "Recognition is falling behind; dropping audio."
+msgstr ""
+
+#: src/audio_capture.py:146
 msgid "Audio read error (IOError):"
-msgstr "Erreur de lecture audio (IOError) :"
+msgstr ""
 
-#: src/audio_capture.py:42
+#: src/audio_capture.py:151
 msgid "Unexpected error in audio capture:"
-msgstr "Erreur inattendue dans la capture audio :"
+msgstr ""
 
-#: src/i18n.py:70
+#: src/diagnose.py:24
+msgid "Environment"
+msgstr ""
+
+#: src/diagnose.py:26
+msgid "Session type"
+msgstr ""
+
+#: src/diagnose.py:28
+msgid "Text-injection backend"
+msgstr ""
+
+#: src/diagnose.py:28
+msgid "none"
+msgstr ""
+
+#: src/diagnose.py:31
+msgid "Tools"
+msgstr ""
+
+#: src/diagnose.py:38
+msgid "found"
+msgstr ""
+
+#: src/diagnose.py:38
+msgid "missing"
+msgstr ""
+
+#: src/diagnose.py:43
+#, python-brace-format
+msgid "Access to {path}"
+msgstr ""
+
+#: src/diagnose.py:44
+msgid "no rw access (add your user to the 'input' group)"
+msgstr ""
+
+#: src/diagnose.py:47
+msgid "Models"
+msgstr ""
+
+#: src/diagnose.py:51
+msgid "not found"
+msgstr ""
+
+#: src/diagnose.py:54
+msgid "Audio input"
+msgstr ""
+
+#: src/diagnose.py:71 src/diagnose.py:73
+msgid "Open an input stream"
+msgstr ""
+
+#: src/diagnose.py:78
+msgid "Clipboard"
+msgstr ""
+
+#: src/diagnose.py:86 src/diagnose.py:90
+msgid "Read / write round-trip"
+msgstr ""
+
+#: src/diagnose.py:87
+msgid "failed (install wl-clipboard or xclip)"
+msgstr ""
+
+#: src/diagnose.py:93
+msgid "Control socket"
+msgstr ""
+
+#: src/diagnose.py:97
+msgid "Socket path"
+msgstr ""
+
+#: src/diagnose.py:98
+msgid "Session running"
+msgstr ""
+
+#: src/diagnose.py:98
+msgid "yes"
+msgstr ""
+
+#: src/diagnose.py:98
+msgid "no"
+msgstr ""
+
+#: src/diagnose.py:100
+msgid "Runtime dir writable"
+msgstr ""
+
+#: src/diagnose.py:103
+#, python-brace-format
+msgid "Config file in use: {path}"
+msgstr ""
+
+#: src/diagnose.py:108
+msgid "All checks passed."
+msgstr ""
+
+#: src/diagnose.py:108
+msgid "Some checks failed (see !! above)."
+msgstr ""
+
+#: src/i18n.py:42
 msgid "i18n"
-msgstr "i18n"
+msgstr ""
 
-#: src/i18n.py:70
-msgid "Language set to"
-msgstr "Langue définie sur"
+#: src/i18n.py:42
+msgid "UI Language set to"
+msgstr ""
 
-#: src/i18n.py:70
-msgid "source"
-msgstr "source"
+#: src/keyboard_listener.py:23
+msgid ""
+"Global hotkeys via pynput are disabled on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
 
-#: src/main.py:34
-msgid "Checking external dependencies..."
-msgstr "Vérification des dépendances externes..."
-
-#: src/main.py:36
-msgid "'xdotool' is a critical dependency and is not installed."
-msgstr "'xdotool' est une dépendance critique et n'est pas installé."
-
-#: src/main.py:37
-msgid "Please install it (e.g., 'sudo apt-get install xdotool')."
-msgstr "Veuillez l'installer (ex: 'sudo apt-get install xdotool')."
-
-#: src/main.py:39
-msgid "'paplay' not found. Sound notifications will be disabled."
-msgstr "'paplay' n'a pas été trouvé. Les notifications sonores seront désactivées."
-
-#: src/main.py:40
-msgid "Dependencies checked."
-msgstr "Dépendances vérifiées."
-
-#: src/main.py:46
-#, python-brace-format
-msgid "Attempting to load model for language: {lang}"
-msgstr "Tentative de chargement du modèle pour la langue : {lang}"
-
-#: src/main.py:50
-#, python-brace-format
-msgid "Failed. Attempting to load default model: {model_name}"
-msgstr "Échec. Tentative de chargement du modèle par défaut : {model_name}"
+#: src/keyboard_listener.py:41 src/recognition.py:185 src/recognition.py:210
+msgid "Control queue full; the UI thread is not responding."
+msgstr ""
 
 #: src/main.py:55
-msgid "Default model failed. Trying any other available models..."
-msgstr "Le modèle par défaut a échoué. Essai des autres modèles disponibles..."
-
-#: src/main.py:64
-msgid "FATAL: No speech recognition model could be loaded."
-msgstr "FATAL : Aucun modèle de reconnaissance vocale n'a pu être chargé."
-
-#: src/main.py:65
-msgid "Please check the model paths and integrity in your config.yaml file."
-msgstr "Veuillez vérifier les chemins et l'intégrité des modèles dans votre fichier config.yaml."
-
-#: src/main.py:84
-#, python-brace-format
-msgid "The script is ready. Current model: {model_name}"
-msgstr "Le script est prêt. Modèle actuel : {model_name}"
-
-#: src/main.py:44
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
 msgstr ""
 
-#: src/main.py:45
+#: src/main.py:56
 #, python-brace-format
-msgid "  - Say '{stop_phrase}' or press {hotkey} to stop and copy."
+msgid ""
+"  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
+"--finalize' to stop and copy."
 msgstr ""
 
-#: src/main.py:89
-msgid "\n  Manual commands to type in this console:"
-msgstr "\n  Commandes manuelles à taper dans cette console :"
+#: src/main.py:57
+msgid "  - Hotkeys are X11-only and reach the focused window; use --finalize."
+msgstr ""
 
-#: src/main.py:90
+#: src/main.py:59
+#, python-brace-format
+msgid ""
+"\n"
+"{style}  Manual commands:{reset}"
+msgstr ""
+
+#: src/main.py:60
 msgid "  - '/cancel', '/delete-word', '/nl'"
-msgstr "  - '/annuler', '/effacer-mot', '/nl'"
+msgstr ""
 
-#: src/main.py:91
-msgid "  - '/change_language <lang_name>' (e.g., /change_language en)"
-msgstr "  - '/changer_langue <nom_langue>' (ex: /changer_langue en)"
+#: src/main.py:65
+#, python-brace-format
+msgid ""
+"\n"
+"{style}  Punctuation commands:{reset}"
+msgstr ""
 
-#: src/main.py:93
+#: src/main.py:95
 msgid "Press Ctrl+C to exit the program."
-msgstr "Appuyez sur Ctrl+C pour quitter le programme."
+msgstr ""
 
-#: src/main.py:108
-#, python-brace-format
-msgid "Model '{model_name}' is already loaded."
-msgstr "Le modèle '{model_name}' est déjà chargé."
+#: src/main.py:102
+msgid ""
+"\n"
+"Program stopped cleanly."
+msgstr ""
 
-#: src/main.py:112
-#, python-brace-format
-msgid "Changing model to '{model_name}'..."
-msgstr "Changement de modèle vers '{model_name}'..."
+#: src/main.py:116
+msgid "A Vosk-based command-line dictation tool."
+msgstr ""
+
+#: src/main.py:117
+msgid "Force the interface and model language."
+msgstr ""
+
+#: src/main.py:118
+msgid "control an already running session"
+msgstr ""
+
+#: src/main.py:119
+msgid "toggle dictation on/off"
+msgstr ""
 
 #: src/main.py:120
-#, python-brace-format
-msgid "Model changed successfully: {model_name}"
-msgstr "Modèle changé avec succès : {model_name}"
+msgid "start dictation"
+msgstr ""
+
+#: src/main.py:121
+msgid "stop dictation, keep listening"
+msgstr ""
 
 #: src/main.py:122
-#, python-brace-format
-msgid "Error: Could not load model '{model_name}'. Reverting to {loaded_model_name}."
-msgstr "Erreur : Impossible de charger le modèle '{model_name}'. Le modèle actuel ({loaded_model_name}) est conservé."
+msgid "finalize the session and copy the text"
+msgstr ""
+
+#: src/main.py:123
+msgid "discard the current session buffer"
+msgstr ""
 
 #: src/main.py:124
-msgid "Invalid command. Usage: /change_language <lang_name>"
-msgstr "Commande invalide. Utilisation : /change_language <nom_langue>"
+msgid "enter deep sleep (release the microphone)"
+msgstr ""
 
-#: src/main.py:133
-msgid "\nStop request received. Shutting down..."
-msgstr "\nDemande d'arrêt reçue. Fermeture en cours..."
+#: src/main.py:125
+msgid "leave deep sleep"
+msgstr ""
 
-#: src/main.py:141
-msgid "Program stopped cleanly."
-msgstr "Programme arrêté proprement."
+#: src/main.py:126
+msgid "toggle deep sleep"
+msgstr ""
 
-#: src/recognition.py:27
-msgid "Error: Model folder not found:"
-msgstr "Erreur : Dossier du modèle introuvable :"
+#: src/main.py:127
+msgid "print the current state"
+msgstr ""
 
-#: src/recognition.py:28
-msgid "Please check your config.yaml and ensure the model is unzipped."
-msgstr "Veuillez vérifier votre config.yaml et vous assurer que le modèle est décompressé."
+#: src/main.py:128
+msgid "stop the running session"
+msgstr ""
 
-#: src/recognition.py:33
-msgid "Attempting to load model:"
-msgstr "Tentative de chargement du modèle :"
+#: src/main.py:129
+msgid "check the environment and exit"
+msgstr ""
 
-#: src/recognition.py:38
-msgid "Model loaded successfully:"
-msgstr "Modèle chargé avec succès :"
+#: src/main.py:131
+msgid "download the small model for LANG (or the current language) and exit"
+msgstr ""
+
+#: src/main.py:147
+msgid "No running vosk-cli-dictation session."
+msgstr ""
+
+#: src/main.py:165
+msgid "A vosk-cli-dictation session is already running (see --status)."
+msgstr ""
+
+#: src/main.py:168
+msgid "Checking external dependencies..."
+msgstr ""
+
+#: src/main.py:170
+msgid "No text-injection backend available for this session."
+msgstr ""
+
+#: src/main.py:171
+msgid ""
+"Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
+"also works."
+msgstr ""
+
+#: src/main.py:174
+msgid "'paplay' not found. Sound notifications will be disabled."
+msgstr ""
+
+#: src/main.py:175
+msgid "Dependencies checked."
+msgstr ""
+
+#: src/main.py:177
+#, python-brace-format
+msgid "Attempting to load model for language: {lang}"
+msgstr ""
+
+#: src/main.py:183
+#, python-brace-format
+msgid "Failed. Attempting to load default model: {model_name}"
+msgstr ""
+
+#: src/main.py:187
+#, python-brace-format
+msgid ""
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
+msgstr ""
+
+#: src/main.py:194
+msgid "No speech recognition model could be loaded."
+msgstr ""
+
+#: src/main.py:195
+#, python-brace-format
+msgid "Run 'vosk-cli-dictation --download-model {lang}' to download one."
+msgstr ""
+
+#: src/main.py:196
+msgid "Please check the model paths and integrity in your config.yaml file."
+msgstr ""
+
+#: src/main.py:243
+#, python-brace-format
+msgid "Control socket: {path}"
+msgstr ""
+
+#: src/main.py:245
+#, python-brace-format
+msgid "Could not open the control socket ({err}); CLI subcommands disabled."
+msgstr ""
+
+#: src/main.py:261
+#, python-brace-format
+msgid "The script is ready. Current model: {model_name}"
+msgstr ""
+
+#: src/main.py:275
+msgid "Control queue full; command ignored."
+msgstr ""
+
+#: src/main.py:280
+msgid ""
+"\n"
+"Stop request received. Shutting down..."
+msgstr ""
+
+#: src/model_download.py:74
+#, python-brace-format
+msgid "No download available for language: {lang}"
+msgstr ""
+
+#: src/model_download.py:75
+#, python-brace-format
+msgid "Available languages: {langs}"
+msgstr ""
+
+#: src/model_download.py:81
+#, python-brace-format
+msgid "Model already installed: {path}"
+msgstr ""
+
+#: src/model_download.py:86
+#, python-brace-format
+msgid "Downloading {url} ({size:.0f} MB)..."
+msgstr ""
+
+#: src/model_download.py:95
+#, python-brace-format
+msgid "Download failed: {error}"
+msgstr ""
+
+#: src/model_download.py:103
+msgid "Checksum mismatch; the download was discarded."
+msgstr ""
+
+#: src/model_download.py:111
+msgid "Unexpected archive layout; aborting."
+msgstr ""
+
+#: src/model_download.py:115
+#, python-brace-format
+msgid "Model installed: {path}"
+msgstr ""
+
+#: src/recognition.py:41
+msgid "No model found for"
+msgstr ""
 
 #: src/recognition.py:42
+msgid "Searched:"
+msgstr ""
+
+#: src/recognition.py:45
+msgid "Download Vosk models from:"
+msgstr ""
+
+#: src/recognition.py:46
+msgid "Or run:"
+msgstr ""
+
+#: src/recognition.py:53
+msgid "Error: Model folder not found:"
+msgstr ""
+
+#: src/recognition.py:54
+msgid "Please check your config.yaml and ensure the model is unzipped."
+msgstr ""
+
+#: src/recognition.py:58
+msgid "Attempting to load model:"
+msgstr ""
+
+#: src/recognition.py:61
+msgid "Model loaded successfully:"
+msgstr ""
+
+#: src/recognition.py:64
 #, python-brace-format
 msgid "Fatal error while loading model '{model_name}': {error}"
-msgstr "Erreur fatale lors du chargement du modèle '{model_name}' : {error}"
+msgstr ""
 
-#: src/system_control.py:34
-msgid "Error: Could not find an active window to type into."
-msgstr "Erreur : Impossible de trouver une fenêtre active pour la saisie."
+#: src/recognition.py:125
+msgid "[In progress]"
+msgstr ""
 
-#: src/system_control.py:49
-msgid "An error occurred with xdotool paste method:"
-msgstr "Une erreur est survenue avec la méthode de collage xdotool :"
+#: src/recognition.py:293
+#, python-brace-format
+msgid "Decoding is slower than real time (RTF {rtf}); latency may drift."
+msgstr ""
 
-#: src/system_control.py:59
-msgid "Error: Could not find an active window to press a key."
-msgstr "Erreur : Impossible de trouver une fenêtre active pour la pression de touche."
+#: src/recognition.py:343
+msgid "Text queue full; the UI thread is not consuming. Dropping a result."
+msgstr ""
 
-#: src/system_control.py:71
-msgid "An error occurred with xdotool key press:"
-msgstr "Une erreur est survenue avec la pression de touche xdotool :"
+#: src/recognition.py:369
+msgid "Error in recognition thread:"
+msgstr ""
+
+#: src/system_control.py:132
+#, python-brace-format
+msgid "'{tool}' timed out; falling back."
+msgstr ""
+
+#: src/system_control.py:355
+msgid "Clipboard holds non-text content; it will not be restored."
+msgstr ""
+
+#: src/system_control.py:358
+msgid "Could not write to the clipboard."
+msgstr ""
+
+#: src/system_control.py:362
+msgid "Clipboard did not take the text in time; skipping paste."
+msgstr ""
 
 #: src/ui.py:41
-msgid "Command not recognized:"
-msgstr "Commande non reconnue :"
-
-#: src/ui.py:91
 msgid "Recording started."
-msgstr "Enregistrement commencé."
+msgstr ""
 
-#: src/ui.py:97
+#: src/ui.py:51
 msgid "Recording paused."
-msgstr "Enregistrement en pause."
+msgstr ""
 
-#: src/ui.py:104
+#: src/ui.py:67
 msgid "Recording finished. Text copied."
-msgstr "Enregistrement terminé. Texte copié."
+msgstr ""
 
-#: src/ui.py:155
-#: src/ui.py:180
-msgid "Typed:"
-msgstr "Tapé :"
+#: src/ui.py:81
+msgid "Sleep mode disabled — listening resumed."
+msgstr ""
 
-#: src/ui.py:168
+#: src/ui.py:88
+msgid "Sleep mode enabled — the microphone is released."
+msgstr ""
+
+#: src/ui.py:106
+msgid "Session canceled."
+msgstr ""
+
+#: src/ui.py:114
+msgid "Last word deleted (simulation)."
+msgstr ""
+
+#: src/ui.py:116
+msgid "No text to modify."
+msgstr ""
+
+#: src/ui.py:121
+msgid "New paragraph inserted."
+msgstr ""
+
+#: src/ui.py:125
+msgid "New paragraph added to buffer."
+msgstr ""
+
+#: src/ui.py:127
+msgid "Unknown command:"
+msgstr ""
+
+#: src/ui.py:137
+msgid ""
+"Heard the stop phrase but confidence was low. Repeat it, or use the stop "
+"hotkey / --finalize."
+msgstr ""
+
+#: src/ui.py:156
 msgid "Warning: xdotool failed. Switching to log-only mode."
-msgstr "Avertissement : xdotool a échoué. Passage en mode journal seul."
+msgstr ""
 
-#: src/ui.py:182
+#: src/ui.py:162
+msgid "Typed:"
+msgstr ""
+
+#: src/ui.py:165
 msgid "[Degraded Mode] Added:"
-msgstr "[Mode Dégradé] Ajouté :"
+msgstr ""
 
-#: src/ui.py:189
+#: src/ui.py:236
 msgid "Stopping user interface..."
-msgstr "Arrêt de l'interface utilisateur..."
+msgstr ""
+
