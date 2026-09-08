@@ -6,7 +6,7 @@ A huge thank you for your interest in this project! Every contribution, whether 
 
 This project was born from a unique partnership: it was **architected and driven by a human**, but its execution was greatly accelerated by the **power of several Large Language Models (LLMs)**.
 
-Roles are asymmetric, not interchangeable: Ronan Davalan is the architect and arbiter of every decision; Claude Code (Anthropic) is the systems engineer and principal author of the source code; Gemini (Google DeepMind) is a synthesizer and strategic advisor; DeepSeek V4 Flash, via OpenCode, is called in as an auditor for occasional review of documentation and web copy. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for the full breakdown.
+Roles are asymmetric, not interchangeable: Ronan Davalan is the architect and arbiter of every decision; Claude Code (Anthropic) is the systems engineer and principal author of the source code since v0.5.0-alpha; Gemini (Google) is a synthesizer and strategic advisor; Grok (xAI) is an external validator; GLM-5.3 ran a blind cross-audit of the hardened interaction core; DeepSeek, via OpenCode, is called in as an auditor for occasional review of documentation and web copy. See [CONTRIBUTORS.md](./CONTRIBUTORS.md) for the full breakdown.
 
 We see this not as mere assistance, but as a modern development model where human vision guides the efficiency of AI. We encourage contributions that share this spirit of innovation, experimentation, and effectiveness.
 
@@ -16,7 +16,7 @@ All help is welcome. Here are the best ways to get started:
 
 ### 🐛 Found a Bug?
 
-1.  **Check First!** Take a look at the [Issues](https://github.com/RonanDavalan/projet_vosk/issues) to make sure the bug hasn't already been reported.
+1.  **Check First!** Take a look at the [Issues](https://github.com/RonanDavalan/vosk-cli-dictation/issues) to make sure the bug hasn't already been reported.
 2.  **Open a New Issue.** If the bug is new, please report it with as much detail as possible:
     *   Your Linux distribution and version.
     *   The exact steps to reproduce the problem.
@@ -26,7 +26,7 @@ All help is welcome. Here are the best ways to get started:
 
 All suggestions to improve the tool are welcome!
 
-1.  **Open a [new issue](https://github.com/RonanDavalan/projet_vosk/issues) to start the discussion.**
+1.  **Open a [new issue](https://github.com/RonanDavalan/vosk-cli-dictation/issues) to start the discussion.**
 2.  Describe your idea and explain how it would benefit users.
 
 ### 💻 Want to Contribute Code?

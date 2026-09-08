@@ -22,9 +22,11 @@ This software relies entirely on the following open-source projects. A big thank
 This project was developed using an asymmetric human-LLM collaboration model. Roles are documented formally here to reflect the actual work performed, rather than listing "AI assistance" as a single vague category.
 
 *   **Architect & Arbiter: Ronan Davalan.** Product vision, security requirements, project direction, validation and testing. All architectural decisions are validated by him.
-*   **Systems Engineer & Lead Developer: Claude Code (Anthropic).** Principal author of the source code — thread architecture, state management, configuration system, session persistence.
-*   **Synthesizer & Strategic Advisor: Gemini (Google DeepMind).** Independent architectural analysis, logical conflict resolution, cross-validation of technical decisions.
-*   **Auditor: DeepSeek V4 Flash, via OpenCode.** Occasional review of documentation and web copy — never commits, never decides on architecture.
+*   **Systems Engineer & Lead Developer: Claude Code (Anthropic).** Principal author of the source code since v0.5.0-alpha — ReAct-style control loop, thread architecture, complex state management, configuration and per-language systems, session persistence and the control socket, the Debian packaging, Python and Bash tooling. Up to v0.0.4-alpha, an occasional outside contributor only.
+*   **Synthesizer & Strategic Advisor: Gemini (Google).** Independent architectural analysis, logical conflict resolution, workflow optimisation, cross-validation of technical decisions.
+*   **External Validator: Grok (xAI).** Challenges hypotheses and model coherence from an outside view.
+*   **Auditor — interaction core: GLM-5.3.** Blind cross-audit of the hardening work; flagged the restricted-grammar recognizer for standby and the GIL check.
+*   **Auditor — documentation: DeepSeek (via OpenCode).** Occasional review of documentation and web copy — never commits, never decides architecture.
 
 ## Code and Documentation Contributors
 

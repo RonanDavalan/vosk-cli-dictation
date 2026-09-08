@@ -3,8 +3,8 @@
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
   <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.0--alpha-yellow.svg" alt="Version: v0.5.0-alpha"></a>
-  <a href="#"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
-  <a href="#"><img src="https://img.shields.io/badge/OS-Debian_12-D70A53.svg" alt="Tested on Debian 12"></a>
+  <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/OS-Debian_13-D70A53.svg" alt="Tested on Debian 13"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
 </p>
 
@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img src="assets/images/vosk-cli-dictation_live-demo.gif" alt="Live Demonstration">
+  <a href="https://vosk.davalan.fr/"><strong>▶ Watch the demonstration video on the homepage</strong></a>
 </p>
 
 A powerful and customizable command-line dictation tool for Linux, powered by the Vosk engine. Turn your speech into text directly in your terminal and have it appear in any application.
@@ -41,72 +41,62 @@ This tool was born from the need for a robust, locally-run dictation system on G
 
 ## ⚙️ Getting Started
 
-### 1. System Dependencies
+### Install the Debian package (recommended)
 
-This project was developed and tested on **Debian 12 (Bookworm)**. You will need the following packages:
+On **Debian 13 (Trixie)** and derivatives, install the `.deb` from the
+[downloads page](https://vosk.davalan.fr/) — no manual setup, no virtual
+environment to create:
+
+```bash
+sudo apt install ./vosk-cli-dictation_0.5.0~alpha_all.deb
+```
+
+The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
+
+Then fetch a speech model and start dictating:
+
+```bash
+vosk-cli-dictation --download-model fr   # also: en, de, es
+vosk-cli-dictation -l fr
+```
+
+If you start the tool with no model installed, it offers the download interactively. A missing model is reported, not fatal, as long as one language loads. Downloaded models are verified by SHA256 and stored under `~/.local/share/vosk-models/`.
+
+The package pulls in `xdotool` (X11) or `ydotool` (Wayland fallback) for text injection. For native Wayland, also install the preferred backend:
+
+```bash
+sudo apt install wtype wl-clipboard
+```
+
+`ydotool` needs your user in the `input` group (`sudo usermod -aG input $USER`, then log out and back in); `xdotool` and `wtype` do not. Run `vosk-cli-dictation --diagnose` to see which backend, audio input and clipboard access are available.
+
+> [!NOTE]
+> If `apt` prints a sandbox / `_apt` permission warning, it is because the `.deb` sits under your home directory, which the `_apt` user cannot read. Copy it to `/tmp/` first and install from there. The installation succeeds either way.
+
+### Install from source (for development)
+
+This path runs the code directly from a git checkout.
 
 ```bash
 sudo apt-get update && sudo apt-get install python3-pip python3-venv portaudio19-dev gettext xdotool pulseaudio-utils
-```
+# Wayland, optional: sudo apt-get install wtype wl-clipboard ydotool
 
-For Wayland, install `wtype` and `wl-clipboard` (the preferred backend), and optionally `ydotool` as a fallback:
-
-```bash
-sudo apt-get install wtype wl-clipboard
-# Optional fallback (enable trixie-backports first on Debian Trixie):
-sudo apt-get install ydotool
-sudo usermod -aG input $USER   # for ydotool only; log out and back in to take effect
-```
-
-After installing, `vosk-cli-dictation --diagnose` checks that a working injection backend, an audio input and the clipboard are all available.
-
-### 2. Project Setup
-
-Clone the repository and create the Python virtual environment.
-
-```bash
 git clone https://github.com/RonanDavalan/vosk-cli-dictation.git
 cd vosk-cli-dictation
 python3 -m venv venv
 source venv/bin/activate
-```
-
-### 3. Install Python Dependencies
-
-Install the required Python packages from the `requirements.txt` file.
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 4. Download Language Models
-
-This project requires Vosk language models to function. They are not included in the repository and must be downloaded manually.
-
-1.  **Download the models you need:** We recommend starting with the small models for efficiency. The factory `config.yaml` declares four:
-    *   **English:** [vosk-model-small-en-us-0.15](https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip)
-    *   **French:** [vosk-model-small-fr-0.22](https://alphacephei.com/vosk/models/vosk-model-small-fr-0.22.zip)
-    *   **German:** [vosk-model-small-de-0.15](https://alphacephei.com/vosk/models/vosk-model-small-de-0.15.zip)
-    *   **Spanish:** [vosk-model-small-es-0.42](https://alphacephei.com/vosk/models/vosk-model-small-es-0.42.zip)
-
-    You only need the ones you will actually use; a missing model is reported at startup, not fatal, as long as one language loads.
-
-2.  **Unzip and place them correctly:** After unzipping, the model folders (e.g., `vosk-model-small-fr-0.22`) must be placed directly inside the `vosk-model/` directory of the project.
-
-### 5. Launch The Application
-
-With the virtual environment still active, run the main script.
+Fetch a model and run the script:
 
 ```bash
-# To run with the French model (default in config)
-python3 src/main.py
-
-# To explicitly run with another language
-python3 src/main.py -l en      # also: fr, de, es
-
-# To check that the environment is ready, without starting a session
-python3 src/main.py --diagnose
+python3 src/main.py --download-model fr   # also: en, de, es
+python3 src/main.py -l fr                 # default language comes from config.yaml
+python3 src/main.py --diagnose            # check the environment without starting a session
 ```
+
+Models downloaded this way also land in `~/.local/share/vosk-models/`. As a fallback, a model folder (e.g. `vosk-model-small-fr-0.22`) dropped directly inside the project's `vosk-model/` directory is picked up too.
 
 Only one session runs per user at a time; a second launch is refused and points you at `--status`.
 
