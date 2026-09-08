@@ -12,6 +12,8 @@ vosk-cli-dictation - Offline-Spracherkennung für die Kommandozeile, systemweit 
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--download-model** [*LANG*]
+
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
 
 # BESCHREIBUNG
@@ -25,7 +27,7 @@ Die Diktierfunktion wird entweder per Sprache (eine konfigurierbare, sprachspezi
 Es läuft jeweils nur eine Sitzung pro Benutzer gleichzeitig. Sie öffnet eine private Unix-Socket-Verbindung an `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (Modus `0600`); derselbe Befehl, der mit einem Kontrollflag aufgerufen wird (siehe "EINE LAUFENDE SITZEUNG STEUEERN"), verbindet sich mit dieser Socket-Verbindung anstatt eine neue Sitzung zu starten.
 
 Text wird injiziert, indem es in die Zwischenablage kopiert und ein Einfügen simuliert wird.
-Unter Wayland werden **wtype** und **wl-clipboard** verwendet, wobei auf **ydotool** zurückgegriffen wird (welches den `ydotoold` Daemon und Zugriff auf `/dev/uinput` benötigt). Unter X11 wird **xdotool** verwendet. Mindestens ein Backend für den aktuellen Sitzungstyp muss installiert sein. **vosk-cli-dictation \--diagnose**
+Unter Wayland werden **wtype** und **wl-clipboard** verwendet, wobei auf **ydotool** zurückgegriffen wird (welches den `ydotoold` Daemon und Zugriff auf `/dev/uinput` benötigt). Unter X11 wird **xdotool** verwendet. Mindestens ein Backend für den aktuellen Sitzungstyp muss installiert sein. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
 zeigt, welche Tools, Audio-Geräte und Zwischenablage-Zugriff verfügbar sind, und beendet dann das Programm.
 
 Globale Hotkeys über `pynput` funktionieren nur unter einer reinen X11-Sitzung;
@@ -43,6 +45,12 @@ unter nativem Wayland sollten Sie die Kontroll-Unterbefehle stattdessen an die e
 :   Überprüfen Sie die Umgebung (Sitzungstyp, Injektions-Backend, Tools, Modelle,
     Audioeingabe, Zwischenablage, Kontrollsocket) und beenden Sie das Programm. Der Exit-Status ist `0`
     wenn alle Prüfungen erfolgreich sind.
+
+**\--download-model** [*LANG*]
+:   Lädt das kleine Vosk-Modell für *LANG* (oder die aktuelle Sprache, wenn
+    nicht angegeben) nach `~/.local/share/vosk-models/` herunter, prüft dessen
+    Prüfsumme und beendet sich dann. Beim ersten Start wird ein Modell auch
+    interaktiv angeboten, wenn keines installiert ist.
 
 # STEUERUNG EINER LAUFENDEN SITZUNG
 

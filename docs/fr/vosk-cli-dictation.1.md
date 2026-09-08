@@ -12,6 +12,8 @@ vosk-cli-dictation - dictée vocale hors ligne, disponible pour tout le système
 
 vosk-cli-dictation **\--diagnose**
 
+vosk-cli-dictation **\--download-model** [*LANG*]
+
 vosk-cli-dictation {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
 
 # DESCRIPTION
@@ -27,7 +29,7 @@ Une seule session s'exécute par utilisateur à la fois. Elle ouvre une socket U
 utilisée avec un indicateur de contrôle (voir GÉRER UNE SESSION EN COURS) se connecte
 à cette socket au lieu de démarrer une nouvelle session.
 
-Sous Wayland, cela utilise **wtype** et **wl-clipboard**, avec une solution de repli vers **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`). Sous X11, cela utilise **xdotool**. Au moins un backend pour le type de session actuel doit être installé. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
+Sous Wayland, cela utilise **wtype** et **wl-clipboard**, avec une solution de repli vers **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`). Sous X11, cela utilise **xdotool**. Au moins un backend pour le type de session actuel doit être installé. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
 
 Les raccourcis globaux via `pynput` ne fonctionnent que dans une session X11 standard ;
 sur Wayland natif, associez les sous-commandes de contrôle aux propres paramètres de raccourcis de votre environnement de bureau.
@@ -44,6 +46,12 @@ sur Wayland natif, associez les sous-commandes de contrôle aux propres paramèt
 :   Vérifiez l'environnement (type de session, backend d'injection, outils, modèles,
     entrée audio, presse-papiers, socket de contrôle) et quittez. Le code de sortie est `0`
     lorsque toutes les vérifications sont réussies.
+
+**\--download-model** [*LANG*]
+:   Télécharge le petit modèle Vosk pour *LANG* (ou la langue courante si
+    l'argument est omis) dans `~/.local/share/vosk-models/`, en vérifiant sa
+    somme de contrôle, puis se termine. Un modèle est également proposé de
+    façon interactive au premier lancement si aucun n'est installé.
 
 # GESTION D'UNE SESSION EN COURS
 

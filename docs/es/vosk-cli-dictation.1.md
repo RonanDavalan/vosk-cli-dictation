@@ -12,6 +12,8 @@ vosk-cli-dictation: dictado de voz sin conexión para la línea de comandos, dis
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--download-model** [*LANG*]
+
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
 
 # DESCRIPCIÓN
@@ -28,7 +30,7 @@ invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN EJECUCIÓN) 
 Se inyecta el texto pegándolo desde el portapapeles.
 Bajo Wayland, esto utiliza **wtype** y **wl-clipboard**, recurriendo a
 **ydotool** (que necesita el demonio `ydotoold` y acceso a
-`/dev/uinput`). Bajo X11, utiliza **xdotool**. Debe estar instalado al menos un backend para el tipo de sesión actual. **vosk-cli-dictation \--diagnose**
+`/dev/uinput`). Bajo X11, utiliza **xdotool**. Debe estar instalado al menos un backend para el tipo de sesión actual. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
 informa qué herramientas, dispositivo de audio y acceso al portapapeles están disponibles, y luego finaliza.
 
 Las combinaciones de teclas globales a través de `pynput` solo son efectivas en una sesión X11 estándar;
@@ -46,6 +48,12 @@ en Wayland nativo, vincule los subcomandos de control a la configuración de acc
 :   Verifique el entorno (tipo de sesión, backend de inyección, herramientas, modelos,
     entrada de audio, portapapeles, socket de control) y salga. El código de salida es `0`
     cuando todas las verificaciones se aprueban.
+
+**\--download-model** [*LANG*]
+:   Descarga el modelo pequeño de Vosk para *LANG* (o el idioma actual si se
+    omite) en `~/.local/share/vosk-models/`, verificando su suma de
+    comprobación, y luego sale. También se ofrece un modelo de forma
+    interactiva en el primer inicio cuando no hay ninguno instalado.
 
 # CONTROLANDO UNA SESIÓN EN CURSO
 

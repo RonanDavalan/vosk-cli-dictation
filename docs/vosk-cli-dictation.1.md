@@ -12,6 +12,8 @@ vosk-cli-dictation - offline, system-wide voice dictation for the command line
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--download-model** [*LANG*]
+
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
 
 # DESCRIPTION
@@ -41,7 +43,9 @@ Text is injected by placing it on the clipboard and simulating a paste.
 Under Wayland this uses **wtype** and **wl-clipboard**, falling back to
 **ydotool** (which needs the `ydotoold` daemon and access to
 `/dev/uinput`). Under X11 it uses **xdotool**. At least one backend for the
-current session type must be installed. **vosk-cli-dictation \--diagnose**
+current session type must be installed. Adding your user to the `input`
+group is required only for the **ydotool** fallback; **wtype** and
+**xdotool** do not need it. **vosk-cli-dictation \--diagnose**
 reports which tools, audio device and clipboard access are present, then
 exits.
 
@@ -61,6 +65,12 @@ shortcut settings instead.
 :   Check the environment (session type, injection backend, tools, models,
     audio input, clipboard, control socket) and exit. Exit status is `0`
     when every check passes.
+
+**\--download-model** [*LANG*]
+:   Download the small Vosk model for *LANG* (or the current language when
+    omitted) into `~/.local/share/vosk-models/`, verifying its checksum,
+    then exit. A model is also offered interactively on the first run when
+    none is installed.
 
 # CONTROLLING A RUNNING SESSION
 
