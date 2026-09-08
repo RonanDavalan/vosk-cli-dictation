@@ -37,6 +37,18 @@ def print_status(message, color):
     """Print status message with color."""
     print(f"{color}{message}")
 
+# Glyphes typographiques que la plupart des terminaux rendent sur deux cellules
+# (largeur « ambiguë » Est-asiatique) : guillemets courbes, chevrons, tirets
+# cadratin / demi-cadratin, points de suspension, ponctuation espagnole ouvrante.
+# Ils apparaissent dans les libellés de la section `punctuation` des configs
+# fr/de/es/en. `len()` les compte pour 1, ce qui décalait la seconde colonne du
+# tableau d'aide en escalier ; on les compte pour 2 dans le calcul de largeur.
+_WIDE_GLYPHS = set("„“”‘’«»—–…¡¿")
+
+def _display_width(text):
+    """Largeur d'affichage de `text` en cellules de terminal (voir _WIDE_GLYPHS)."""
+    return sum(2 if ch in _WIDE_GLYPHS else 1 for ch in text)
+
 def print_help_message():
     """
     Print a structured and logically grouped help message.
@@ -72,19 +84,21 @@ def print_help_message():
 
         # AFFICHE DYNAMIQUEMENT TOUTES les commandes de ponctuation de la config,
         # triées par ordre alphabétique. La largeur de colonne suit le libellé le
-        # plus large de la langue courante (un 35 fixe débordait en allemand et en
-        # espagnol, décalant la colonne de droite en escalier). Si une paire ne
-        # tient pas dans 80 colonnes, on passe à une seule colonne.
+        # plus large de la langue courante, mesuré en cellules d'affichage
+        # (`_display_width`, pas `len()` : un `„` ou un `—` occupe deux cellules
+        # dans un terminal et décalait la colonne de droite en escalier). Si une
+        # paire ne tient pas dans 80 colonnes, on passe à une seule colonne.
         entries = [
             f"{cmd} ({repr(all_punctuation_cmds[cmd]).strip('/')})"
             for cmd in sorted(all_punctuation_cmds.keys())
         ]
-        widest = max((len(e) for e in entries), default=0)
+        widest = max((_display_width(e) for e in entries), default=0)
         if widest * 2 + 4 <= 80:
             col_width = widest + 2
             for i in range(0, len(entries), 2):
-                line_str = "  " + entries[i].ljust(col_width)
+                line_str = "  " + entries[i]
                 if i + 1 < len(entries):
+                    line_str += " " * (col_width - _display_width(entries[i]))
                     line_str += entries[i + 1]
                 print_status(line_str.rstrip(), config.color_help_text)
         else:
