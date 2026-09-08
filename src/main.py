@@ -35,8 +35,8 @@ CONTROL_FLAGS = [
 ]
 
 def print_status(message, color):
-    """Print status message with color."""
-    print(f"{color}{message}")
+    """Print status message with color, restoring the terminal default after."""
+    print(f"{color}{message}{config.RESET}")
 
 # Glyphes typographiques que la plupart des terminaux rendent sur deux cellules
 # (largeur « ambiguë » Est-asiatique) : guillemets courbes, chevrons, tirets
@@ -104,7 +104,7 @@ def print_help_message():
         # dans un terminal et décalait la colonne de droite en escalier). Si une
         # paire ne tient pas dans 80 colonnes, on passe à une seule colonne.
         entries = [
-            f"{cmd} ({repr(all_punctuation_cmds[cmd]).strip('/')})"
+            f"{cmd} ({repr(all_punctuation_cmds[cmd])[1:-1]})"
             for cmd in sorted(all_punctuation_cmds.keys())
         ]
         widest = max((_display_width(e) for e in entries), default=0)

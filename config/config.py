@@ -126,9 +126,12 @@ class Config:
         }
 
         user_theme = self.data.get('theme', {})
+        # La couleur ne marque que les accents (titres, bandeau « prêt ») ; le
+        # corps du texte prend la couleur par défaut du terminal via `RESET`,
+        # lisible sur thème clair comme sombre. `BLUE` proscrit pour du courant.
         defaults = {
-            'ready_message': 'GREEN', 'help_text': 'BLUE', 'help_title': 'CYAN',
-            'info': 'BLUE', 'success': 'GREEN', 'warning': 'YELLOW', 'error': 'RED',
+            'ready_message': 'GREEN', 'help_text': 'RESET', 'help_title': 'CYAN',
+            'info': 'RESET', 'success': 'GREEN', 'warning': 'YELLOW', 'error': 'RED',
         }
 
         # Dynamically create attributes like self.color_ready_message

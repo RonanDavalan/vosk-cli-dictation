@@ -300,11 +300,16 @@ hotkeys:
 
 sound_file: "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
 
+# La couleur ne marque que les accents : titres de section et bandeau « prêt ».
+# Le corps du texte (`help_text`, `info`) prend la couleur par défaut du
+# terminal via `RESET`, ce qui reste lisible sur un thème clair comme sombre.
+# `BLUE` (ANSI 4) est proscrit pour du texte courant : illisible ou viré au
+# violet selon le thème.
 theme:
   ready_message: "GREEN"
-  help_text: "BLUE"
+  help_text: "RESET"
   help_title: "CYAN"
-  info: "BLUE"
+  info: "RESET"
   success: "GREEN"
   warning: "YELLOW"
   error: "RED"
