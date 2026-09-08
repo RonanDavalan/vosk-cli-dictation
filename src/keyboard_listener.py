@@ -2,6 +2,7 @@
 
 import os
 import queue
+import textwrap
 from config.config import config
 from src.i18n import get_translation
 
@@ -19,9 +20,8 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
 
     session = os.environ.get("XDG_SESSION_TYPE", "").lower()
     if session != "x11" or not config.hotkeys.get('pynput_enabled', True):
-        print(f"{config.color_info}"
-              f"{_('Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts.')}"
-              f"{config.RESET}")
+        notice = _('Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts.')
+        print(f"{config.color_info}{textwrap.fill(notice, width=76)}{config.RESET}")
         stop_event.wait()
         return
 

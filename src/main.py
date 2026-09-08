@@ -70,26 +70,26 @@ def print_help_message():
             if isinstance(section, dict):
                 all_punctuation_cmds.update(section)
 
-        # AFFICHE DYNAMIQUEMENT TOUTES les commandes de ponctuation de la config, triées
-        # par ordre alphabétique et sur deux colonnes pour la lisibilité.
-        display_commands = sorted(all_punctuation_cmds.keys())
-        col_width = 35
-        for i in range(0, len(display_commands), 2):
-            line_str = "  "
-            # Colonne 1
-            cmd1 = display_commands[i]
-            symbol1 = all_punctuation_cmds[cmd1]
-            display_entry1 = f"{cmd1} ({repr(symbol1).strip('/')})"
-            line_str += display_entry1.ljust(col_width)
-
-            # Colonne 2 (si elle existe)
-            if i + 1 < len(display_commands):
-                cmd2 = display_commands[i + 1]
-                symbol2 = all_punctuation_cmds[cmd2]
-                display_entry2 = f"{cmd2} ({repr(symbol2).strip('/')})"
-                line_str += display_entry2
-
-            print_status(line_str, config.color_help_text)
+        # AFFICHE DYNAMIQUEMENT TOUTES les commandes de ponctuation de la config,
+        # triées par ordre alphabétique. La largeur de colonne suit le libellé le
+        # plus large de la langue courante (un 35 fixe débordait en allemand et en
+        # espagnol, décalant la colonne de droite en escalier). Si une paire ne
+        # tient pas dans 80 colonnes, on passe à une seule colonne.
+        entries = [
+            f"{cmd} ({repr(all_punctuation_cmds[cmd]).strip('/')})"
+            for cmd in sorted(all_punctuation_cmds.keys())
+        ]
+        widest = max((len(e) for e in entries), default=0)
+        if widest * 2 + 4 <= 80:
+            col_width = widest + 2
+            for i in range(0, len(entries), 2):
+                line_str = "  " + entries[i].ljust(col_width)
+                if i + 1 < len(entries):
+                    line_str += entries[i + 1]
+                print_status(line_str.rstrip(), config.color_help_text)
+        else:
+            for entry in entries:
+                print_status("  " + entry, config.color_help_text)
 
     print(separator)
     print_status(_("Press Ctrl+C to exit the program."), config.color_help_text)
@@ -275,7 +275,17 @@ def main():
     except (ValueError, OSError):
         pass
 
-    ready_message = _("The script is ready. Current model: {model_name}").format(model_name=loaded_model_name.upper())
+    # Où l'outil a réellement trouvé le modèle et la config, pour éviter d'avoir
+    # à se rappeler ~/.local/share contre ~/.config, et pour les rapports de bug.
+    model_path = config.get_model_path_by_name(loaded_model_name)
+    if model_path:
+        print_status(_("Model directory: {path}").format(path=model_path), config.color_info)
+    config_line = _("Config file in use: {path}").format(path=config.config_path)
+    if config.local_config_path:
+        config_line += f"  (+ {os.path.basename(config.local_config_path)})"
+    print_status(config_line, config.color_info)
+
+    ready_message = _("The script is ready. Current model: {model_name}").format(model_name=loaded_model_name)
     print_status(ready_message, config.color_ready_message)
     print_help_message()
 

@@ -511,3 +511,7 @@ msgstr "[Mode Dégradé] Ajouté :"
 msgid "Stopping user interface..."
 msgstr "Arrêt de l'interface utilisateur..."
 
+#: src/main.py:284
+msgid "Model directory: {path}"
+msgstr "Répertoire du modèle : {path}"
+

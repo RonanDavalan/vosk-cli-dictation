@@ -511,3 +511,7 @@ msgstr "[Eingeschränkter Modus] Hinzugefügt:"
 msgid "Stopping user interface..."
 msgstr "Benutzeroberfläche wird beendet..."
 
+#: src/main.py:284
+msgid "Model directory: {path}"
+msgstr "Modellverzeichnis: {path}"
+

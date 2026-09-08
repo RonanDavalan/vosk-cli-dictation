@@ -529,3 +529,7 @@ msgstr ""
 msgid "Stopping user interface..."
 msgstr ""
 
+#: src/main.py:284
+msgid "Model directory: {path}"
+msgstr ""
+
