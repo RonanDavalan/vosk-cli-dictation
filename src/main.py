@@ -8,6 +8,7 @@ import atexit
 import argparse
 import select
 import signal
+import textwrap
 import vosk
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,6 +50,16 @@ def _display_width(text):
     """Largeur d'affichage de `text` en cellules de terminal (voir _WIDE_GLYPHS)."""
     return sum(2 if ch in _WIDE_GLYPHS else 1 for ch in text)
 
+def _wrap_help_line(text, width=74):
+    """Replie une ligne d'aide à puce (« - … ») pour tenir dans un terminal de
+    80 colonnes, les lignes de continuation alignées sous le texte de la puce.
+    `width` reste sous 80 pour absorber les glyphes larges que `textwrap` compte
+    pour un (les chevrons « » des libellés fr/de)."""
+    return textwrap.fill(
+        text, width=width, subsequent_indent="    ",
+        break_long_words=False, break_on_hyphens=False,
+    )
+
 def print_help_message():
     """
     Print a structured and logically grouped help message.
@@ -64,9 +75,13 @@ def print_help_message():
     toggle_hotkey = config.hotkeys['toggle_recording']['display_name']
     finalize_hotkey = config.hotkeys['finalize_session']['display_name']
 
-    print_status(_("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey), config.color_help_text)
-    print_status(_("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey), config.color_help_text)
-    print_status(_("  - Hotkeys are X11-only and reach the focused window; use --finalize."), config.color_help_text)
+    intro_lines = (
+        _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
+        _("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
+        _("  - Hotkeys are X11-only and reach the focused window; use --finalize."),
+    )
+    for line in intro_lines:
+        print_status(_wrap_help_line(line), config.color_help_text)
 
     print_status(_("\n{style}  Manual commands:{reset}").format(style=title_style, reset=config.RESET), config.color_help_text)
     print_status(_("  - '/cancel', '/delete-word', '/nl'"), config.color_help_text)
