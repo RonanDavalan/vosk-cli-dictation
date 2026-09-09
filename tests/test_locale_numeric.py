@@ -9,10 +9,16 @@
 
 import json
 import locale
+import queue
+import threading
+import time
 
 import pytest
 
 import src.recognition as rec
+from config.config import config
+from src.recognition import MODE_STOP
+from src.runtime_state import runtime_state, STATE_DICTATING
 
 _COMMA_LOCALES = ("fr_FR.UTF-8", "fr_FR.utf8", "de_DE.UTF-8", "de_DE.utf8")
 
@@ -96,3 +102,116 @@ def test_build_recognizer_forces_c_locale_before_creating_the_kaldi_recognizer(m
     rec.build_recognizer(object(), rec.MODE_FULL)
 
     assert seen["decimal_point"] == "."
+
+
+class _LocaleSensitiveRec:
+    """Recognizer bouché qui sérialise ses flottants selon la locale numérique
+    du moment — comme Vosk/Kaldi. Sous une locale à virgule, Result() renvoie du
+    JSON invalide ; sous « C », du JSON valide."""
+
+    def __init__(self, texts):
+        self.texts = texts
+        self.calls = 0
+
+    def AcceptWaveform(self, data):
+        self.calls += 1
+        return True
+
+    def _floats(self):
+        dp = locale.localeconv()["decimal_point"]
+        return f'"conf" : 0{dp}82, "start" : 1{dp}5, "end" : 2{dp}0'
+
+    def Result(self):
+        i = min(self.calls - 1, len(self.texts) - 1)
+        return ('{\n  "result" : [{ ' + self._floats()
+                + ', "word" : "' + self.texts[i] + '" }],\n'
+                + '  "text" : "' + self.texts[i] + '"\n}')
+
+    def PartialResult(self):
+        return json.dumps({"partial": ""})
+
+    def Reset(self):
+        pass
+
+    def SetWords(self, flag):
+        pass
+
+
+class _SilentStopRec:
+    """Recognizer d'arrêt bouché : ne déclenche jamais."""
+
+    def AcceptWaveform(self, data):
+        return False
+
+    def PartialResult(self):
+        return json.dumps({"partial": ""})
+
+    def Result(self):
+        return json.dumps({"text": "", "result": []})
+
+    def Reset(self):
+        pass
+
+    def SetWords(self, flag):
+        pass
+
+
+def test_recognition_loop_guards_a_late_locale_flip(monkeypatch):
+    # L'essai de Ronan sur `ada` (09/09 soir) : LC_NUMERIC bascule sur une
+    # virgule APRÈS build_recognizer(). La garde par trame de la boucle de
+    # reconnaissance neutralise la locale avant chaque Result() : aucun final
+    # n'est perdu, aucune json.JSONDecodeError.
+    name = _set_a_comma_locale()
+    if name is None:
+        pytest.skip("aucune locale à virgule décimale installée sur ce système")
+
+    config.set_language("fr")
+    texts = ["un", "deux", "trois", "quatre"]
+    fake = _LocaleSensitiveRec(texts)
+    stop_fake = _SilentStopRec()
+    monkeypatch.setattr(
+        rec, "build_recognizer",
+        lambda model, mode: stop_fake if mode == MODE_STOP else fake,
+    )
+
+    audio_q = queue.Queue(maxsize=64)
+    text_q = queue.Queue(maxsize=64)
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    display = threading.Event()
+    wake = threading.Event()
+    wake.set()
+
+    runtime_state.set_state(STATE_DICTATING)
+    runtime_state._last_transition = 0.0
+    for _ in range(len(texts)):
+        audio_q.put_nowait(b"\x00\x00")
+
+    # La locale est déjà à la virgule au démarrage du thread (flip « tardif »).
+    assert locale.localeconv()["decimal_point"] == ","
+
+    t = threading.Thread(
+        target=rec.recognition_thread,
+        args=(object(), fake, audio_q, text_q, ctrl_q, stop, display, wake),
+        daemon=True,
+    )
+    t.start()
+    time.sleep(0.4)
+
+    assert not stop.is_set()
+    forwarded = [txt for txt, _w in _drain(text_q)]
+    assert forwarded == texts  # tous les finaux remontés, aucun perdu
+
+    stop.set()
+    wake.set()
+    t.join(timeout=2.0)
+
+
+def _drain(q):
+    out = []
+    try:
+        while True:
+            out.append(q.get_nowait())
+    except queue.Empty:
+        pass
+    return out

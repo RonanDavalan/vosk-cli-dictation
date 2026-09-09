@@ -33,12 +33,16 @@ def force_c_numeric_locale():
     """Chantier stabilité v0.5.1 : Vosk/Kaldi sérialise les flottants de
     `SetWords(True)` avec le séparateur décimal de `LC_NUMERIC`. Sous une locale
     à virgule — `ada` a `LC_ALL=fr_FR.UTF-8` — `Result()` rend
-    « "conf" : 1,000000 », JSON invalide, et `json.loads` casse à chaque final
-    avec mots (`neo`, en locale `C`, ne l'a jamais vu). On force `LC_NUMERIC` du
-    processus à « C ». Appelé au démarrage (`src/main.py`) et défensivement ici
-    avant chaque `KaldiRecognizer` : `Model()` ou une dépendance peut avoir
-    reposé la locale depuis le démarrage. Idempotent, sans effet si la locale
-    est déjà neutre."""
+    « "conf" : 0,822848 », JSON invalide, et `json.loads` casse (`neo`, en
+    locale « C », ne l'a jamais vu).
+
+    Appelé au démarrage (`src/main.py`), dans `build_recognizer()`, et — parce
+    que l'essai interactif de Ronan sur `ada` (09/09 soir) a montré un
+    basculement de `LC_NUMERIC` vers la virgule APRÈS le dernier
+    `build_recognizer()`, d'une source non identifiée et une seule fois tôt dans
+    la session — juste avant chaque `Result()`/`PartialResult()` de la boucle de
+    reconnaissance. Idempotent, coût d'un `setlocale` (négligeable), sans effet
+    si la locale est déjà neutre."""
     try:
         locale.setlocale(locale.LC_NUMERIC, "C")
     except locale.Error:
@@ -355,6 +359,18 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             if state == STATE_DICTATING and time.monotonic() < discard_until:
                 clear_partial()
                 continue
+
+            # Chantier stabilité v0.5.1 : garde par trame. L'essai interactif de
+            # Ronan sur `ada` le 09/09 au soir montre que LC_NUMERIC bascule sur
+            # une virgule APRÈS le dernier build_recognizer() — source non
+            # identifiée, une seule fois, tôt dans la session. Sans cette ligne,
+            # le premier final avec mots casse (json.loads sur « "conf" :
+            # 0,822848 »), la couche de reprise reconstruit le recognizer et se
+            # rétablit — mais l'utilisateur voit un message d'erreur et perd un
+            # final. On neutralise la locale numérique juste avant chaque
+            # Result()/PartialResult() de la boucle : coût d'un setlocale par
+            # trame (~microsecondes), plus aucune trame perdue.
+            force_c_numeric_locale()
 
             t0 = time.perf_counter()
             is_final = recognizer.AcceptWaveform(data)
