@@ -42,11 +42,12 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         # sinon on ouvre une DICTÉE fantôme sur un périphérique fermé. La garde
         # est portée ici pour qu'aucun chemin d'appel (TOGGLE_RECORDING,
         # DICTATION_ON, /nl) ne puisse la contourner.
+        woke_from_sleep = False
         if sleep_event.is_set():
             sleep_event.clear()
             wake_event.set()
             runtime_state.set_state(STATE_LISTENING)
-            print(f"\n{config.color_success}{_('Sleep mode disabled — listening resumed.')}{config.RESET}")
+            woke_from_sleep = True
         recording = True
         runtime_state.set_state(STATE_DICTATING)
         display_partials_event.set()
@@ -54,7 +55,14 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         xdotool_failed_once = False
         processor.reset_state()
         # UPDATE: Use theme colors from config
-        print(f"\n{config.color_success}{_('Recording started.')}{config.RESET}")
+        # Chantier stabilité v0.5.1, défaut 3 (révision 09/09 soir) : sur une
+        # sortie de veille implicite, une seule ligne cohérente au lieu de
+        # « veille désactivée » suivi de « enregistrement démarré » — deux
+        # messages qui se lisent comme contradictoires (Ronan, 09/09 sur neo).
+        if woke_from_sleep:
+            print(f"\n{config.color_success}{_('Waking from sleep; recording started.')}{config.RESET}")
+        else:
+            print(f"\n{config.color_success}{_('Recording started.')}{config.RESET}")
         play_sound()
 
     def stop_recording():

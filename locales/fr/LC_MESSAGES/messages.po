@@ -594,3 +594,19 @@ msgstr "[Mode Dégradé] Ajouté :"
 msgid "Stopping user interface..."
 msgstr "Arrêt de l'interface utilisateur..."
 
+
+#: src/recognition.py
+msgid "Malformed decoder output captured:"
+msgstr "Sortie du décodeur non conforme capturée :"
+
+#: src/recognition.py
+msgid ""
+"The recognition engine is not recovering; ending the session. Please restart "
+"the tool."
+msgstr ""
+"Le moteur de reconnaissance ne se rétablit pas ; fin de la session. Relancez "
+"l'outil."
+
+#: src/ui.py
+msgid "Waking from sleep; recording started."
+msgstr "Réveil depuis la veille ; enregistrement démarré."

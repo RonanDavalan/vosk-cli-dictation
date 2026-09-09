@@ -4,6 +4,7 @@ import json
 import queue
 import os
 import time
+import datetime
 from vosk import Model, KaldiRecognizer
 from config.config import config
 from src.i18n import get_translation
@@ -16,6 +17,54 @@ from src.voice_commands import (
 
 MODE_FULL = "full"
 MODE_LISTENING = "listening"
+
+# Chantier stabilité v0.5.1, défaut 1 (révision 09/09 soir). Une trame malformée
+# ne tue plus le thread : on reconstruit le recognizer. Mais si la
+# reconstruction ne rétablit rien — cas observé sur `ada`, json.JSONDecodeError
+# à chaque trame, Reset() sans effet — on ne boucle pas indéfiniment : au-delà
+# de DECODE_ERROR_MAX_CONSECUTIVE trames en échec d'affilée, le thread pose
+# stop_event et termine la session proprement. Tout décodage réussi remet le
+# compteur à zéro.
+DECODE_ERROR_MAX_CONSECUTIVE = 5
+
+
+def _diagnostics_dir() -> str:
+    """Répertoire d'écriture des captures de diagnostic (chaîne Result() fautive).
+
+    Jamais /tmp, jamais le dépôt de code. Ordre de préférence :
+    1. $VOSK_CLI_DIAG_DIR s'il est défini ;
+    2. `scripts/diagnostics/` du répertoire tampon, à côté du dépôt de code, s'il
+       existe déjà (cas du poste de développement) ;
+    3. `~/.local/state/vosk-cli-dictation/diagnostics/` (cas paquet installé).
+    """
+    env = os.environ.get("VOSK_CLI_DIAG_DIR")
+    if env:
+        return env
+    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    tampon_scripts = os.path.join(os.path.dirname(repo_root), "scripts")
+    if os.path.isdir(tampon_scripts):
+        return os.path.join(tampon_scripts, "diagnostics")
+    base = os.environ.get("XDG_STATE_HOME") or os.path.expanduser("~/.local/state")
+    return os.path.join(base, "vosk-cli-dictation", "diagnostics")
+
+
+def _capture_malformed_result(raw: str) -> str:
+    """Écrit la chaîne brute renvoyée par Result()/PartialResult() qui n'a pas
+    pu être parsée en JSON. Retourne le chemin écrit, ou '' si l'écriture a
+    échoué. Tronque à 1 Kio."""
+    snippet = raw[:1024] if isinstance(raw, str) else repr(raw)[:1024]
+    try:
+        d = _diagnostics_dir()
+        os.makedirs(d, exist_ok=True)
+        stamp = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        path = os.path.join(d, f"vosk-result-malforme_{stamp}.txt")
+        with open(path, "w", encoding="utf-8") as fh:
+            fh.write(snippet)
+        return path
+    except Exception:
+        return ""
+
+
 # Chantier 7 bis : recognizer secondaire en DICTÉE, grammaire restreinte à la
 # phrase d'arrêt. Détection d'arrêt de haute confiance, indépendante du garde
 # de confiance sur le recognizer complet.
@@ -131,6 +180,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # plus une fois toutes les DECODE_ERROR_THROTTLE_S secondes.
     last_decode_error_warning = 0.0
     DECODE_ERROR_THROTTLE_S = 5.0
+    # Trames en échec de décodage consécutives (remis à zéro par tout décodage
+    # réussi) et capture unique de la chaîne fautive pour la session.
+    consecutive_decode_errors = 0
+    malformed_result_captured = False
 
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
@@ -317,6 +370,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
             if is_final:
                 result_dict = json.loads(recognizer.Result())
+                consecutive_decode_errors = 0
                 text = result_dict.get("text", "")
                 words = result_dict.get("result", [])
 
@@ -350,6 +404,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     clear_partial()
             else:
                 partial_dict = json.loads(recognizer.PartialResult())
+                consecutive_decode_errors = 0
                 partial_text = partial_dict.get("partial", "").strip()
 
                 # R1 (28/08 soir) : plus de réveil sur les partiels. La
@@ -370,25 +425,51 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         except queue.Empty:
             continue
         except Exception as e:
-            # Chantier stabilité v0.5.1, défaut 1 : une erreur ponctuelle sur
-            # une trame — au premier chef une json.JSONDecodeError sur
-            # Result()/PartialResult() — ne termine plus le décodage pour la vie
-            # du processus. On la journalise à cadence fixe, on repart d'un
-            # recognizer propre (reconstruction complète si Reset échoue), puis
-            # on continue. Le seul break de cette boucle est la condition du
-            # while (stop_event).
+            # Chantier stabilité v0.5.1, défaut 1 (révision 09/09 soir). Une
+            # erreur sur une trame — au premier chef une json.JSONDecodeError sur
+            # Result()/PartialResult() — ne termine plus le décodage. On
+            # reconstruit le recognizer : Reset() seul s'est montré sans effet
+            # sur `ada` (erreur à chaque trame). Si les échecs s'enchaînent
+            # au-delà de DECODE_ERROR_MAX_CONSECUTIVE, la reconstruction ne
+            # rétablit rien : on pose stop_event et on termine la session
+            # proprement plutôt que de boucler à vide. Tout décodage réussi a
+            # remis consecutive_decode_errors à zéro plus haut.
             clear_partial()
+            consecutive_decode_errors += 1
+
+            if isinstance(e, json.JSONDecodeError) and not malformed_result_captured:
+                malformed_result_captured = True
+                raw = getattr(e, "doc", "") or ""
+                path = _capture_malformed_result(raw)
+                where = f" — {path}" if path else ""
+                print(f"\n{config.color_error}"
+                      f"{_('Malformed decoder output captured:')} {raw[:200]!r}{where}"
+                      f"{config.RESET}")
+
             now = time.monotonic()
             if now - last_decode_error_warning >= DECODE_ERROR_THROTTLE_S:
                 last_decode_error_warning = now
                 print(f"\n{config.color_error}"
                       f"{_('Recognition error on a frame (recovering):')} {e}"
                       f"{config.RESET}")
+
+            if consecutive_decode_errors >= DECODE_ERROR_MAX_CONSECUTIVE:
+                print(f"\n{config.color_error}"
+                      f"{_('The recognition engine is not recovering; ending the session. Please restart the tool.')}"
+                      f"{config.RESET}")
+                stop_event.set()
+                break
+
             try:
-                recognizer.Reset()
+                recognizer = build_recognizer(model, current_mode or MODE_FULL)
             except Exception:
                 try:
-                    recognizer = build_recognizer(model, current_mode or MODE_FULL)
+                    recognizer.Reset()
+                except Exception:
+                    pass
+            if stop_rec is not None:
+                try:
+                    stop_rec = build_recognizer(model, MODE_STOP)
                 except Exception:
                     pass
             continue

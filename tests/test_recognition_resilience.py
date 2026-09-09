@@ -10,11 +10,20 @@ import queue
 import threading
 import time
 
+import pytest
+
 import src.main as appmain
 import src.recognition as rec
 from config.config import config
 from src.recognition import MODE_STOP
 from src.runtime_state import runtime_state, STATE_DICTATING
+
+
+@pytest.fixture(autouse=True)
+def _diag_dir_to_tmp(tmp_path, monkeypatch):
+    # Les captures de chaîne fautive ne doivent jamais toucher le vrai
+    # répertoire de diagnostic pendant les tests.
+    monkeypatch.setenv("VOSK_CLI_DIAG_DIR", str(tmp_path / "diag"))
 
 
 class BadOnNthRec:
@@ -175,6 +184,111 @@ def test_repeated_decode_errors_keep_recovering(monkeypatch):
     stop.set()
     wake.set()
     t.join(timeout=2.0)
+
+
+def test_permanent_decode_errors_escalate_and_end_the_session(monkeypatch):
+    # Toutes les trames sont malformées et la reconstruction ne rétablit rien
+    # (cas `ada` du 09/09 : json.JSONDecodeError à chaque trame). Au-delà de
+    # DECODE_ERROR_MAX_CONSECUTIVE, le thread pose stop_event lui-même et sort,
+    # au lieu de boucler indéfiniment sur l'erreur.
+    config.set_language("fr")
+
+    class AlwaysBadRec(BadOnNthRec):
+        def Result(self):
+            return "{ jamais du json"
+
+        def PartialResult(self):
+            return "{ jamais du json"
+
+    fake = AlwaysBadRec(bad_frame=-1, texts=[])
+    stop_fake = SilentStopRec()
+    monkeypatch.setattr(
+        rec, "build_recognizer",
+        lambda model, mode: stop_fake if mode == MODE_STOP else fake,
+    )
+
+    audio_q = queue.Queue(maxsize=64)
+    text_q = queue.Queue(maxsize=64)
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    display = threading.Event()
+    display.set()
+    wake = threading.Event()
+    wake.set()
+
+    runtime_state.set_state(STATE_DICTATING)
+    runtime_state._last_transition = 0.0
+
+    for _ in range(rec.DECODE_ERROR_MAX_CONSECUTIVE + 20):
+        audio_q.put_nowait(b"\x00\x00")
+
+    t = threading.Thread(
+        target=rec.recognition_thread,
+        args=(object(), fake, audio_q, text_q, ctrl_q, stop, display, wake),
+        daemon=True,
+    )
+    t.start()
+    t.join(timeout=2.0)
+
+    # Le thread a posé stop_event de lui-même et s'est terminé.
+    assert stop.is_set()
+    assert not t.is_alive()
+    # Rien n'a été transcrit et la session ne reste pas ouverte à vide.
+    assert _drain(text_q) == []
+
+
+def test_malformed_result_is_captured_to_a_file(monkeypatch, tmp_path):
+    # À la première json.JSONDecodeError, la chaîne brute de Result() est
+    # écrite telle quelle sous le répertoire de diagnostic (jamais /tmp, jamais
+    # le dépôt). Le répertoire est fixé par la fixture autouse.
+    config.set_language("fr")
+    diag_dir = tmp_path / "diag"
+
+    raw = '{\n  "result" : [{\n      "conf" : ,\n'
+    texts = ["mot1", "mot2", "mot3"]
+
+    class RawBadRec(BadOnNthRec):
+        def Result(self):
+            if self.calls == self.bad_frame:
+                return raw
+            i = min(self.calls - 1, len(self.texts) - 1)
+            return json.dumps({"text": self.texts[i], "result": []})
+
+    fake = RawBadRec(bad_frame=2, texts=texts)
+    stop_fake = SilentStopRec()
+    monkeypatch.setattr(
+        rec, "build_recognizer",
+        lambda model, mode: stop_fake if mode == MODE_STOP else fake,
+    )
+
+    audio_q = queue.Queue(maxsize=64)
+    text_q = queue.Queue(maxsize=64)
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    display = threading.Event()
+    display.set()
+    wake = threading.Event()
+    wake.set()
+
+    runtime_state.set_state(STATE_DICTATING)
+    runtime_state._last_transition = 0.0
+    for _ in range(len(texts)):
+        audio_q.put_nowait(b"\x00\x00")
+
+    t = threading.Thread(
+        target=rec.recognition_thread,
+        args=(object(), fake, audio_q, text_q, ctrl_q, stop, display, wake),
+        daemon=True,
+    )
+    t.start()
+    time.sleep(0.4)
+    stop.set()
+    wake.set()
+    t.join(timeout=2.0)
+
+    captures = list(diag_dir.glob("vosk-result-malforme_*.txt"))
+    assert len(captures) == 1
+    assert captures[0].read_text(encoding="utf-8") == raw
 
 
 # --- défaut 1, seconde couche : supervision des threads par main.py -----------

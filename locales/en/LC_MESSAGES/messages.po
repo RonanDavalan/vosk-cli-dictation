@@ -576,3 +576,19 @@ msgstr "[Degraded Mode] Added:"
 msgid "Stopping user interface..."
 msgstr "Stopping user interface..."
 
+
+#: src/recognition.py
+msgid "Malformed decoder output captured:"
+msgstr "Malformed decoder output captured:"
+
+#: src/recognition.py
+msgid ""
+"The recognition engine is not recovering; ending the session. Please restart "
+"the tool."
+msgstr ""
+"The recognition engine is not recovering; ending the session. Please restart "
+"the tool."
+
+#: src/ui.py
+msgid "Waking from sleep; recording started."
+msgstr "Waking from sleep; recording started."
