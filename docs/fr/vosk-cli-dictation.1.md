@@ -31,8 +31,10 @@ utilisée avec un indicateur de contrôle (voir GÉRER UNE SESSION EN COURS) se 
 
 Sous Wayland, cela utilise **wtype** et **wl-clipboard**, avec une solution de repli vers **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`). Sous X11, cela utilise **xdotool**. Au moins un backend pour le type de session actuel doit être installé. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
 
-Les raccourcis globaux via `pynput` ne fonctionnent que dans une session X11 standard ;
-sur Wayland natif, associez les sous-commandes de contrôle aux propres paramètres de raccourcis de votre environnement de bureau.
+Les raccourcis globaux via `pynput` observent le serveur X : sous Wayland ils
+n'atteignent que les fenêtres passant par XWayland, jamais une fenêtre Wayland
+native active. Associez les sous-commandes de contrôle aux paramètres de
+raccourcis de votre environnement de bureau pour un contrôle qui marche partout.
 
 # OPTIONS
 
@@ -99,16 +101,14 @@ La ponctuation et la mise en forme sont également déterminées par la voix ; l
 
 # TOUCHE DE RACCORTAGE
 
-`pynput` Les touches de raccourci globales ne sont activées que dans une session X11 standard et uniquement
-quand `hotkeys.pynput_enabled` est vrai ; elles ne sont pas
-activées dans Wayland natif, et les sous-commandes de contrôle associées à un raccourci de bureau les remplacent. Même sous X11, l'écouteur `pynput` ne consomme pas l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (par exemple `^[s` pour **Alt+S**). Pour un arrêt propre depuis n'importe quelle fenêtre, liez plutôt **\--finalize** (ou **\--toggle**, **\--sleep-toggle**) à un raccourci clavier de bureau. La configuration par défaut définit :
+Les raccourcis globaux `pynput` sont activés dès qu'un serveur X est joignable et quand `hotkeys.pynput_enabled` est vrai. `pynput` observe le serveur X : sous Wayland les raccourcis n'atteignent que les fenêtres passant par XWayland (beaucoup d'applications Electron et anciennes), jamais une fenêtre Wayland native active ; les sous-commandes de contrôle liées à un raccourci de bureau couvrent toutes les fenêtres. L'écouteur `pynput` ne consomme pas non plus l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (par exemple `^[s` pour **Alt+S**). Pour un arrêt propre depuis n'importe quelle fenêtre, liez plutôt **\--finalize** (ou **\--toggle**, **\--sleep-toggle**) à un raccourci clavier de bureau. La configuration par défaut définit :
 
 **Alt+H**
 :   Activez ou désactivez la dictée. Cela met simplement en pause ou reprend la dictée ; cela **ne** copie **rien** dans le presse-papiers, contrairement à **Alt+S** et à la phrase d'arrêt.
     Pendant la pause, le microphone reste actif et la phrase d'activation continue de fonctionner.
 
 **Alt+S**
-: Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers – équivalent à la phrase d'arrêt. X11 uniquement, et la combinaison fuit dans la fenêtre active (voir ci-dessus) ; préférez **\--finalize** lié à un raccourci de bureau.
+: Arrête la dictée en cours et copie le texte accumulé dans le presse-papiers – équivalent à la phrase d'arrêt. La combinaison fuit aussi dans la fenêtre active (voir ci-dessus) et manque les fenêtres Wayland natives ; préférez **\--finalize** lié à un raccourci de bureau.
 
 **Alt+W**
 :   Active/désactive le mode veille, un troisième état distinct des deux précédents. En mode veille, le flux audio est interrompu (le microphone est désactivé) et la reconnaissance est bloquée, ce qui réduit l'utilisation du processeur à presque zéro. La phrase de réveil ne peut être entendue tant que le mode veille n'est pas désactivé. La fonction **Alt+W** elle-même continue de fonctionner même en mode veille, car elle ne dépend pas de l'audio. L'activation du mode veille pendant une dictée l'interrompt proprement, ce qui évite toute perte de données au milieu d'une phrase.

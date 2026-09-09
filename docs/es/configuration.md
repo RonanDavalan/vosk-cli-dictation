@@ -194,9 +194,9 @@ Reemplaza lo que antes era una rama francesa codificada de forma rígida. Por id
 
 ### `hotkeys`
 
-Atajos de teclado globales a través de `pynput`. Estos solo se inician en una sesión X11 estándar, e incluso ahí el listener de `pynput` no consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (`^[s` para `Alt+S`). Para una parada limpia desde cualquier ventana — y para Wayland nativo, donde `pynput` no ve nada — vincule en su lugar los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio.
+Atajos de teclado globales a través de `pynput`. `pynput` observa el servidor X: se inicia en cuanto hay uno accesible y, en Wayland, solo ve las teclas de las ventanas que pasan por XWayland (muchas aplicaciones Electron y antiguas), nunca las de una ventana Wayland nativa enfocada. El listener tampoco consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (`^[s` para `Alt+S`). Para un control que funcione en todas partes, vincule en su lugar los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio.
 
--   **`pynput_enabled`** (booleano, valor predeterminado `true`): Solo se aplica en X11. Establecer en `false` para que el listener de `pynput` nunca se inicie.
+-   **`pynput_enabled`** (booleano, valor predeterminado `true`): Se aplica en cualquier tipo de sesión. Establecer en `false` para que el listener de `pynput` nunca se inicie.
 -   **`pynput_keys`**: Una lista de teclas de Pynput para el atajo.
 -   **`display_name`**: Una cadena que se muestra en el mensaje de ayuda.
 
@@ -217,8 +217,8 @@ hotkeys:
 -   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
     paused, the microphone stays active and the voice wake phrase still works.
 -   **`finalize_session`** (predeterminado `Alt+S`): detiene el dictado y copia el texto
-    acumulado al portapapeles. Solo X11, y la combinación se filtra a la ventana enfocada
-    (véase más arriba) — prefiera `vosk-cli-dictation --finalize` vinculado a un atajo del escritorio.
+    acumulado al portapapeles. La combinación se filtra a la ventana enfocada y no llega a
+    las ventanas Wayland nativas (véase más arriba) — prefiera `vosk-cli-dictation --finalize` vinculado a un atajo del escritorio.
 -   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
     the two above. In sleep mode the audio stream is closed (the microphone is released) and
     recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be

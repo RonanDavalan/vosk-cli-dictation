@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-04 23:16+0200\n"
+"POT-Creation-Date: 2026-09-09 15:05+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -134,7 +134,7 @@ msgstr ""
 msgid "Runtime dir writable"
 msgstr ""
 
-#: src/diagnose.py:103
+#: src/diagnose.py:103 src/main.py:312
 #, python-brace-format
 msgid "Config file in use: {path}"
 msgstr ""
@@ -155,200 +155,221 @@ msgstr ""
 msgid "UI Language set to"
 msgstr ""
 
-#: src/keyboard_listener.py:23
+#: src/keyboard_listener.py:38
 msgid ""
 "Global hotkeys via pynput are disabled on this session; use the CLI "
 "subcommands bound to your desktop shortcuts."
 msgstr ""
 
-#: src/keyboard_listener.py:41 src/recognition.py:185 src/recognition.py:210
+#: src/keyboard_listener.py:43 src/keyboard_listener.py:50
+#: src/keyboard_listener.py:126
+msgid ""
+"Global hotkeys via pynput are not available on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
+
+#: src/keyboard_listener.py:56
+msgid ""
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
+msgstr ""
+
+#: src/keyboard_listener.py:69 src/recognition.py:185 src/recognition.py:210
 msgid "Control queue full; the UI thread is not responding."
 msgstr ""
 
-#: src/main.py:55
+#: src/main.py:79
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
 msgstr ""
 
-#: src/main.py:56
+#: src/main.py:80
 #, python-brace-format
 msgid ""
 "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
 "--finalize' to stop and copy."
 msgstr ""
 
-#: src/main.py:57
-msgid "  - Hotkeys are X11-only and reach the focused window; use --finalize."
+#: src/main.py:81
+msgid ""
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
 msgstr ""
 
-#: src/main.py:59
+#: src/main.py:86
 #, python-brace-format
 msgid ""
 "\n"
 "{style}  Manual commands:{reset}"
 msgstr ""
 
-#: src/main.py:60
+#: src/main.py:87
 msgid "  - '/cancel', '/delete-word', '/nl'"
 msgstr ""
 
-#: src/main.py:65
+#: src/main.py:92
 #, python-brace-format
 msgid ""
 "\n"
 "{style}  Punctuation commands:{reset}"
 msgstr ""
 
-#: src/main.py:95
+#: src/main.py:124
 msgid "Press Ctrl+C to exit the program."
 msgstr ""
 
-#: src/main.py:102
+#: src/main.py:131
 msgid ""
 "\n"
 "Program stopped cleanly."
 msgstr ""
 
-#: src/main.py:116
+#: src/main.py:162
 msgid "A Vosk-based command-line dictation tool."
 msgstr ""
 
-#: src/main.py:117
+#: src/main.py:163
 msgid "Force the interface and model language."
 msgstr ""
 
-#: src/main.py:118
+#: src/main.py:164
 msgid "control an already running session"
 msgstr ""
 
-#: src/main.py:119
+#: src/main.py:165
 msgid "toggle dictation on/off"
 msgstr ""
 
-#: src/main.py:120
+#: src/main.py:166
 msgid "start dictation"
 msgstr ""
 
-#: src/main.py:121
+#: src/main.py:167
 msgid "stop dictation, keep listening"
 msgstr ""
 
-#: src/main.py:122
+#: src/main.py:168
 msgid "finalize the session and copy the text"
 msgstr ""
 
-#: src/main.py:123
+#: src/main.py:169
 msgid "discard the current session buffer"
 msgstr ""
 
-#: src/main.py:124
+#: src/main.py:170
 msgid "enter deep sleep (release the microphone)"
 msgstr ""
 
-#: src/main.py:125
+#: src/main.py:171
 msgid "leave deep sleep"
 msgstr ""
 
-#: src/main.py:126
+#: src/main.py:172
 msgid "toggle deep sleep"
 msgstr ""
 
-#: src/main.py:127
+#: src/main.py:173
 msgid "print the current state"
 msgstr ""
 
-#: src/main.py:128
+#: src/main.py:174
 msgid "stop the running session"
 msgstr ""
 
-#: src/main.py:129
+#: src/main.py:175
 msgid "check the environment and exit"
 msgstr ""
 
-#: src/main.py:131
+#: src/main.py:177
 msgid "download the small model for LANG (or the current language) and exit"
 msgstr ""
 
-#: src/main.py:147
+#: src/main.py:193
 msgid "No running vosk-cli-dictation session."
 msgstr ""
 
-#: src/main.py:165
+#: src/main.py:211
 msgid "A vosk-cli-dictation session is already running (see --status)."
 msgstr ""
 
-#: src/main.py:168
+#: src/main.py:214
 msgid "Checking external dependencies..."
 msgstr ""
 
-#: src/main.py:170
+#: src/main.py:216
 msgid "No text-injection backend available for this session."
 msgstr ""
 
-#: src/main.py:171
+#: src/main.py:217
 msgid ""
 "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
 "also works."
 msgstr ""
 
-#: src/main.py:174
+#: src/main.py:220
 msgid "'paplay' not found. Sound notifications will be disabled."
 msgstr ""
 
-#: src/main.py:175
+#: src/main.py:221
 msgid "Dependencies checked."
 msgstr ""
 
-#: src/main.py:177
+#: src/main.py:223
 #, python-brace-format
 msgid "Attempting to load model for language: {lang}"
 msgstr ""
 
-#: src/main.py:183
+#: src/main.py:229
 #, python-brace-format
 msgid "Failed. Attempting to load default model: {model_name}"
 msgstr ""
 
-#: src/main.py:187
+#: src/main.py:233
 #, python-brace-format
 msgid ""
 "No speech recognition model could be loaded. Download the small model for"
 " '{lang}' now? [y/N] "
 msgstr ""
 
-#: src/main.py:194
+#: src/main.py:240
 msgid "No speech recognition model could be loaded."
 msgstr ""
 
-#: src/main.py:195
+#: src/main.py:241
 #, python-brace-format
 msgid "Run 'vosk-cli-dictation --download-model {lang}' to download one."
 msgstr ""
 
-#: src/main.py:196
+#: src/main.py:242
 msgid "Please check the model paths and integrity in your config.yaml file."
 msgstr ""
 
-#: src/main.py:243
+#: src/main.py:289
 #, python-brace-format
 msgid "Control socket: {path}"
 msgstr ""
 
-#: src/main.py:245
+#: src/main.py:291
 #, python-brace-format
 msgid "Could not open the control socket ({err}); CLI subcommands disabled."
 msgstr ""
 
-#: src/main.py:261
+#: src/main.py:311
+#, python-brace-format
+msgid "Model directory: {path}"
+msgstr ""
+
+#: src/main.py:317
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr ""
 
-#: src/main.py:275
+#: src/main.py:331
 msgid "Control queue full; command ignored."
 msgstr ""
 
-#: src/main.py:280
+#: src/main.py:336
 msgid ""
 "\n"
 "Stop request received. Shutting down..."
@@ -527,9 +548,5 @@ msgstr ""
 
 #: src/ui.py:236
 msgid "Stopping user interface..."
-msgstr ""
-
-#: src/main.py:284
-msgid "Model directory: {path}"
 msgstr ""
 

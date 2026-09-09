@@ -195,9 +195,9 @@ Remplace une branche française codée en dur. Pour chaque langue :
 
 ### `hotkeys`
 
-Raccourcis clavier globaux via `pynput`. Ceux-ci ne fonctionnent que dans une session X11 simple, et même là l'écouteur `pynput` ne consomme pas l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (`^[s` pour `Alt+S`). Pour un arrêt propre depuis n'importe quelle fenêtre — et pour Wayland natif, où `pynput` ne voit rien — associez plutôt les sous-commandes de contrôle (`--toggle`, `--finalize`, `--sleep-toggle`) aux propres paramètres de raccourcis de votre bureau.
+Raccourcis clavier globaux via `pynput`. `pynput` observe le serveur X : il démarre dès qu'un serveur X est joignable et, sous Wayland, ne voit les touches que pour les fenêtres passant par XWayland (beaucoup d'applications Electron et anciennes), jamais pour une fenêtre Wayland native active. L'écouteur ne consomme pas non plus l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (`^[s` pour `Alt+S`). Pour un contrôle qui marche partout, associez plutôt les sous-commandes de contrôle (`--toggle`, `--finalize`, `--sleep-toggle`) aux propres paramètres de raccourcis de votre bureau.
 
--   **`pynput_enabled`** (booléen, par défaut `true`): activé uniquement sous X11. Définissez-le sur `false` pour empêcher le démarrage du service d'écoute `pynput`.
+-   **`pynput_enabled`** (booléen, par défaut `true`): pris en compte sur tout type de session. Définissez-le sur `false` pour empêcher le démarrage du service d'écoute `pynput`.
 -   **`pynput_keys`**: Une liste de touches Pynput pour le raccourci.
 -   **`display_name`**: Une chaîne de caractères affichée dans le message d'aide.
 
@@ -218,8 +218,8 @@ hotkeys:
 -   **`toggle_recording`** (par défaut `Alt+H`): démarre ou met en pause la dictée en cours.
     Pendant la pause, le microphone reste actif et la phrase de réveil vocale continue de fonctionner.
 -   **`finalize_session`** (par défaut `Alt+S`): arrête la dictée et copie le texte accumulé
-    dans le presse-papiers. X11 uniquement, et la combinaison fuit dans la fenêtre active
-    (voir ci-dessus) — préférez `vosk-cli-dictation --finalize` lié à un raccourci de bureau.
+    dans le presse-papiers. La combinaison fuit dans la fenêtre active et manque les
+    fenêtres Wayland natives (voir ci-dessus) — préférez `vosk-cli-dictation --finalize` lié à un raccourci de bureau.
 -   **`sleep_toggle`** (par défaut `Alt+W`): active/désactive le **mode veille**, un troisième état
     distinct des deux précédents. En mode veille, le flux audio est fermé (le microphone est libéré) et
     la reconnaissance est bloquée, ce qui réduit l'utilisation du processeur à presque zéro. Cependant,

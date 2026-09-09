@@ -49,9 +49,10 @@ group is required only for the **ydotool** fallback; **wtype** and
 reports which tools, audio device and clipboard access are present, then
 exits.
 
-Global hotkeys via `pynput` are only effective under a plain X11 session;
-on native Wayland, bind the control subcommands to your desktop's own
-shortcut settings instead.
+Global hotkeys via `pynput` watch the X server: under Wayland they reach
+only windows running through XWayland, never a focused native-Wayland
+window. Bind the control subcommands to your desktop's own shortcut
+settings for control that works everywhere.
 
 # OPTIONS
 
@@ -139,15 +140,17 @@ printed by the program itself at startup.
 
 # HOTKEYS
 
-`pynput` global hotkeys are started only under a plain X11 session and only
-when `hotkeys.pynput_enabled` is true; on native Wayland they are not
-started, and the control subcommands bound to a desktop shortcut take their
-place. Even under X11 the `pynput` listener does not consume the key event:
-the combination also reaches the focused window, so pressing it while the
-cursor is in a terminal inserts an escape sequence (for example `^[s` for
-**Alt+S**). For a clean stop from any window, bind **\--finalize** (or
-**\--toggle**, **\--sleep-toggle**) to a desktop keyboard shortcut instead.
-The factory configuration defines:
+`pynput` global hotkeys are started whenever an X server is reachable and
+`hotkeys.pynput_enabled` is true. `pynput` watches the X server, so under
+Wayland the hotkeys reach only windows running through XWayland (many
+Electron and legacy apps), never a focused native-Wayland window; the
+control subcommands bound to a desktop shortcut cover every window. The
+`pynput` listener also does not consume the key event: the combination also
+reaches the focused window, so pressing it while the cursor is in a
+terminal inserts an escape sequence (for example `^[s` for **Alt+S**). For
+a clean stop from any window, bind **\--finalize** (or **\--toggle**,
+**\--sleep-toggle**) to a desktop keyboard shortcut instead. The factory
+configuration defines:
 
 **Alt+H**
 :   Toggle dictation on or off. This only pauses or resumes; it does **not**
@@ -157,9 +160,9 @@ The factory configuration defines:
 
 **Alt+S**
 :   Stop the current dictation and copy the accumulated text to the
-    clipboard — equivalent to the stop phrase. X11 only, and the chord
-    leaks into the focused window (see above); prefer **\--finalize** bound
-    to a desktop shortcut.
+    clipboard — equivalent to the stop phrase. The chord also leaks into
+    the focused window (see above) and misses native-Wayland windows;
+    prefer **\--finalize** bound to a desktop shortcut.
 
 **Alt+W**
 :   Toggle sleep mode, a third state distinct from the two above. In sleep

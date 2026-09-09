@@ -33,8 +33,11 @@ Bajo Wayland, esto utiliza **wtype** y **wl-clipboard**, recurriendo a
 `/dev/uinput`). Bajo X11, utiliza **xdotool**. Debe estar instalado al menos un backend para el tipo de sesión actual. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
 informa qué herramientas, dispositivo de audio y acceso al portapapeles están disponibles, y luego finaliza.
 
-Las combinaciones de teclas globales a través de `pynput` solo son efectivas en una sesión X11 estándar;
-en Wayland nativo, vincule los subcomandos de control a la configuración de acceso directo propia de su escritorio en lugar de eso.
+Las combinaciones de teclas globales a través de `pynput` observan el servidor
+X: en Wayland solo alcanzan las ventanas que pasan por XWayland, nunca una
+ventana Wayland nativa enfocada. Vincule los subcomandos de control a la
+configuración de acceso directo propia de su escritorio para un control que
+funcione en todas partes.
 
 # OPCIONES
 
@@ -110,9 +113,7 @@ La puntuación y la disposición también se dictan mediante la voz; la lista co
 
 # TECLAS DE ACCESO RÁPIDO
 
-Los atajos de teclado globales de `pynput` se inician solo en una sesión X11 estándar y solo
-cuando `hotkeys.pynput_enabled` es verdadero; en Wayland nativo, no se
-inician, y los subcomandos de control asociados a un acceso directo del escritorio los reemplazan. Incluso bajo X11, el listener de `pynput` no consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (por ejemplo `^[s` para **Alt+S**). Para una parada limpia desde cualquier ventana, vincule en su lugar **\--finalize** (o **\--toggle**, **\--sleep-toggle**) a un atajo de teclado del escritorio. La configuración predeterminada define:
+Los atajos de teclado globales de `pynput` se inician en cuanto un servidor X está accesible y `hotkeys.pynput_enabled` es verdadero. `pynput` observa el servidor X, así que en Wayland los atajos solo alcanzan las ventanas que pasan por XWayland (muchas aplicaciones Electron y antiguas), nunca una ventana Wayland nativa enfocada; los subcomandos de control asociados a un acceso directo del escritorio cubren todas las ventanas. El listener de `pynput` tampoco consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (por ejemplo `^[s` para **Alt+S**). Para una parada limpia desde cualquier ventana, vincule en su lugar **\--finalize** (o **\--toggle**, **\--sleep-toggle**) a un atajo de teclado del escritorio. La configuración predeterminada define:
 
 **Alt+H**
 :   Activa o desactiva la dictado. Esto solo pausa o reanuda; **no**
@@ -121,7 +122,7 @@ inician, y los subcomandos de control asociados a un acceso directo del escritor
     sigue funcionando.
 
 **Alt+S**
-: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada. Solo X11, y la combinación se filtra a la ventana enfocada (véase más arriba); prefiera **\--finalize** vinculado a un atajo del escritorio.
+: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada. La combinación también se filtra a la ventana enfocada (véase más arriba) y no llega a las ventanas Wayland nativas; prefiera **\--finalize** vinculado a un atajo del escritorio.
 
 **Alt+W**
 :   Activa/desactiva el modo de suspensión, un tercer estado distinto de los dos anteriores. En el modo de suspensión, el flujo de audio se cierra (el micrófono se libera) y el reconocimiento se bloquea, por lo que el uso de la CPU disminuye hasta casi cero; la frase de activación no se puede escuchar hasta que el modo de suspensión se desactiva. **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión durante una dictado la detiene limpiamente primero, para que no se pierda audio en medio de una frase.

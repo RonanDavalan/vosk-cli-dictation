@@ -285,8 +285,12 @@ language_settings:
       "vosk": "Vosk"
 
 hotkeys:
-  # pynput n'écoute que sous X11 (aveugle sous Wayland natif). Sous Wayland,
-  # utiliser les sous-commandes CLI liées aux raccourcis du bureau.
+  # pynput observe le serveur X : sous Wayland il n'atteint que les fenêtres
+  # passant par XWayland (beaucoup d'applications Electron et anciennes), jamais
+  # une fenêtre Wayland native. Le listener démarre dès qu'un serveur X est
+  # joignable, quel que soit le type de session. Mettre à false pour ne jamais
+  # le démarrer ; pour un contrôle universel, lier les sous-commandes CLI
+  # (--toggle / --finalize / --sleep-toggle) aux raccourcis du bureau.
   pynput_enabled: true
   toggle_recording:
     pynput_keys: ["alt_l", "h"]

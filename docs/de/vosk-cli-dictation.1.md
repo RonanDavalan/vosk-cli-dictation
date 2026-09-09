@@ -30,8 +30,11 @@ Text wird injiziert, indem es in die Zwischenablage kopiert und ein Einfügen si
 Unter Wayland werden **wtype** und **wl-clipboard** verwendet, wobei auf **ydotool** zurückgegriffen wird (welches den `ydotoold` Daemon und Zugriff auf `/dev/uinput` benötigt). Unter X11 wird **xdotool** verwendet. Mindestens ein Backend für den aktuellen Sitzungstyp muss installiert sein. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
 zeigt, welche Tools, Audio-Geräte und Zwischenablage-Zugriff verfügbar sind, und beendet dann das Programm.
 
-Globale Hotkeys über `pynput` funktionieren nur unter einer reinen X11-Sitzung;
-unter nativem Wayland sollten Sie die Kontroll-Unterbefehle stattdessen an die eigenen Tastenkombinationseinstellungen Ihres Desktops binden.
+Globale Hotkeys über `pynput` beobachten den X-Server: unter Wayland erreichen
+sie nur Fenster, die über XWayland laufen, niemals ein fokussiertes natives
+Wayland-Fenster. Binden Sie die Kontroll-Unterbefehle an die eigenen
+Tastenkombinationseinstellungen Ihres Desktops, damit die Steuerung überall
+funktioniert.
 
 # OPTIONEN
 
@@ -107,9 +110,7 @@ Die Zeichensetzung und Anordnung von Wörtern (Komma, Punkt, Zeilenumbruch usw.)
 
 # TASTENBELEGUNGEN
 
-`pynput` Globale Hotkeys werden nur unter einer reinen X11-Sitzung und nur
-wenn `hotkeys.pynput_enabled` wahr ist, aktiviert; auf nativen Wayland-Systemen werden sie nicht
-aktiviert, und die Kontroll-Unterbefehle, die an eine Desktop-Verknüpfung gebunden sind, übernehmen deren Funktion. Selbst unter X11 verbraucht der `pynput`-Listener das Tastenereignis nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (zum Beispiel `^[s` für **Alt+S**). Für einen sauberen Stopp aus einem beliebigen Fenster binden Sie stattdessen **\--finalize** (oder **\--toggle**, **\--sleep-toggle**) an eine Desktop-Tastenkombination. Die Werkseinstellungen definieren:
+Globale `pynput`-Hotkeys werden aktiviert, sobald ein X-Server erreichbar ist und `hotkeys.pynput_enabled` wahr ist. `pynput` beobachtet den X-Server, daher erreichen die Hotkeys unter Wayland nur Fenster, die über XWayland laufen (viele Electron- und Alt-Anwendungen), niemals ein fokussiertes natives Wayland-Fenster; die an eine Desktop-Verknüpfung gebundenen Kontroll-Unterbefehle decken jedes Fenster ab. Der `pynput`-Listener verbraucht das Tastenereignis ebenfalls nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (zum Beispiel `^[s` für **Alt+S**). Für einen sauberen Stopp aus einem beliebigen Fenster binden Sie stattdessen **\--finalize** (oder **\--toggle**, **\--sleep-toggle**) an eine Desktop-Tastenkombination. Die Werkseinstellungen definieren:
 
 **Alt+H**
 :   Aktiviert oder deaktiviert die Diktierfunktion. Dies pausiert oder setzt die Diktierfunktion fort; es wird **nichts**
@@ -117,7 +118,7 @@ aktiviert, und die Kontroll-Unterbefehle, die an eine Desktop-Verknüpfung gebun
     Während der Pause bleibt das Mikrofon aktiv und die Aktivierungsphrase funktioniert weiterhin.
 
 **Alt+S:**
-Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase. Nur X11, und die Kombination gelangt in das fokussierte Fenster (siehe oben); bevorzugen Sie **\--finalize**, an eine Desktop-Tastenkombination gebunden.
+Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase. Die Kombination gelangt auch in das fokussierte Fenster (siehe oben) und verfehlt native Wayland-Fenster; bevorzugen Sie **\--finalize**, an eine Desktop-Tastenkombination gebunden.
 
 **Alt+W**
 :   Aktiviert den Energiesparmodus, einen dritten Zustand, der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus wird der Audio-Stream beendet (das Mikrofon wird freigegeben) und die Spracherkennung wird deaktiviert, wodurch die CPU-Auslastung auf nahezu Null sinkt; die Aktivierungsphrase kann erst gehört werden, wenn der Energiesparmodus wieder deaktiviert wird. **Alt+W** selbst funktioniert weiterhin im Energiesparmodus, da es nicht von Audio abhängig ist. Die Aktivierung des Energiesparmodus während einer Diktierfunktion beendet diese sauber, sodass kein Audio während eines Satzes verloren geht.

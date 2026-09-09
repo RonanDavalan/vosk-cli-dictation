@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.0--alpha-yellow.svg" alt="Version: v0.5.0-alpha"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.1--alpha-yellow.svg" alt="Version: v0.5.1-alpha"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
   <a href="#"><img src="https://img.shields.io/badge/OS-Debian_13-D70A53.svg" alt="Tested on Debian 13"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
@@ -28,7 +28,7 @@ This tool was born from the need for a robust, locally-run dictation system on G
 
 *   **System-Wide Integration:** Dictate into any active application (terminal, browser, code editor, etc.).
 *   **Multi-Language Support:** Works out-of-the-box with **English**, **French**, **German** and **Spanish**.
-*   **Universal Control:** A running session is driven through a private Unix socket, so the same command bound to a desktop shortcut (`vosk-cli-dictation --toggle`, `--sleep`, `--status`) controls it on any desktop — native Wayland included. Global hotkeys via `pynput` remain as a convenience under plain X11.
+*   **Universal Control:** A running session is driven through a private Unix socket, so the same command bound to a desktop shortcut (`vosk-cli-dictation --toggle`, `--sleep`, `--status`) controls it on any desktop — native Wayland included. Global hotkeys via `pynput` remain as a best-effort convenience: under Wayland they reach only XWayland windows, not native-Wayland ones.
 *   **Fully Customizable:** Configure UI colors, shortcuts, voice trigger phrases, per-language typography and recognition aliases in a simple `config.yaml` file.
 *   **Full Punctuation:** Dictate a complete range of punctuation with natural voice commands.
 *   **Private and Offline:** Runs entirely on your machine. Your voice data never leaves your computer.
@@ -37,7 +37,7 @@ This tool was born from the need for a robust, locally-run dictation system on G
 >
 > **X11 and Wayland support.** Text is injected by copying it to the clipboard and simulating a paste. Under Wayland the tool uses `wtype` and `wl-clipboard`, falling back to `ydotool` (which needs the `ydotoold` daemon and access to `/dev/uinput`, typically via the `input` group — `sudo usermod -aG input $USER`, then log out and back in). Under X11 it uses `xdotool`. At least one backend for the current session type must be installed; `vosk-cli-dictation --diagnose` reports what is available.
 >
-> **Global shortcuts.** `pynput` only sees key events under plain X11, and even there it does not consume them — the key combination also reaches the focused window, so pressing it while typing into a terminal inserts an escape sequence (`^[s` for `Alt+S`). Bind your desktop's own shortcut settings to the control subcommands (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`) instead — this works on native Wayland too. See *Controlling a running session* below. On Debian, `ydotool` is packaged in `trixie-backports`, not in stable.
+> **Global shortcuts.** `pynput` watches the X server: under Wayland it only sees key events for windows running through XWayland (many Electron and legacy apps), never for a focused native-Wayland window. It also does not consume the events — the key combination reaches the focused window too, so pressing it while typing into a terminal inserts an escape sequence (`^[s` for `Alt+S`). For control that works everywhere, bind your desktop's own shortcut settings to the control subcommands (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`) instead. See *Controlling a running session* below. On Debian, `ydotool` is packaged in `trixie-backports`, not in stable.
 
 ## ⚙️ Getting Started
 
@@ -48,7 +48,7 @@ On **Debian 13 (Trixie)** and derivatives, install the `.deb` from the
 environment to create:
 
 ```bash
-sudo apt install ./vosk-cli-dictation_0.5.0~alpha_all.deb
+sudo apt install ./vosk-cli-dictation_0.5.1~alpha_all.deb
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
@@ -150,7 +150,7 @@ vosk-cli-dictation --finalize        # stop and copy the accumulated text
 vosk-cli-dictation --stop            # shut the session down
 ```
 
-Bind these to your desktop's keyboard-shortcut settings (KDE, GNOME, Sway, labwc…) to get global control that works on native Wayland, where `pynput` cannot see key events. Under plain X11, the `pynput` hotkeys in the `hotkeys` section also work, as a convenience.
+Bind these to your desktop's keyboard-shortcut settings (KDE, GNOME, Sway, labwc…) to get global control that works everywhere, including the native-Wayland windows `pynput` cannot see. The `pynput` hotkeys in the `hotkeys` section also work as a best-effort convenience — under Wayland only over XWayland windows.
 
 ### Manual Commands
 

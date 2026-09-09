@@ -252,15 +252,17 @@ Replaces what used to be a hard-coded French branch. Per language:
 
 ### `hotkeys`
 
-Global keyboard shortcuts via `pynput`. These are only started under a plain
-X11 session, and even there the `pynput` listener does not consume the key
-event: the combination also reaches the focused window, so pressing it while
-the cursor is in a terminal inserts an escape sequence (`^[s` for `Alt+S`).
-For a clean stop from any window — and for native Wayland, where `pynput`
-sees nothing — bind the control subcommands (`--toggle`, `--finalize`,
-`--sleep-toggle`) to your desktop's own shortcut settings instead.
+Global keyboard shortcuts via `pynput`. `pynput` watches the X server, so it
+is started whenever one is reachable; under Wayland it only sees key events
+for windows running through XWayland (many Electron and legacy apps), never
+for a focused native-Wayland window. The listener also does not consume the
+key event: the combination reaches the focused window too, so pressing it
+while the cursor is in a terminal inserts an escape sequence (`^[s` for
+`Alt+S`). For control that works everywhere, bind the control subcommands
+(`--toggle`, `--finalize`, `--sleep-toggle`) to your desktop's own shortcut
+settings instead.
 
--   **`pynput_enabled`** (boolean, default `true`): honoured only under X11. Set to `false` to never start the `pynput` listener.
+-   **`pynput_enabled`** (boolean, default `true`): honoured on every session type. Set to `false` to never start the `pynput` listener.
 -   **`pynput_keys`**: A list of Pynput keys for the shortcut.
 -   **`display_name`**: A string shown in the help message.
 
@@ -281,8 +283,8 @@ hotkeys:
 -   **`toggle_recording`** (default `Alt+H`): starts or pauses the current dictation. While
     paused, the microphone stays active and the voice wake phrase still works.
 -   **`finalize_session`** (default `Alt+S`): stops the dictation and copies the accumulated
-    text to the clipboard. X11 only, and the chord leaks into the focused window (see above) —
-    prefer `vosk-cli-dictation --finalize` bound to a desktop shortcut.
+    text to the clipboard. The chord leaks into the focused window (see above) and misses
+    native-Wayland windows — prefer `vosk-cli-dictation --finalize` bound to a desktop shortcut.
 -   **`sleep_toggle`** (default `Alt+W`): toggles **sleep mode**, a third state distinct from
     the two above. In sleep mode the audio stream is closed (the microphone is released) and
     recognition is blocked, so CPU use drops to near zero — but the wake phrase cannot be
@@ -301,9 +303,10 @@ hotkeys:
 
 #### Binding shortcuts on KDE Plasma (Wayland)
 
-Under a Plasma Wayland session `pynput` sees no key events, so the `hotkeys`
-section above does nothing. Bind the control subcommands to Plasma's own
-shortcuts instead — this is the supported path on Wayland:
+Under a Plasma Wayland session `pynput` only sees key events from XWayland
+windows, so the `hotkeys` section above is unreliable for native-Wayland
+windows. Bind the control subcommands to Plasma's own shortcuts instead —
+this is the path that works everywhere:
 
 1.  Open **System Settings → Keyboard → Shortcuts → Add New → Command or
     Script**.

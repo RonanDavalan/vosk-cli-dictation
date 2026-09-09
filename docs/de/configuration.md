@@ -194,9 +194,9 @@ Ersetzt eine bisher fest codierte französische Version. Pro Sprache:
 
 ### `hotkeys`
 
-Globale Tastenkombinationen über `pynput`. Diese werden nur unter einer reinen X11-Sitzung gestartet, und selbst dort verbraucht der `pynput`-Listener das Tastenereignis nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (`^[s` für `Alt+S`). Für einen sauberen Stopp aus einem beliebigen Fenster — und für natives Wayland, wo `pynput` nichts sieht — binden Sie stattdessen die Kontroll-Unterbefehle (`--toggle`, `--finalize`, `--sleep-toggle`) an die eigenen Tastenkombinationseinstellungen Ihres Desktops.
+Globale Tastenkombinationen über `pynput`. `pynput` beobachtet den X-Server: es wird gestartet, sobald einer erreichbar ist, und sieht unter Wayland Tasten nur für Fenster, die über XWayland laufen (viele Electron- und Alt-Anwendungen), niemals für ein fokussiertes natives Wayland-Fenster. Der Listener verbraucht das Tastenereignis ebenfalls nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (`^[s` für `Alt+S`). Für eine Steuerung, die überall funktioniert, binden Sie stattdessen die Kontroll-Unterbefehle (`--toggle`, `--finalize`, `--sleep-toggle`) an die eigenen Tastenkombinationseinstellungen Ihres Desktops.
 
--   **`pynput_enabled`** (boolesch, Standardwert: `true`): Wird nur unter X11 berücksichtigt. Setzen Sie den Wert auf `false`, um den `pynput` Listener nie zu starten.
+-   **`pynput_enabled`** (boolesch, Standardwert: `true`): Wird bei jedem Sitzungstyp berücksichtigt. Setzen Sie den Wert auf `false`, um den `pynput` Listener nie zu starten.
 -   **`pynput_keys`**: Eine Liste von Pynput-Tasten für die Tastenkombination.
 -   **`display_name`**: Ein String, der in der Hilfenachricht angezeigt wird.
 
@@ -217,8 +217,8 @@ hotkeys:
 -   **`toggle_recording`** (Standard: `Alt+H`): Startet oder pausiert die aktuelle Diktierfunktion. Während
     der Pause bleibt das Mikrofon aktiv und die Sprachaktivierungsphrase funktioniert weiterhin.
 -   **`finalize_session`** (Standard: `Alt+S`): Stoppt die Diktierfunktion und kopiert den
-    gesammelten Text in die Zwischenablage. Nur X11, und die Kombination gelangt in das
-    fokussierte Fenster (siehe oben) — bevorzugen Sie `vosk-cli-dictation --finalize`, an
+    gesammelten Text in die Zwischenablage. Die Kombination gelangt in das fokussierte
+    Fenster und verfehlt native Wayland-Fenster (siehe oben) — bevorzugen Sie `vosk-cli-dictation --finalize`, an
     eine Desktop-Tastenkombination gebunden.
 -   **`sleep_toggle`** (Standard: `Alt+W`): Schaltet den **Energiesparmodus** ein, einen dritten Zustand,
     der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus wird der

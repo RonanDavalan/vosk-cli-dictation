@@ -78,7 +78,7 @@ def print_help_message():
     intro_lines = (
         _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
         _("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
-        _("  - Hotkeys are X11-only and reach the focused window; use --finalize."),
+        _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
     )
     for line in intro_lines:
         print_status(_wrap_help_line(line), config.color_help_text)

@@ -6,26 +6,54 @@ import textwrap
 from config.config import config
 from src.i18n import get_translation
 
+
+def _notice(text: str, color=None) -> None:
+    """Print a one-paragraph notice, wrapped to 76 columns."""
+    colour = config.color_info if color is None else color
+    print(f"{colour}{textwrap.fill(text, width=76)}{config.RESET}")
+
+
 def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
     """
     Global-hotkey listener via pynput.
 
-    Chantier 7 volet A : pynput n'écoute réellement que sous X11 (sous Wayland
-    natif il est aveugle aux fenêtres non-XWayland). Ce thread ne démarre donc
-    le listener que si la session est X11 et si `hotkeys.pynput_enabled` n'a pas
-    été mis à false. Sinon, le contrôle passe par les sous-commandes CLI liées
-    aux raccourcis du bureau (voir --toggle / --sleep / --status).
+    pynput on Linux watches the X server. Under a Wayland session an XWayland
+    server is almost always present and relays key events for the windows that
+    run through it (most Electron and legacy X11 apps), but never for a focused
+    native-Wayland surface. The listener is therefore a best-effort convenience
+    that starts whenever an X server is reachable, on any session type; the
+    universal control path stays the Unix socket and its CLI subcommands
+    (--toggle / --finalize / --sleep-toggle / --status).
+
+    v0.5.1-alpha (COMPATIBILITE_WAYLAND.md §5): the earlier
+    `XDG_SESSION_TYPE == "x11"` gate is gone -- it dropped the XWayland case
+    that already worked in v0.0.4-alpha. `hotkeys.pynput_enabled: false` still
+    disables the listener, now on every session type.
     """
     _ = get_translation()
 
     session = os.environ.get("XDG_SESSION_TYPE", "").lower()
-    if session != "x11" or not config.hotkeys.get('pynput_enabled', True):
-        notice = _('Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts.')
-        print(f"{config.color_info}{textwrap.fill(notice, width=76)}{config.RESET}")
+
+    if not config.hotkeys.get('pynput_enabled', True):
+        _notice(_('Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts.'))
         stop_event.wait()
         return
 
-    from pynput.keyboard import GlobalHotKeys
+    if not os.environ.get("DISPLAY"):
+        _notice(_('Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts.'))
+        stop_event.wait()
+        return
+
+    try:
+        from pynput.keyboard import GlobalHotKeys
+    except Exception as exc:  # ImportError, or an Xlib backend failure at import
+        _notice(_('Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts.'))
+        print(f"{config.color_info}  ({exc}){config.RESET}")
+        stop_event.wait()
+        return
+
+    if session != "x11":
+        _notice(_('Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows.'))
 
     def submit(command):
         """Push a control command without ever blocking the pynput callback.
@@ -83,16 +111,22 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
                     hotkeys_to_listen[hotkey_string] = actions[action]
             except (TypeError, KeyError, AttributeError) as e:
                 # This handles cases where config might be malformed.
-                print(f"{config.RED}Could not create hotkey for action '{action}': {e}{config.RESET}")
+                print(f"{config.color_error}Could not create hotkey for action '{action}': {e}{config.RESET}")
 
     if not hotkeys_to_listen:
-        print(f"{config.YELLOW}No valid hotkeys found in configuration. Keyboard listener will not run.{config.RESET}")
+        print(f"{config.color_warning}No valid hotkeys found in configuration. Keyboard listener will not run.{config.RESET}")
         return
 
     # Create and run the listener with the defined hotkeys.
     # GlobalHotKeys runs in its own thread.
-    hotkey_listener = GlobalHotKeys(hotkeys_to_listen)
-    hotkey_listener.start()
+    try:
+        hotkey_listener = GlobalHotKeys(hotkeys_to_listen)
+        hotkey_listener.start()
+    except Exception as exc:
+        _notice(_('Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts.'), color=config.color_error)
+        print(f"{config.color_info}  ({exc}){config.RESET}")
+        stop_event.wait()
+        return
 
     # The main part of this thread will now block here until the main program
     # sets the stop_event, indicating it's time to shut down.
