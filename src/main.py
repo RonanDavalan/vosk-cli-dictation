@@ -153,7 +153,7 @@ def main():
     """Main function"""
     # Chantier stabilité v0.5.1 : neutralise LC_NUMERIC pour tout le processus
     # avant que Vosk ne sérialise le moindre Result(). Sous une locale à virgule
-    # (fr_FR.UTF-8 sur `ada`), les flottants de SetWords(True) sortent en
+    # (p. ex. fr_FR.UTF-8), les flottants de SetWords(True) sortent en
     # « 1,000000 » et cassent json.loads à chaque final avec mots. Répété
     # défensivement dans src/recognition.py avant chaque KaldiRecognizer.
     force_c_numeric_locale()

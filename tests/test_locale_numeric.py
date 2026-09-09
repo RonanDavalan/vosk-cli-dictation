@@ -1,6 +1,6 @@
 # Chantier stabilité v0.5.1 — Vosk/Kaldi sérialise les flottants de
 # SetWords(True) avec le séparateur décimal de LC_NUMERIC. Sous fr_FR.UTF-8
-# (cas `ada`), Result() rend « "conf" : 1,000000 » et json.loads casse à chaque
+# (locale à virgule), Result() rend « "conf" : 1,000000 » et json.loads casse à chaque
 # final avec mots. Le correctif force LC_NUMERIC du processus à « C » au
 # démarrage (src/main.py) et défensivement dans build_recognizer().
 #
@@ -48,8 +48,8 @@ def _restore_numeric_locale():
             locale.setlocale(locale.LC_NUMERIC, "C")
 
 
-def test_the_captured_ada_string_is_really_invalid_json():
-    # La chaîne exacte capturée sur `ada` le 09/09 (virgule décimale) n'est pas
+def test_the_captured_comma_locale_string_is_really_invalid_json():
+    # La chaîne exacte capturée en conditions réelles (virgule décimale) n'est pas
     # du JSON — c'est ce que le correctif de locale empêche Vosk de produire.
     raw = (
         '{\n  "result" : [{\n      "conf" : 1,000000,\n'
@@ -157,7 +157,7 @@ class _SilentStopRec:
 
 
 def test_recognition_loop_guards_a_late_locale_flip(monkeypatch):
-    # L'essai de Ronan sur `ada` (09/09 soir) : LC_NUMERIC bascule sur une
+    # Essai interactif en conditions réelles : LC_NUMERIC bascule sur une
     # virgule APRÈS build_recognizer(). La garde par trame de la boucle de
     # reconnaissance neutralise la locale avant chaque Result() : aucun final
     # n'est perdu, aucune json.JSONDecodeError.

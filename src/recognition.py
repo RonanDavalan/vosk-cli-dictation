@@ -21,7 +21,7 @@ MODE_LISTENING = "listening"
 
 # Chantier stabilité v0.5.1, défaut 1 (révision 09/09 soir). Une trame malformée
 # ne tue plus le thread : on reconstruit le recognizer. Mais si la
-# reconstruction ne rétablit rien — cas observé sur `ada`, json.JSONDecodeError
+# reconstruction ne rétablit rien — cas observé sur un Raspberry Pi, json.JSONDecodeError
 # à chaque trame, Reset() sans effet — on ne boucle pas indéfiniment : au-delà
 # de DECODE_ERROR_MAX_CONSECUTIVE trames en échec d'affilée, le thread pose
 # stop_event et termine la session proprement. Tout décodage réussi remet le
@@ -32,12 +32,12 @@ DECODE_ERROR_MAX_CONSECUTIVE = 5
 def force_c_numeric_locale():
     """Chantier stabilité v0.5.1 : Vosk/Kaldi sérialise les flottants de
     `SetWords(True)` avec le séparateur décimal de `LC_NUMERIC`. Sous une locale
-    à virgule — `ada` a `LC_ALL=fr_FR.UTF-8` — `Result()` rend
-    « "conf" : 0,822848 », JSON invalide, et `json.loads` casse (`neo`, en
-    locale « C », ne l'a jamais vu).
+    à virgule — p. ex. `LC_ALL=fr_FR.UTF-8` — `Result()` rend
+    « "conf" : 0,822848 », JSON invalide, et `json.loads` casse (jamais reproduit
+    sous locale « C »).
 
     Appelé au démarrage (`src/main.py`), dans `build_recognizer()`, et — parce
-    que l'essai interactif de Ronan sur `ada` (09/09 soir) a montré un
+    qu'un essai interactif en conditions réelles (Raspberry Pi) a montré un
     basculement de `LC_NUMERIC` vers la virgule APRÈS le dernier
     `build_recognizer()`, d'une source non identifiée et une seule fois tôt dans
     la session — juste avant chaque `Result()`/`PartialResult()` de la boucle de
@@ -361,7 +361,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 continue
 
             # Chantier stabilité v0.5.1 : garde par trame. L'essai interactif de
-            # Ronan sur `ada` le 09/09 au soir montre que LC_NUMERIC bascule sur
+            # un essai interactif en conditions réelles montre que LC_NUMERIC bascule sur
             # une virgule APRÈS le dernier build_recognizer() — source non
             # identifiée, une seule fois, tôt dans la session. Sans cette ligne,
             # le premier final avec mots casse (json.loads sur « "conf" :
@@ -463,7 +463,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             # erreur sur une trame — au premier chef une json.JSONDecodeError sur
             # Result()/PartialResult() — ne termine plus le décodage. On
             # reconstruit le recognizer : Reset() seul s'est montré sans effet
-            # sur `ada` (erreur à chaque trame). Si les échecs s'enchaînent
+            # sur un Raspberry Pi (erreur à chaque trame). Si les échecs s'enchaînent
             # au-delà de DECODE_ERROR_MAX_CONSECUTIVE, la reconstruction ne
             # rétablit rien : on pose stop_event et on termine la session
             # proprement plutôt que de boucler à vide. Tout décodage réussi a
