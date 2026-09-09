@@ -58,7 +58,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         # Chantier stabilité v0.5.1, défaut 3 (révision 09/09 soir) : sur une
         # sortie de veille implicite, une seule ligne cohérente au lieu de
         # « veille désactivée » suivi de « enregistrement démarré » — deux
-        # messages qui se lisent comme contradictoires (Ronan, 09/09 sur neo).
+        # messages qui se lisent comme contradictoires (constat réel, 09/09).
         if woke_from_sleep:
             print(f"\n{config.color_success}{_('Waking from sleep; recording started.')}{config.RESET}")
         else:
