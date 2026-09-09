@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://vosk.davalan.fr/"><strong>➡️ Visit the Official Homepage for a full tour!</strong></a>
+  <a href="https://vosk.davalan.fr/"><strong>Visit the Official Homepage for a full tour!</strong></a>
 </p>
 
 <p align="center">
@@ -20,11 +20,11 @@ A powerful and customizable command-line dictation tool for Linux, powered by th
 
 ---
 
-## ✨ Why This Project?
+## Why This Project?
 
 This tool was born from the need for a robust, locally-run dictation system on GNU/Linux that gives the user full control over their data and the software's behavior. Unlike cloud-based solutions, it operates **100% offline**, guaranteeing your privacy.
 
-## 🚀 Key Features
+## Key Features
 
 *   **System-Wide Integration:** Dictate into any active application (terminal, browser, code editor, etc.).
 *   **Multi-Language Support:** Works out-of-the-box with **English**, **French**, **German** and **Spanish**.
@@ -39,7 +39,7 @@ This tool was born from the need for a robust, locally-run dictation system on G
 >
 > **Global shortcuts.** `pynput` watches the X server: under Wayland it only sees key events for windows running through XWayland (many Electron and legacy apps), never for a focused native-Wayland window. It also does not consume the events — the key combination reaches the focused window too, so pressing it while typing into a terminal inserts an escape sequence (`^[s` for `Alt+S`). For control that works everywhere, bind your desktop's own shortcut settings to the control subcommands (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`) instead. See *Controlling a running session* below. On Debian, `ydotool` is packaged in `trixie-backports`, not in stable.
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### Install the Debian package (recommended)
 
@@ -100,7 +100,7 @@ Models downloaded this way also land in `~/.local/share/vosk-models/`. As a fall
 
 Only one session runs per user at a time; a second launch is refused and points you at `--status`.
 
-### 💡 Pro Tip: Create a Quick-Launch Command (Optional)
+### Pro Tip: Create a Quick-Launch Command (Optional)
 
 For easier access, you can add a function to your shell's configuration file (e.g., `~/.bashrc` or `~/.zshrc`).
 
@@ -125,7 +125,7 @@ For easier access, you can add a function to your shell's configuration file (e.
 3.  Apply the changes by running `source ~/.bashrc` or by opening a new terminal.
 4.  You can now launch the application from anywhere by simply typing `vosk` or `vosk -l en`.
 
-## 🛠️ Usage & Configuration
+## Usage & Configuration
 
 ### Language Selection
 
@@ -164,12 +164,12 @@ While the script is running in a terminal, you can also type these commands and 
 
 All settings can be modified in the `config/config.yaml` file: shortcuts, UI colors, voice trigger phrases, per-language typography, and recognition aliases. Corpus-specific alias examples live in `config/config.example.yaml`. See [`docs/configuration.md`](docs/configuration.md) for the full reference.
 
-## 🤝 Contributing
+## Contributing
 
 This project is open source and contributions are highly encouraged! Please check out our **[Contribution Guide](CONTRIBUTING.md)** and feel free to open an issue on the [issues page](https://github.com/RonanDavalan/vosk-cli-dictation/issues).
 
 This project is built through an asymmetric human-LLM collaboration — see [CONTRIBUTORS.md](CONTRIBUTORS.md) for the roles involved.
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
