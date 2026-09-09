@@ -124,6 +124,22 @@ def print_help_message():
     print_status(_("Press Ctrl+C to exit the program."), config.color_help_text)
 
 
+def supervise_threads(supervised, stop_event):
+    """Chantier stabilité v0.5.1, défaut 1 : si l'un des threads cœur
+    (`recognition`, `audio`, `ui`) meurt sans que `stop_event` soit posé, on
+    pose `stop_event` et on retourne son nom pour que la boucle principale
+    termine la session proprement au lieu de tourner à vide. Retourne None si
+    tout va bien ou si l'arrêt est déjà demandé.
+    """
+    if stop_event.is_set():
+        return None
+    for name, t in supervised.items():
+        if not t.is_alive():
+            stop_event.set()
+            return name
+    return None
+
+
 def exit_cleanup():
     """Clean exit function"""
     _ = get_translation()
@@ -279,6 +295,15 @@ def main():
         if t is not threading.current_thread():
             t.daemon = True
 
+    # Chantier stabilité v0.5.1, défaut 1 : threads cœur surveillés par la
+    # boucle principale. Le listener clavier est exclu — son absence (pynput
+    # indisponible) est un cas légitime, pas une panne.
+    supervised = {
+        "recognition": threads[0],
+        "audio": threads[1],
+        "ui": threads[3],
+    }
+
     # Socket de contrôle (chantier 7 volet A). Non bloquant si le bind échoue :
     # l'outil reste utilisable en interactif, seules les sous-commandes CLI
     # sont indisponibles.
@@ -322,6 +347,13 @@ def main():
         for t in threads: t.start()
 
         while not stop_event.is_set():
+            dead = supervise_threads(supervised, stop_event)
+            if dead is not None:
+                print_status(
+                    _("The {name} thread stopped; ending the session.").format(name=dead),
+                    config.color_error,
+                )
+                break
             if sys.stdin.isatty() and select.select([sys.stdin], [], [], 0.1)[0]:
                 line = sys.stdin.readline().strip()
                 if line.startswith('/'):

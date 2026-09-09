@@ -126,6 +126,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     chunk_audio_s = config.audio['buffer_size'] / config.audio['sample_rate']
     last_rtf_warning = 0.0
+    # Chantier stabilité v0.5.1, défaut 1 : cadence fixe du log d'erreur de
+    # décodage. Une trame malformée ne tue plus le thread ; on la journalise au
+    # plus une fois toutes les DECODE_ERROR_THROTTLE_S secondes.
+    last_decode_error_warning = 0.0
+    DECODE_ERROR_THROTTLE_S = 5.0
 
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
@@ -365,8 +370,27 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         except queue.Empty:
             continue
         except Exception as e:
+            # Chantier stabilité v0.5.1, défaut 1 : une erreur ponctuelle sur
+            # une trame — au premier chef une json.JSONDecodeError sur
+            # Result()/PartialResult() — ne termine plus le décodage pour la vie
+            # du processus. On la journalise à cadence fixe, on repart d'un
+            # recognizer propre (reconstruction complète si Reset échoue), puis
+            # on continue. Le seul break de cette boucle est la condition du
+            # while (stop_event).
             clear_partial()
-            print(f"\n{config.color_error}{_('Error in recognition thread:')} {e}{config.RESET}")
-            break
+            now = time.monotonic()
+            if now - last_decode_error_warning >= DECODE_ERROR_THROTTLE_S:
+                last_decode_error_warning = now
+                print(f"\n{config.color_error}"
+                      f"{_('Recognition error on a frame (recovering):')} {e}"
+                      f"{config.RESET}")
+            try:
+                recognizer.Reset()
+            except Exception:
+                try:
+                    recognizer = build_recognizer(model, current_mode or MODE_FULL)
+                except Exception:
+                    pass
+            continue
 
     clear_partial()

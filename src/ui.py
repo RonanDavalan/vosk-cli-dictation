@@ -16,6 +16,11 @@ from src.voice_commands import (
     strip_one_repetition, remove_phrase_and_after, mean_confidence,
 )
 
+# Chantier stabilité v0.5.1, défaut 3 : cadence du rappel « micro en veille »
+# tant que la VEILLE dure. Assez espacé pour ne pas harceler, assez fréquent
+# pour qu'un utilisateur qui dicte dans le vide s'en aperçoive vite.
+SLEEP_REMINDER_INTERVAL_S = 30.0
+
 def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event, wake_event):
     recording = False
     full_text_log = ""
@@ -27,10 +32,21 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     last_low_conf_hint = [0.0]  # horodatage du dernier indice, pour le throttle
+    last_sleep_reminder = [0.0]  # horodatage du dernier rappel « micro en veille »
 
     def start_recording():
         nonlocal recording, full_text_log, xdotool_failed_once
         _ = get_translation()
+        # Chantier stabilité v0.5.1, défaut 3 : une demande de dictée pendant la
+        # VEILLE sort d'abord de veille (rouvre le micro) AVANT de démarrer,
+        # sinon on ouvre une DICTÉE fantôme sur un périphérique fermé. La garde
+        # est portée ici pour qu'aucun chemin d'appel (TOGGLE_RECORDING,
+        # DICTATION_ON, /nl) ne puisse la contourner.
+        if sleep_event.is_set():
+            sleep_event.clear()
+            wake_event.set()
+            runtime_state.set_state(STATE_LISTENING)
+            print(f"\n{config.color_success}{_('Sleep mode disabled — listening resumed.')}{config.RESET}")
         recording = True
         runtime_state.set_state(STATE_DICTATING)
         display_partials_event.set()
@@ -62,9 +78,23 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         runtime_state.set_state(STATE_LISTENING)
         display_partials_event.clear()
         text_to_copy = full_text_log.strip()
+        # Chantier stabilité v0.5.1, défaut 2 : sur une session sans
+        # presse-papiers accessible (SSH nu, pas de DISPLAY, pas de
+        # xclip/xsel/wl-clipboard), pyperclip.copy lève une exception qui
+        # remontait hors du thread UI et le tuait. On la capture : le texte est
+        # imprimé sur stdout et la finalisation se poursuit normalement.
+        # pyperclip reste le mécanisme de copie (acquis technique), non remplacé.
+        copied = True
         if text_to_copy:
-            pyperclip.copy(text_to_copy)
-        msg = _('Recording finished. Text copied.')
+            try:
+                pyperclip.copy(text_to_copy)
+            except Exception:
+                copied = False
+                print(f"\n{config.color_warning}"
+                      f"{_('Clipboard unavailable — session text below:')}"
+                      f"{config.RESET}\n{text_to_copy}")
+        msg = _('Recording finished. Text copied.') if copied \
+            else _('Recording finished. Clipboard unavailable — text printed above.')
         # UPDATE: Use theme colors from config
         print(f"\n{config.color_error}{msg}{config.RESET}")
         full_text_log = ""
@@ -85,8 +115,25 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             sleep_event.set()
             wake_event.clear()
             runtime_state.set_state(STATE_SLEEPING)
+            # Défaut 3 : le premier rappel « micro en veille » attend un
+            # intervalle complet après l'entrée en VEILLE.
+            last_sleep_reminder[0] = time.monotonic()
             print(f"\n{config.color_warning}{_('Sleep mode enabled — the microphone is released.')}{config.RESET}")
         play_sound()
+
+    def maybe_sleep_reminder():
+        """Chantier stabilité v0.5.1, défaut 3 : tant que la VEILLE dure, un
+        rappel throttlé que le micro ne capte rien — entre le silence trompeur
+        et la boucle « audio abandonné », un retour honnête à cadence fixe."""
+        if not sleep_event.is_set():
+            return
+        now = time.monotonic()
+        if now - last_sleep_reminder[0] >= SLEEP_REMINDER_INTERVAL_S:
+            last_sleep_reminder[0] = now
+            _ = get_translation()
+            print(f"\n{config.color_warning}"
+                  f"{_('Microphone asleep — Alt+W or --wake to resume.')}"
+                  f"{config.RESET}")
 
     def execute_manual_command(command: str):
         nonlocal full_text_log, recording
@@ -116,6 +163,10 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                 print(f"{config.color_warning}{_('No text to modify.')}{config.RESET}")
         elif cmd_name == 'nl':
             to_add = '\n\n' if config.current_lang == 'fr' else '\n'
+            # Défaut 3 : /nl est une demande de dictée — en VEILLE, on réveille
+            # et on démarre l'enregistrement avant d'insérer le saut.
+            if sleep_event.is_set():
+                start_recording()
             if recording:
                 process_and_type(to_add)
                 print(f"{config.color_warning}{_('New paragraph inserted.')}{config.RESET}")
@@ -168,13 +219,16 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     try:
         while not stop_event.is_set():
             _ = get_translation()
+            maybe_sleep_reminder()
             try:
                 command = control_queue.get_nowait()
                 if command == 'TOGGLE_RECORDING':
                     if recording: stop_recording()
                     else: start_recording()
                 elif command == 'DICTATION_ON':
-                    if not recording and not sleep_event.is_set(): start_recording()
+                    # Défaut 3 : plus de garde `not sleep_event` ici —
+                    # start_recording() sort de veille de lui-même.
+                    if not recording: start_recording()
                 elif command == 'DICTATION_OFF':
                     if recording: stop_recording()
                 elif command == 'FINALIZE_SESSION':
