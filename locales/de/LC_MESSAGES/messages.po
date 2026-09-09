@@ -602,3 +602,17 @@ msgstr "[Eingeschränkter Modus] Hinzugefügt:"
 msgid "Stopping user interface..."
 msgstr "Benutzeroberfläche wird beendet..."
 
+
+#: src/recognition.py
+msgid "Malformed decoder output captured:"
+msgstr ""
+
+#: src/recognition.py
+msgid ""
+"The recognition engine is not recovering; ending the session. Please restart "
+"the tool."
+msgstr ""
+
+#: src/ui.py
+msgid "Waking from sleep; recording started."
+msgstr ""
