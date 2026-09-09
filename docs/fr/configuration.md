@@ -121,13 +121,15 @@ sleep:
 Le texte est injecté en le plaçant dans le presse-papiers et en simulant un copier-coller.
 
 -   **`restore`** (booléen, par défaut `true`): restaure le contenu précédent du presse-papiers de l'utilisateur après le collage. Un contenu du presse-papiers non textuel (par exemple, une image) n'est jamais enregistré ni écrasé. Peut également être désactivé pour chaque exécution avec `--no-clipboard-restore`.
--   **`restore_delay_ms`** (entier, par défaut `250`): délai avant de restaurer, pour permettre à l'application cible de lire le résultat du collage.
+-   **`restore_delay_ms`** (entier, par défaut `400`): fenêtre maximale, sondée par courtes tranches, laissée à l'application cible pour lire la sélection avant la restauration du presse-papiers. L'attente s'arrête plus tôt si le presse-papiers a déjà changé (un autre propriétaire a pris la main).
+-   **`defer_restore`** (booléen, par défaut `false`): à `true`, le presse-papiers n'est pas restauré entre les segments dictés ; le contenu d'origine est remis une seule fois à la fin de la session (pause, `--finalize`, veille ou sortie). Cela supprime la course « colle l'ancien contenu du presse-papiers » observée sous Wayland avec les applications GTK, au prix d'un presse-papiers non restauré pendant la dictée.
 -   **`confirm_timeout_ms`** (entier, par défaut `500`): temps maximum d'attente pour confirmer que le presse-papiers contient bien notre texte avant d'envoyer la frappe de touche pour le collage.
 
 ```yaml
 clipboard:
   restore: true
-  restore_delay_ms: 250
+  restore_delay_ms: 400
+  defer_restore: false
   confirm_timeout_ms: 500
 ```
 

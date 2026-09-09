@@ -120,13 +120,15 @@ sleep:
 El texto se inyecta insertándolo en el portapapeles y simulando un pegado.
 
 -   **`restore`** (booleano, valor predeterminado: `true`): Restaura el contenido anterior del portapapeles del usuario después de pegar. Un portapapeles que no contenga texto (por ejemplo, una imagen) nunca se guarda ni se sobrescribe. También se puede desactivar por sesión con `--no-clipboard-restore`.
--   **`restore_delay_ms`** (entero, valor predeterminado: `250`): Retraso antes de restaurar, para permitir que la aplicación de destino lea el contenido pegado.
+-   **`restore_delay_ms`** (entero, valor predeterminado: `400`): Ventana máxima, sondeada en tramos cortos, que se deja a la aplicación de destino para leer la selección antes de restaurar el portapapeles. La espera termina antes si el portapapeles ya ha cambiado (otro propietario ha tomado el control).
+-   **`defer_restore`** (booleano, valor predeterminado: `false`): Con `true`, el portapapeles no se restaura entre los segmentos dictados; el contenido original se restablece una sola vez al final de la sesión (pausa, `--finalize`, suspensión o salida). Esto elimina la condición de carrera por la que se pega el contenido anterior del portapapeles, observada en Wayland con aplicaciones GTK, a costa de un portapapeles no restaurado durante el dictado.
 -   **`confirm_timeout_ms`** (entero, valor predeterminado: `500`): Tiempo máximo de espera para confirmar que el portapapeles realmente contiene nuestro texto antes de enviar la pulsación de tecla para pegar.
 
 ```yaml
 clipboard:
   restore: true
-  restore_delay_ms: 250
+  restore_delay_ms: 400
+  defer_restore: false
   confirm_timeout_ms: 500
 ```
 

@@ -12,6 +12,7 @@
 #     (keycodes physiques), puis mode dégradé console.
 #   - combo de collage adapté à la cible (Ctrl+Shift+V dans les terminaux).
 
+import atexit
 import os
 import subprocess
 import time
@@ -32,6 +33,17 @@ _SOUND_TIMEOUT = 5.0
 
 _caps = None          # capacités détectées (session + outils), calculées une fois
 _last_warn = 0.0
+
+# Restauration différée du presse-papiers (clipboard.defer_restore).
+# On mémorise le presse-papiers d'origine — celui d'avant la première dictée
+# de la session — et on le restaure une seule fois, en fin de session
+# (src/ui.py) ou à la sortie du processus (atexit). Voir
+# _CADRE/SPECIFICATIONS/CORRECTIF_INJECTION_COLLAGE.md.
+_deferred_clip = {"pending": False, "value": None}
+_deferred_atexit_registered = False
+
+_RESTORE_POLL_S = 0.08  # granularité de la fenêtre de restauration adaptative
+                        # (chaque tranche sonde le presse-papiers = un sous-processus)
 
 
 # --------------------------------------------------------------------------- #
@@ -332,6 +344,55 @@ def _send_key(key_name: str, count: int) -> bool:
 
 
 # --------------------------------------------------------------------------- #
+# Restauration du presse-papiers après collage                                #
+# --------------------------------------------------------------------------- #
+
+def _settle_before_restore(text: str, budget_s: float) -> bool:
+    """Laisse à la cible le temps de lire la sélection avant de restaurer.
+
+    `_send_paste` rend la main quand l'événement Ctrl+V est remis, pas quand la
+    cible a lu la sélection (lecture asynchrone sous Wayland). On attend donc
+    jusqu'à `budget_s`, en tranches courtes. Retourne True si notre `text` est
+    toujours dans le presse-papiers au terme de l'attente — la restauration est
+    alors pertinente ; False si un autre propriétaire (gestionnaire de
+    presse-papiers, cible, utilisateur) l'a déjà remplacé, auquel cas réécrire
+    reviendrait à lutter contre lui.
+
+    Parade probabiliste bornée : aucune API portable ne confirme que le collage
+    a réellement abouti dans la cible.
+    """
+    deadline = time.monotonic() + budget_s
+    while time.monotonic() < deadline:
+        time.sleep(_RESTORE_POLL_S)
+        if _clipboard_get() != text:
+            return False
+    return True
+
+
+def _register_deferred_atexit() -> None:
+    global _deferred_atexit_registered
+    if not _deferred_atexit_registered:
+        _deferred_atexit_registered = True
+        atexit.register(flush_deferred_clipboard)
+
+
+def flush_deferred_clipboard() -> None:
+    """Restaure le presse-papiers mémorisé en mode `clipboard.defer_restore`.
+
+    Idempotente : sans restauration en attente, ne fait rien. Appelée en fin de
+    session de dictée (src/ui.py : stop_recording, finalize_session,
+    toggle_sleep) et via atexit pour couvrir une sortie brutale.
+    """
+    if not _deferred_clip["pending"]:
+        return
+    saved = _deferred_clip["value"]
+    _deferred_clip["pending"] = False
+    _deferred_clip["value"] = None
+    if saved is not None:
+        _clipboard_set(saved)
+
+
+# --------------------------------------------------------------------------- #
 # API publique                                                               #
 # --------------------------------------------------------------------------- #
 
@@ -344,7 +405,8 @@ def type_text(text: str) -> bool:
         return False
 
     want_restore = _cfg("clipboard", "restore", True)
-    restore_delay = _cfg("clipboard", "restore_delay_ms", 250) / 1000.0
+    defer_restore = _cfg("clipboard", "defer_restore", False)
+    restore_delay = _cfg("clipboard", "restore_delay_ms", 400) / 1000.0
     confirm_ms = _cfg("clipboard", "confirm_timeout_ms", 500)
 
     saved = None
@@ -366,8 +428,24 @@ def type_text(text: str) -> bool:
 
     ok = _send_paste(_paste_combo_for_target())
 
-    time.sleep(restore_delay)
-    if saved is not None:
+    if saved is None:
+        return ok
+
+    if defer_restore:
+        # Pas de restauration en ligne : la cible a un temps non borné pour lire
+        # la sélection. Le presse-papiers d'origine (celui d'avant la première
+        # dictée de la session) est remis par flush_deferred_clipboard().
+        if not _deferred_clip["pending"]:
+            _deferred_clip["pending"] = True
+            _deferred_clip["value"] = saved
+            _register_deferred_atexit()
+        return ok
+
+    if ok:
+        if _settle_before_restore(text, restore_delay):
+            _clipboard_set(saved)
+    else:
+        # Rien n'a été collé : restauration immédiate, sans fenêtre d'attente.
         _clipboard_set(saved)
     return ok
 

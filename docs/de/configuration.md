@@ -120,13 +120,15 @@ sleep:
 Der Text wird injiziert, indem er in die Zwischenablage kopiert und dann durch eine Simulation eingefügt wird.
 
 -   **`restore`** (Boolean, Standardwert: `true`): Setzt den vorherigen Inhalt der Zwischenablage des Benutzers wieder ein, nachdem ein Einfügen stattgefunden hat. Inhalte der Zwischenablage, die keine Texte sind (z. B. ein Bild), werden niemals gespeichert oder überschrieben. Kann auch pro Ausführung deaktiviert werden (mit `--no-clipboard-restore`).
--   **`restore_delay_ms`** (Integer, Standardwert: `250`): Verzögerung vor dem Wiederherstellen, um der Zielanwendung Zeit zu geben, den eingefügten Text zu lesen.
+-   **`restore_delay_ms`** (Integer, Standardwert: `400`): Maximales Zeitfenster, in kurzen Abschnitten abgefragt, das der Zielanwendung zum Lesen der Auswahl gelassen wird, bevor die Zwischenablage wiederhergestellt wird. Die Wartezeit endet früher, wenn sich die Zwischenablage bereits geändert hat (ein anderer Eigentümer hat übernommen).
+-   **`defer_restore`** (Boolean, Standardwert: `false`): Bei `true` wird die Zwischenablage zwischen den diktierten Segmenten nicht wiederhergestellt; der ursprüngliche Inhalt wird einmalig am Ende der Sitzung zurückgesetzt (Pause, `--finalize`, Ruhezustand oder Beenden). Das behebt das Problem, dass unter Wayland mit GTK-Anwendungen der vorherige Inhalt der Zwischenablage eingefügt wird, um den Preis einer während des Diktierens nicht wiederhergestellten Zwischenablage.
 -   **`confirm_timeout_ms`** (Integer, Standardwert: `500`): Maximale Wartezeit, bis bestätigt wird, dass die Zwischenablage tatsächlich unseren Text enthält, bevor der Einfügetaste-Befehl gesendet wird.
 
 ```yaml
 clipboard:
   restore: true
-  restore_delay_ms: 250
+  restore_delay_ms: 400
+  defer_restore: false
   confirm_timeout_ms: 500
 ```
 

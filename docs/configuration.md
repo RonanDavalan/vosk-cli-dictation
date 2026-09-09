@@ -152,13 +152,15 @@ sleep:
 Text is injected by placing it on the clipboard and simulating a paste.
 
 -   **`restore`** (boolean, default `true`): put the user's previous clipboard content back after pasting. A non-text clipboard (an image, for instance) is never saved or overwritten. Can also be disabled per run with `--no-clipboard-restore`.
--   **`restore_delay_ms`** (integer, default `250`): delay before restoring, to let the target application read the paste.
+-   **`restore_delay_ms`** (integer, default `400`): the maximum window, polled in short slices, left for the target application to read the selection before the clipboard is restored. The wait stops early if the clipboard has already changed (another owner took over).
+-   **`defer_restore`** (boolean, default `false`): when `true`, the clipboard is not restored between dictated segments; the original content is put back once at the end of the session (pause, `--finalize`, sleep, or exit). This removes the "pastes the previous clipboard content" race seen under Wayland with GTK applications, at the cost of the clipboard not being restored while you dictate.
 -   **`confirm_timeout_ms`** (integer, default `500`): maximum time to wait for confirmation that the clipboard actually holds our text before sending the paste keystroke.
 
 ```yaml
 clipboard:
   restore: true
-  restore_delay_ms: 250
+  restore_delay_ms: 400
+  defer_restore: false
   confirm_timeout_ms: 500
 ```
 

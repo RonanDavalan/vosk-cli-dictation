@@ -65,8 +65,16 @@ sleep:
 clipboard:
   # Restaurer le presse-papiers de l'utilisateur après le collage (chantier 7 volet B).
   restore: true
-  # Délai avant restauration, laissé à l'application cible pour lire le presse-papiers.
-  restore_delay_ms: 250
+  # Fenêtre max, en tranches courtes, laissée à l'application cible pour lire la
+  # sélection avant restauration. L'attente s'arrête plus tôt si le
+  # presse-papiers a déjà changé (un autre propriétaire a pris la main).
+  restore_delay_ms: 400
+  # true : ne pas restaurer entre les segments d'une session ; le presse-papiers
+  # d'origine est remis une seule fois en fin de session (pause, --finalize,
+  # VEILLE, sortie). Élimine la course "collage de l'ancien contenu" sous
+  # Wayland + appli GTK, au prix d'un presse-papiers non restauré pendant la
+  # dictée. Voir le guide de dépannage.
+  defer_restore: false
   # Durée max d'attente de la confirmation que le presse-papiers contient bien
   # notre texte, avant d'envoyer Ctrl+V.
   confirm_timeout_ms: 500

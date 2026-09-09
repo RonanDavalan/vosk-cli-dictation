@@ -5,7 +5,9 @@ import time
 import pyperclip
 
 from config.config import config
-from src.system_control import type_text, press_key, play_sound
+from src.system_control import (
+    type_text, press_key, play_sound, flush_deferred_clipboard,
+)
 from src.i18n import get_translation, set_ui_language
 from src.text_processing import TextProcessor
 from src.runtime_state import (
@@ -71,6 +73,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         recording = False
         runtime_state.set_state(STATE_LISTENING)
         display_partials_event.clear()
+        # Correctif de collage : fin de session de dictée -> on rend le
+        # presse-papiers d'origine si clipboard.defer_restore l'a mis de côté.
+        flush_deferred_clipboard()
         # UPDATE: Use theme colors from config
         print(f"\n{config.color_error}{_('Recording paused.')}{config.RESET}")
         play_sound()
@@ -85,6 +90,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         recording = False
         runtime_state.set_state(STATE_LISTENING)
         display_partials_event.clear()
+        # Correctif de collage : rendre le presse-papiers d'origine (mode
+        # clipboard.defer_restore) avant d'y copier le texte de session.
+        flush_deferred_clipboard()
         text_to_copy = full_text_log.strip()
         # Chantier stabilité v0.5.1, défaut 2 : sur une session sans
         # presse-papiers accessible (SSH nu, pas de DISPLAY, pas de
@@ -120,6 +128,10 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         else:
             if recording:
                 stop_recording()
+            else:
+                # stop_recording() l'aurait fait ; on couvre l'entrée en VEILLE
+                # depuis l'ÉCOUTE (mode clipboard.defer_restore).
+                flush_deferred_clipboard()
             sleep_event.set()
             wake_event.clear()
             runtime_state.set_state(STATE_SLEEPING)
