@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Benutzerbefehle
 % Ronan Davalan
-% 2026-08-28
+% 2026-09-10
 
 # NAME
 
@@ -26,8 +26,8 @@ Die Diktierfunktion wird entweder per Sprache (eine konfigurierbare, sprachspezi
 
 Es läuft jeweils nur eine Sitzung pro Benutzer gleichzeitig. Sie öffnet eine private Unix-Socket-Verbindung an `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (Modus `0600`); derselbe Befehl, der mit einem Kontrollflag aufgerufen wird (siehe "EINE LAUFENDE SITZEUNG STEUEERN"), verbindet sich mit dieser Socket-Verbindung anstatt eine neue Sitzung zu starten.
 
-Text wird injiziert, indem es in die Zwischenablage kopiert und ein Einfügen simuliert wird.
-Unter Wayland werden **wtype** und **wl-clipboard** verwendet, wobei auf **ydotool** zurückgegriffen wird (welches den `ydotoold` Daemon und Zugriff auf `/dev/uinput` benötigt). Unter X11 wird **xdotool** verwendet. Mindestens ein Backend für den aktuellen Sitzungstyp muss installiert sein. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
+Text wird injiziert, indem er in die Zwischenablage kopiert und ein Einfügen simuliert wird; daher werden zwei Arten von Werkzeugen benötigt: ein Tastendruck-Simulator und ein Zwischenablage-Werkzeug.
+Unter Wayland sind das **wtype** und **wl-clipboard**; fehlt **wtype**, greift der Tastendruck auf **ydotool** zurück (welches den `ydotoold`-Daemon und Zugriff auf `/dev/uinput` benötigt), doch **wl-clipboard** bleibt erforderlich. Unter X11 sind es **xdotool** und **xclip**. Das Debian-Paket hängt von **wl-clipboard** ab und empfiehlt **xclip**; ein Git-Checkout muss sie selbst installieren. Ohne Zwischenablage-Werkzeug erreicht der diktierte Text die Zwischenablage nie, und das Einfügen fügt erneut ein, was zuletzt von Hand kopiert wurde. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
 zeigt, welche Tools, Audio-Geräte und Zwischenablage-Zugriff verfügbar sind, und beendet dann das Programm.
 
 Globale Hotkeys über `pynput` beobachten den X-Server: unter Wayland erreichen

@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Comandos de usuario
 % Ronan Davalan
-% 2026-08-28
+% 2026-09-10
 
 # NOMBRE
 
@@ -27,10 +27,8 @@ La función de dictado se inicia y se detiene mediante la voz (una frase de acti
 Solo una sesión se ejecuta por usuario a la vez. Abre un socket Unix privado en `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (modo `0600`); el mismo comando
 invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN EJECUCIÓN) se conecta a ese socket en lugar de iniciar una nueva sesión.
 
-Se inyecta el texto pegándolo desde el portapapeles.
-Bajo Wayland, esto utiliza **wtype** y **wl-clipboard**, recurriendo a
-**ydotool** (que necesita el demonio `ydotoold` y acceso a
-`/dev/uinput`). Bajo X11, utiliza **xdotool**. Debe estar instalado al menos un backend para el tipo de sesión actual. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
+El texto se inyecta colocándolo en el portapapeles y simulando un pegado, por lo que se necesitan dos tipos de herramienta: un simulador de pulsaciones y una herramienta de portapapeles.
+Bajo Wayland son **wtype** y **wl-clipboard**; si falta **wtype**, la pulsación recurre a **ydotool** (que necesita el demonio `ydotoold` y acceso a `/dev/uinput`), pero **wl-clipboard** sigue siendo necesario. Bajo X11 son **xdotool** y **xclip**. El paquete Debian depende de **wl-clipboard** y recomienda **xclip**; una copia de Git debe instalarlos por su cuenta. Sin una herramienta de portapapeles, el texto dictado nunca llega al portapapeles y el pegado reinserta lo último que se copió a mano. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
 informa qué herramientas, dispositivo de audio y acceso al portapapeles están disponibles, y luego finaliza.
 
 Las combinaciones de teclas globales a través de `pynput` observan el servidor

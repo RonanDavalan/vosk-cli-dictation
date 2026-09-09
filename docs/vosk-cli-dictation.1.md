@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | User Commands
 % Ronan Davalan
-% 2026-08-28
+% 2026-09-10
 
 # NAME
 
@@ -39,15 +39,19 @@ Only one session runs per user at a time. It opens a private Unix socket at
 invoked with a control flag (see CONTROLLING A RUNNING SESSION) connects to
 that socket instead of starting a new session.
 
-Text is injected by placing it on the clipboard and simulating a paste.
-Under Wayland this uses **wtype** and **wl-clipboard**, falling back to
-**ydotool** (which needs the `ydotoold` daemon and access to
-`/dev/uinput`). Under X11 it uses **xdotool**. At least one backend for the
-current session type must be installed. Adding your user to the `input`
-group is required only for the **ydotool** fallback; **wtype** and
-**xdotool** do not need it. **vosk-cli-dictation \--diagnose**
-reports which tools, audio device and clipboard access are present, then
-exits.
+Text is injected by placing it on the clipboard and simulating a paste, so
+two kinds of tool are needed: a keystroke simulator and a clipboard tool.
+Under Wayland this is **wtype** plus **wl-clipboard**; if **wtype** is
+missing the keystroke falls back to **ydotool** (which needs the
+`ydotoold` daemon and access to `/dev/uinput`), but **wl-clipboard** is
+still required. Under X11 it is **xdotool** plus **xclip**. The Debian
+package depends on **wl-clipboard** and recommends **xclip**; a Git
+checkout must install them itself. Without a clipboard tool the dictated
+text never reaches the clipboard and the paste re-inserts whatever was
+last copied by hand. Adding your user to the `input` group is required
+only for the **ydotool** fallback; **wtype** and **xdotool** do not need
+it. **vosk-cli-dictation \--diagnose** reports which tools, audio device
+and clipboard access are present, then exits.
 
 Global hotkeys via `pynput` watch the X server: under Wayland they reach
 only windows running through XWayland, never a focused native-Wayland

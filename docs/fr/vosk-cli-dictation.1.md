@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Commandes utilisateur
 % Ronan Davalan
-% 2026-08-28
+% 2026-09-10
 
 # NOM
 
@@ -29,7 +29,7 @@ Une seule session s'exécute par utilisateur à la fois. Elle ouvre une socket U
 utilisée avec un indicateur de contrôle (voir GÉRER UNE SESSION EN COURS) se connecte
 à cette socket au lieu de démarrer une nouvelle session.
 
-Sous Wayland, cela utilise **wtype** et **wl-clipboard**, avec une solution de repli vers **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`). Sous X11, cela utilise **xdotool**. Au moins un backend pour le type de session actuel doit être installé. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
+Le texte est injecté en le plaçant dans le presse-papiers puis en simulant un collage : deux sortes d'outils sont donc nécessaires, un simulateur de frappe et un outil de presse-papiers. Sous Wayland, c'est **wtype** plus **wl-clipboard** ; si **wtype** est absent, la frappe se rabat sur **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`), mais **wl-clipboard** reste requis. Sous X11, c'est **xdotool** plus **xclip**. Le paquet Debian dépend de **wl-clipboard** et recommande **xclip** ; un clone Git doit les installer lui-même. Sans outil de presse-papiers, le texte dicté n'atteint jamais le presse-papiers et le collage réinsère le dernier contenu copié à la main. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
 
 Les raccourcis globaux via `pynput` observent le serveur X : sous Wayland ils
 n'atteignent que les fenêtres passant par XWayland, jamais une fenêtre Wayland
