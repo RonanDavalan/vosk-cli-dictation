@@ -18,7 +18,7 @@ from config.config import config
 from src.i18n import set_ui_language, get_translation
 from src.system_control import check_command_exists, injection_backend_available
 from src.audio_capture import initialize_audio, audio_capture_thread
-from src.recognition import load_model, recognition_thread
+from src.recognition import load_model, recognition_thread, force_c_numeric_locale
 from src.ui import ui_thread
 from src.keyboard_listener import keyboard_listener_thread
 from src.text_processing import TextProcessor
@@ -151,6 +151,13 @@ def exit_cleanup():
 
 def main():
     """Main function"""
+    # Chantier stabilité v0.5.1 : neutralise LC_NUMERIC pour tout le processus
+    # avant que Vosk ne sérialise le moindre Result(). Sous une locale à virgule
+    # (fr_FR.UTF-8 sur `ada`), les flottants de SetWords(True) sortent en
+    # « 1,000000 » et cassent json.loads à chaque final avec mots. Répété
+    # défensivement dans src/recognition.py avant chaque KaldiRecognizer.
+    force_c_numeric_locale()
+
     # R5 (28/08 soir) : coupe les LOG (VoskAPI...) au boot — le bruit de Vosk
     # s'affichait après « Appuyez sur Ctrl+C pour quitter » (démarrage des
     # threads après l'aide). --diagnose n'a pas besoin de ces logs.

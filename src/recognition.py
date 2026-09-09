@@ -1,6 +1,7 @@
 # src/recognition.py
 
 import json
+import locale
 import queue
 import os
 import time
@@ -26,6 +27,22 @@ MODE_LISTENING = "listening"
 # stop_event et termine la session proprement. Tout décodage réussi remet le
 # compteur à zéro.
 DECODE_ERROR_MAX_CONSECUTIVE = 5
+
+
+def force_c_numeric_locale():
+    """Chantier stabilité v0.5.1 : Vosk/Kaldi sérialise les flottants de
+    `SetWords(True)` avec le séparateur décimal de `LC_NUMERIC`. Sous une locale
+    à virgule — `ada` a `LC_ALL=fr_FR.UTF-8` — `Result()` rend
+    « "conf" : 1,000000 », JSON invalide, et `json.loads` casse à chaque final
+    avec mots (`neo`, en locale `C`, ne l'a jamais vu). On force `LC_NUMERIC` du
+    processus à « C ». Appelé au démarrage (`src/main.py`) et défensivement ici
+    avant chaque `KaldiRecognizer` : `Model()` ou une dépendance peut avoir
+    reposé la locale depuis le démarrage. Idempotent, sans effet si la locale
+    est déjà neutre."""
+    try:
+        locale.setlocale(locale.LC_NUMERIC, "C")
+    except locale.Error:
+        pass
 
 
 def _diagnostics_dir() -> str:
@@ -124,6 +141,7 @@ def build_recognizer(model, mode: str):
       the decoder does almost no work while idle. Rebuilt back to MODE_FULL on
       waking.
     """
+    force_c_numeric_locale()
     sample_rate = config.audio['sample_rate']
     if mode in (MODE_LISTENING, MODE_STOP):
         # ensure_ascii=False est indispensable : Vosk ne déséchappe pas les
