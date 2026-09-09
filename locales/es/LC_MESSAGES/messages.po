@@ -589,14 +589,16 @@ msgstr "Deteniendo la interfaz de usuario..."
 
 #: src/recognition.py
 msgid "Malformed decoder output captured:"
-msgstr ""
+msgstr "Salida del decodificador con formato incorrecto capturada:"
 
 #: src/recognition.py
 msgid ""
 "The recognition engine is not recovering; ending the session. Please restart "
 "the tool."
 msgstr ""
+"El motor de reconocimiento no se recupera; se finaliza la sesión. Reinicie "
+"la herramienta."
 
 #: src/ui.py
 msgid "Waking from sleep; recording started."
-msgstr ""
+msgstr "Saliendo del modo de reposo; grabación iniciada."

@@ -605,14 +605,16 @@ msgstr "Benutzeroberfläche wird beendet..."
 
 #: src/recognition.py
 msgid "Malformed decoder output captured:"
-msgstr ""
+msgstr "Fehlerhafte Decoder-Ausgabe erfasst:"
 
 #: src/recognition.py
 msgid ""
 "The recognition engine is not recovering; ending the session. Please restart "
 "the tool."
 msgstr ""
+"Die Spracherkennung erholt sich nicht; die Sitzung wird beendet. Bitte "
+"starten Sie das Werkzeug neu."
 
 #: src/ui.py
 msgid "Waking from sleep; recording started."
-msgstr ""
+msgstr "Aufwachen aus dem Ruhemodus; Aufnahme gestartet."
