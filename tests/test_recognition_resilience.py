@@ -188,7 +188,7 @@ def test_repeated_decode_errors_keep_recovering(monkeypatch):
 
 def test_permanent_decode_errors_escalate_and_end_the_session(monkeypatch):
     # Toutes les trames sont malformées et la reconstruction ne rétablit rien
-    # (cas `ada` du 09/09 : json.JSONDecodeError à chaque trame). Au-delà de
+    # (cas Raspberry Pi du 09/09 : json.JSONDecodeError à chaque trame). Au-delà de
     # DECODE_ERROR_MAX_CONSECUTIVE, le thread pose stop_event lui-même et sort,
     # au lieu de boucler indéfiniment sur l'erreur.
     config.set_language("fr")
