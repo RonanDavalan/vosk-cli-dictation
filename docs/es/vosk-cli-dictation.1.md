@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Comandos de usuario
 % Ronan Davalan
-% 2026-09-10
+% 2026-09-16
 
 # NOMBRE
 
@@ -25,7 +25,7 @@ Todo el reconocimiento de voz se realiza localmente: ni el audio ni el texto tra
 La función de dictado se inicia y se detiene mediante la voz (una frase de activación y una frase de detención configurables, según el idioma) o a través de subcomandos que se pueden asignar a un atajo de teclado en el escritorio. Además, se puede poner en modo de espera para liberar completamente el micrófono y suspender el reconocimiento cuando no sea necesario, sin tener que cerrar el programa.
 
 Solo una sesión se ejecuta por usuario a la vez. Abre un socket Unix privado en `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (modo `0600`); el mismo comando
-invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN EJECUCIÓN) se conecta a ese socket en lugar de iniciar una nueva sesión.
+invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN CURSO) se conecta a ese socket en lugar de iniciar una nueva sesión.
 
 El texto se inyecta colocándolo en el portapapeles y simulando un pegado, por lo que se necesitan dos tipos de herramienta: un simulador de pulsaciones y una herramienta de portapapeles.
 Bajo Wayland son **wtype** y **wl-clipboard**; si falta **wtype**, la pulsación recurre a **ydotool** (que necesita el demonio `ydotoold` y acceso a `/dev/uinput`), pero **wl-clipboard** sigue siendo necesario. Bajo X11 son **xdotool** y **xclip**. El paquete Debian depende de **wl-clipboard** y recomienda **xclip**; una copia de Git debe instalarlos por su cuenta. Sin una herramienta de portapapeles, el texto dictado nunca llega al portapapeles y el pegado reinserta lo último que se copió a mano. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**

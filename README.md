@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.1--alpha-yellow.svg" alt="Version: v0.5.1-alpha"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.2--beta-yellow.svg" alt="Version: v0.5.2-beta"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
   <a href="#"><img src="https://img.shields.io/badge/OS-Debian_13-D70A53.svg" alt="Tested on Debian 13"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
@@ -48,7 +48,7 @@ On **Debian 13 (Trixie)** and derivatives, install the `.deb` from the
 environment to create:
 
 ```bash
-sudo apt install ./vosk-cli-dictation_0.5.1~alpha_all.deb
+sudo apt install ./vosk-cli-dictation_0.5.2~beta_all.deb
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).

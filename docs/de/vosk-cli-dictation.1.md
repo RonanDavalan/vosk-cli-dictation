@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Benutzerbefehle
 % Ronan Davalan
-% 2026-09-10
+% 2026-09-16
 
 # NAME
 
@@ -24,7 +24,7 @@ Die gesamte Spracherkennung läuft lokal: weder Audio noch transkribierter Text 
 
 Die Diktierfunktion wird entweder per Sprache (eine konfigurierbare, sprachspezifische Aktivierungs- und Stoppphrase) oder über Steuerungssubbefehle gestartet und gestoppt, die an eine Tastenkombination auf dem Desktop gebunden werden können. Außerdem kann die Funktion in einen Ruhezustand versetzt werden, um das Mikrofon vollständig freizugeben und die Spracherkennung zu deaktivieren, wenn sie nicht benötigt wird, ohne das Programm zu beenden.
 
-Es läuft jeweils nur eine Sitzung pro Benutzer gleichzeitig. Sie öffnet eine private Unix-Socket-Verbindung an `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (Modus `0600`); derselbe Befehl, der mit einem Kontrollflag aufgerufen wird (siehe "EINE LAUFENDE SITZEUNG STEUEERN"), verbindet sich mit dieser Socket-Verbindung anstatt eine neue Sitzung zu starten.
+Es läuft jeweils nur eine Sitzung pro Benutzer gleichzeitig. Sie öffnet eine private Unix-Socket-Verbindung an `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (Modus `0600`); derselbe Befehl, der mit einem Kontrollflag aufgerufen wird (siehe STEUERUNG EINER LAUFENDEN SITZUNG), verbindet sich mit dieser Socket-Verbindung anstatt eine neue Sitzung zu starten.
 
 Text wird injiziert, indem er in die Zwischenablage kopiert und ein Einfügen simuliert wird; daher werden zwei Arten von Werkzeugen benötigt: ein Tastendruck-Simulator und ein Zwischenablage-Werkzeug.
 Unter Wayland sind das **wtype** und **wl-clipboard**; fehlt **wtype**, greift der Tastendruck auf **ydotool** zurück (welches den `ydotoold`-Daemon und Zugriff auf `/dev/uinput` benötigt), doch **wl-clipboard** bleibt erforderlich. Unter X11 sind es **xdotool** und **xclip**. Das Debian-Paket hängt von **wl-clipboard** ab und empfiehlt **xclip**; ein Git-Checkout muss sie selbst installieren. Ohne Zwischenablage-Werkzeug erreicht der diktierte Text die Zwischenablage nie, und das Einfügen fügt erneut ein, was zuletzt von Hand kopiert wurde. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
@@ -133,8 +133,8 @@ Globale `pynput`-Hotkeys werden aktiviert, sobald ein X-Server erreichbar ist un
     in die Zwischenablage kopiert, im Gegensatz zu **Alt+S** und der Stoppphrase.
     Während der Pause bleibt das Mikrofon aktiv und die Aktivierungsphrase funktioniert weiterhin.
 
-**Alt+S:**
-Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase. Die Kombination gelangt auch in das fokussierte Fenster (siehe oben) und verfehlt native Wayland-Fenster; bevorzugen Sie **\--finalize**, an eine Desktop-Tastenkombination gebunden.
+**Alt+S**
+:   Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwischenablage – entspricht der Stopp-Phrase. Die Kombination gelangt auch in das fokussierte Fenster (siehe oben) und verfehlt native Wayland-Fenster; bevorzugen Sie **\--finalize**, an eine Desktop-Tastenkombination gebunden.
 
 **Alt+W**
 :   Aktiviert den Energiesparmodus, einen dritten Zustand, der sich von den beiden oben genannten unterscheidet. Im Energiesparmodus wird der Audio-Stream beendet (das Mikrofon wird freigegeben) und die Spracherkennung wird deaktiviert, wodurch die CPU-Auslastung auf nahezu Null sinkt; die Aktivierungsphrase kann erst gehört werden, wenn der Energiesparmodus wieder deaktiviert wird. **Alt+W** selbst funktioniert weiterhin im Energiesparmodus, da es nicht von Audio abhängig ist. Die Aktivierung des Energiesparmodus während einer Diktierfunktion beendet diese sauber, sodass kein Audio während eines Satzes verloren geht.
@@ -153,8 +153,8 @@ Während das Programm läuft, kann es auch über das Terminalfenster gesteuert w
 **/cancel**
 :   Beendet die aktuelle Aufnahme ohne jegliche Textausgabe.
 
-**/delete-word**:
-   Löscht das zuletzt eingegebene Wort.
+**/delete-word**
+:   Löscht das zuletzt eingegebene Wort.
 
 **/nl**
 :   Eine neue Zeile einfügen (simuliert das Drücken der Eingabetaste).

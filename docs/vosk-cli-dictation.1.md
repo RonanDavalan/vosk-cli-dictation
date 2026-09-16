@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | User Commands
 % Ronan Davalan
-% 2026-09-10
+% 2026-09-16
 
 # NAME
 

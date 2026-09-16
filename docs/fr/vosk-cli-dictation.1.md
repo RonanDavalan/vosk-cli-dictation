@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Commandes utilisateur
 % Ronan Davalan
-% 2026-09-10
+% 2026-09-16
 
 # NOM
 
@@ -26,7 +26,7 @@ La dictée peut être démarrée et arrêtée soit par la voix (à l'aide d'une 
 
 Une seule session s'exécute par utilisateur à la fois. Elle ouvre une socket Unix privée à
 `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (en mode `0600`); la même commande
-utilisée avec un indicateur de contrôle (voir GÉRER UNE SESSION EN COURS) se connecte
+utilisée avec un indicateur de contrôle (voir GESTION D'UNE SESSION EN COURS) se connecte
 à cette socket au lieu de démarrer une nouvelle session.
 
 Le texte est injecté en le plaçant dans le presse-papiers puis en simulant un collage : deux sortes d'outils sont donc nécessaires, un simulateur de frappe et un outil de presse-papiers. Sous Wayland, c'est **wtype** plus **wl-clipboard** ; si **wtype** est absent, la frappe se rabat sur **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`), mais **wl-clipboard** reste requis. Sous X11, c'est **xdotool** plus **xclip**. Le paquet Debian dépend de **wl-clipboard** et recommande **xclip** ; un clone Git doit les installer lui-même. Sans outil de presse-papiers, le texte dicté n'atteint jamais le presse-papiers et le collage réinsère le dernier contenu copié à la main. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
@@ -146,7 +146,8 @@ Pendant l'exécution du programme, taper l'une des commandes suivantes dans sa f
 **/delete-word**
 :   Supprime le dernier mot saisi.
 
-: Insérer une nouvelle ligne (simule l'appui sur la touche Entrée).
+**/nl**
+:   Insérer une nouvelle ligne (simule l'appui sur la touche Entrée).
 
 # CONFIGURATION
 
