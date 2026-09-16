@@ -87,13 +87,17 @@ an Tastenkombinationen auf dem Desktop gebunden werden.
 
 Der Aktivierungsausdruck und der Stoppausdruck bestehen jeweils aus zwei Wörtern und können pro Sprache unter `language_settings.<lang>.voice_commands` konfiguriert werden. Es werden zwei Wörter anstelle von einem verwendet, damit ein normaler Satz diese nicht auslöst. Mit der Werkseinstellung:
 
-Sagen Sie "**start Diktat**", um zu beginnen, "**Stopp Diktat**", um zu beenden, und kopieren Sie das Ergebnis in die Zwischenablage.
+Englisch
+:   Sagen Sie **"start dictation"**, um zu beginnen, **"stop dictation"**, um zu beenden, und kopieren Sie das Ergebnis in die Zwischenablage.
 
-"aktive Diktierfunktion" / "Diktierfunktion pausieren".
+Französisch
+:   **"active dictée"** / **"stop dictée"**.
 
-"Diktat starten" / "Diktat stoppen".
+Deutsch
+:   **"diktat starten"** / **"diktat stoppen"**.
 
-"Start des Diktats" / "Ende des Diktats".
+Spanisch
+:   **"iniciar dictado"** / **"terminar dictado"**.
 
 Eine Auslösephrase wird nur berücksichtigt, wenn die durchschnittliche
 Erkennungsgenauigkeit ihrer Wörter `recognition.confidence_threshold` überschreitet

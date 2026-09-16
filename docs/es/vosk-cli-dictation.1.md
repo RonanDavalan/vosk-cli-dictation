@@ -70,7 +70,7 @@ ser asignadas a atajos de teclado del escritorio.
 :   Alterna entre el modo de dictado (DICTÉE) y el modo de escucha (ÉCOUTE).
 
 **\--dictation-on**, **\--dictation-off**
-:   Activar o desactivar la dictado por voz.
+:   Activar o desactivar el dictado por voz.
 
 **\--finalize**
 :   Detenga la dictación y copie el texto acumulado; equivalente a la
@@ -89,13 +89,17 @@ ser asignadas a atajos de teclado del escritorio.
 
 La frase de activación y la frase de detención constan de dos palabras cada una, y son configurables por idioma en `language_settings.<lang>.voice_commands`. Se utilizan dos palabras en lugar de una para evitar que una oración común las active accidentalmente. Con la configuración de fábrica:
 
-Para comenzar, diga "**iniciar dictado**". Para finalizar, diga "**detener dictado**" y copie el resultado al portapapeles.
+Inglés
+:   Diga **"start dictation"** para comenzar y **"stop dictation"** para terminar y copiar el resultado al portapapeles.
 
-"dictado activo" / "detener dictado".
+Francés
+:   **"active dictée"** / **"stop dictée"**.
 
-"comenzar la dictada" / "detener la dictada".
+Alemán
+:   **"diktat starten"** / **"diktat stoppen"**.
 
-comenzar la dictación / finalizar la dictación
+Español
+:   **"iniciar dictado"** / **"terminar dictado"**.
 
 Una frase disparadora solo se activa cuando la confianza promedio de reconocimiento
 de sus palabras supera el umbral `recognition.confidence_threshold` (valor predeterminado
@@ -126,13 +130,13 @@ En los tres modos, la frase de parada hablada y **\--finalize** / **\--cancel** 
 Los atajos de teclado globales de `pynput` se inician en cuanto un servidor X está accesible y `hotkeys.pynput_enabled` es verdadero. `pynput` observa el servidor X, así que en Wayland los atajos solo alcanzan las ventanas que pasan por XWayland (muchas aplicaciones Electron y antiguas), nunca una ventana Wayland nativa enfocada; los subcomandos de control asociados a un acceso directo del escritorio cubren todas las ventanas. El listener de `pynput` tampoco consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (por ejemplo `^[s` para **Alt+S**). Para una parada limpia desde cualquier ventana, vincule en su lugar **\--finalize** (o **\--toggle**, **\--sleep-toggle**) a un atajo de teclado del escritorio. La configuración predeterminada define:
 
 **Alt+H**
-:   Activa o desactiva la dictado. Esto solo pausa o reanuda; **no**
+:   Activa o desactiva el dictado. Esto solo pausa o reanuda; **no**
     copia nada al portapapeles, a diferencia de **Alt+S** y la frase de parada.
     Mientras está pausado, el micrófono permanece activo y la frase de activación
     sigue funcionando.
 
 **Alt+S**
-: Detiene la dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada. La combinación también se filtra a la ventana enfocada (véase más arriba) y no llega a las ventanas Wayland nativas; prefiera **\--finalize** vinculado a un atajo del escritorio.
+: Detiene el dictado actual y copia el texto acumulado al portapapeles; equivalente a la frase de parada. La combinación también se filtra a la ventana enfocada (véase más arriba) y no llega a las ventanas Wayland nativas; prefiera **\--finalize** vinculado a un atajo del escritorio.
 
 **Alt+W**
 :   Activa/desactiva el modo de suspensión, un tercer estado distinto de los dos anteriores. En el modo de suspensión, el flujo de audio se cierra (el micrófono se libera) y el reconocimiento se bloquea, por lo que el uso de la CPU disminuye hasta casi cero; la frase de activación no se puede escuchar hasta que el modo de suspensión se desactiva. **Alt+W** sigue funcionando mientras está en modo de suspensión, ya que no depende del audio. Activar el modo de suspensión durante una dictado la detiene limpiamente primero, para que no se pierda audio en medio de una frase.

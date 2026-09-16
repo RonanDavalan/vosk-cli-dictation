@@ -87,13 +87,17 @@ associés à des raccourcis clavier de bureau.
 
 La phrase de veille et la phrase d'arrêt sont constituées de deux mots chacune et sont configurables pour chaque langue dans `language_settings.<lang>.voice_commands`. Deux mots plutôt qu'un seul afin qu'une phrase ordinaire ne les déclenche pas. Avec la configuration par défaut :
 
-Dites "**démarrer la dictée**" pour commencer, "**arrêter la dictée**" pour terminer, et copiez le résultat dans le presse-papiers.
+Anglais
+:   Dites **"start dictation"** pour commencer, **"stop dictation"** pour terminer, et copiez le résultat dans le presse-papiers.
 
-"active la dictée" / "arrêter la dictée".
+Français
+:   **"active dictée"** / **"stop dictée"**.
 
-"démarrer le dictée" / "arrêter le dictée".
+Allemand
+:   **"diktat starten"** / **"diktat stoppen"**.
 
-:   **"commencer l'enregistrement"** / **"arrêter l'enregistrement"**.
+Espagnol
+:   **"iniciar dictado"** / **"terminar dictado"**.
 
 Une phrase de déclenchement n'est activée que lorsque la moyenne de la confiance de reconnaissance de ses mots dépasse `recognition.confidence_threshold` (valeur par défaut `0.55`, surchargeable par langue). Une phrase d'arrêt entendue sous le seuil est absorbée — ni exécutée, ni écrite dans le document — et un indice est affiché ; répétez-la, ou utilisez `--finalize`. Pendant la dictée, un second reconnaisseur léger restreint à la phrase d'arrêt fournit un arrêt de haute confiance indépendant de ce seuil (`recognition.restricted_stop_in_dictation`, actif par défaut, surchargeable par langue). Prononcer une phrase deux fois de suite la transcrit littéralement plutôt que de déclencher une action.
 
@@ -111,7 +115,7 @@ La ponctuation et la mise en forme sont également déterminées par la voix ; l
 
 Dans les trois modes, la phrase d'arrêt vocale et **\--finalize** / **\--cancel** restent actifs comme filet de sécurité.
 
-# TOUCHE DE RACCORTAGE
+# RACCOURCIS CLAVIER
 
 Les raccourcis globaux `pynput` sont activés dès qu'un serveur X est joignable et quand `hotkeys.pynput_enabled` est vrai. `pynput` observe le serveur X : sous Wayland les raccourcis n'atteignent que les fenêtres passant par XWayland (beaucoup d'applications Electron et anciennes), jamais une fenêtre Wayland native active ; les sous-commandes de contrôle liées à un raccourci de bureau couvrent toutes les fenêtres. L'écouteur `pynput` ne consomme pas non plus l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (par exemple `^[s` pour **Alt+S**). Pour un arrêt propre depuis n'importe quelle fenêtre, liez plutôt **\--finalize** (ou **\--toggle**, **\--sleep-toggle**) à un raccourci clavier de bureau. La configuration par défaut définit :
 
