@@ -48,7 +48,7 @@ Install the package built for your distribution from the
 environment to create:
 
 ```bash
-# Debian 13 (Trixie) and derivatives
+# Debian 12+ and derivatives (Ubuntu 24.04+, Mint 22+...)
 sudo apt install ./vosk-cli-dictation_0.5.2~beta_all.deb
 
 # Fedora
