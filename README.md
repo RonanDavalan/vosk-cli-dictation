@@ -41,14 +41,24 @@ This tool was born from the need for a robust, locally-run dictation system on G
 
 ## Getting Started
 
-### Install the Debian package (recommended)
+### Install the native package (recommended)
 
-On **Debian 13 (Trixie)** and derivatives, install the `.deb` from the
+Install the package built for your distribution from the
 [downloads page](https://vosk.davalan.fr/) — no manual setup, no virtual
 environment to create:
 
 ```bash
+# Debian 13 (Trixie) and derivatives
 sudo apt install ./vosk-cli-dictation_0.5.2~beta_all.deb
+
+# Fedora
+sudo dnf install ./vosk-cli-dictation-0.5.2~beta-1.fc42.noarch.rpm
+
+# openSUSE (Leap)
+sudo zypper install ./vosk-cli-dictation-0.5.2~beta-1.leap156.noarch.rpm
+
+# Arch Linux
+sudo pacman -U ./vosk-cli-dictation-0.5.2_beta-1-any.pkg.tar.zst
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
