@@ -137,9 +137,8 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         key_name = config.hotkeys.get('push_to_talk')
         target_key = _parse_single_key(key_name, Key, KeyCode) if key_name else None
         if target_key is None:
-            print(f"{config.color_warning}"
-                  f"{_('interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled.')}"
-                  f"{config.RESET}")
+            warning = _('interaction.mode is "maintenue" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled.')
+            print(f"{config.color_warning}{warning}{config.RESET}")
         else:
             pressed = [False]  # garde anti-répétition tant que la touche reste enfoncée
 
