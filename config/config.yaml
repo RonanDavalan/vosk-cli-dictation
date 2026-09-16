@@ -56,6 +56,23 @@ recognition:
   # produisait un mot parasite (« Les »). Surchargeable par langue.
   wake_discard_ms: 300
 
+interaction:
+  # Chantier 11 : mode de déclenchement de la dictée. toggle (défaut, inchangé)
+  # = un geste démarre, un geste distinct arrête (phrase vocale, raccourci
+  # --dictation-on/--dictation-off/--finalize). maintenue = pousser-pour-parler,
+  # la dictée dure le temps où hotkeys.push_to_talk reste enfoncée (best-effort
+  # X11/XWayland, D3 — repli composition CLI universelle sous Wayland natif).
+  # silence = une pression démarre, la dictée s'arrête et se finalise seule
+  # après silence_timeout_ms sans résultat du décodeur, une fois qu'au moins un
+  # mot a été capté. Le détecteur de phrase d'arrêt vocal et --finalize/--cancel
+  # restent actifs comme filet de sécurité dans les trois modes (D6).
+  mode: toggle
+  # Délai de silence, en millisecondes, avant finalisation automatique en mode
+  # silence (D4). Surchargeable par langue via
+  # language_settings.<lang>.silence_timeout_ms, même motif que
+  # recognition.confidence_threshold (D5).
+  silence_timeout_ms: 700
+
 sleep:
   # true : en VEILLE, le flux audio est fermé — micro relâché, LED éteinte,
   #        réouverture ~200 ms au réveil (chantier 7 volet D).
@@ -300,6 +317,10 @@ hotkeys:
   # le démarrer ; pour un contrôle universel, lier les sous-commandes CLI
   # (--toggle / --finalize / --sleep-toggle) aux raccourcis du bureau.
   pynput_enabled: true
+  # Chantier 11, mode interaction.mode = maintenue : touche simple (pas une
+  # combinaison — le relâchement d'un chord est ambigu, D2) écoutée en
+  # appui/relâchement. Sans effet dans les autres modes.
+  push_to_talk: "ctrl_r"
   toggle_recording:
     pynput_keys: ["alt_l", "h"]
     display_name: "[Alt+H]"

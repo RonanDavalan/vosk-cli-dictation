@@ -195,11 +195,29 @@ Remplace une branche française codée en dur. Pour chaque langue :
 -   **`capitalize_sentence_start`** (booléen) : met en majuscule le premier mot de chaque phrase. En allemand, seules les phrases commencent par une majuscule ; les noms communs restent tels quels, car une capitalisation fiable des noms nécessiterait un analyseur morphologique.
 -   **`quote_open`** / **`quote_close`** : guillemets ouvrants et fermants (utilisez `« »` pour le français, `„ "` pour l'allemand).
 
+### `interaction`
+
+Comment une session de dictée démarre et s'arrête. Trois modes, un seul actif à la fois :
+
+```yaml
+interaction:
+  mode: toggle
+  silence_timeout_ms: 700
+```
+
+-   **`mode`** (`toggle` | `maintenue` | `silence`, par défaut `toggle`) : le défaut livré est inchangé par rapport aux versions précédentes — un geste démarre, un geste distinct arrête (phrase vocale de réveil/arrêt, `--dictation-on` / `--dictation-off` / `--finalize`).
+    -   **`maintenue`** (pousser-pour-parler) : la dictée dure exactement le temps où la touche configurée sous `hotkeys.push_to_talk` reste enfoncée. Voir `hotkeys` ci-dessous.
+    -   **`silence`** : une pression (ou la phrase de réveil) démarre la session ; elle s'arrête et se copie seule une fois `silence_timeout_ms` écoulé sans sortie du décodeur, dès qu'au moins un mot a été capté. Une hésitation avant de parler ne finalise jamais une session vide.
+-   **`silence_timeout_ms`** (entier, par défaut `700`) : délai de silence pour le mode `silence`. Surchargeable par langue sous `language_settings.<lang>.silence_timeout_ms`, même motif que `recognition.confidence_threshold`.
+
+Dans les trois modes, la phrase d'arrêt vocale et `--finalize` / `--cancel` restent actifs comme filet de sécurité — aucun mode ne retire un moyen d'arrêt existant.
+
 ### `hotkeys`
 
 Raccourcis clavier globaux via `pynput`. `pynput` observe le serveur X : il démarre dès qu'un serveur X est joignable et, sous Wayland, ne voit les touches que pour les fenêtres passant par XWayland (beaucoup d'applications Electron et anciennes), jamais pour une fenêtre Wayland native active. L'écouteur ne consomme pas non plus l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (`^[s` pour `Alt+S`). Pour un contrôle qui marche partout, associez plutôt les sous-commandes de contrôle (`--toggle`, `--finalize`, `--sleep-toggle`) aux propres paramètres de raccourcis de votre bureau.
 
 -   **`pynput_enabled`** (booléen, par défaut `true`): pris en compte sur tout type de session. Définissez-le sur `false` pour empêcher le démarrage du service d'écoute `pynput`.
+-   **`push_to_talk`** (nom de touche unique, par défaut `ctrl_r`) : la touche maintenue enfoncée en `interaction.mode: maintenue` (pousser-pour-parler). Une touche simple, pas une combinaison — le relâchement d'une touche d'une combinaison est ambigu. Même portée best-effort X11/XWayland que les raccourcis ci-dessous ; sous Wayland natif, liez plutôt un outil de raccourcis capable de distinguer appui et relâchement (`sway bindsym --release`, `xbindkeys`) à `vosk-cli-dictation --dictation-on` / `--finalize`.
 -   **`pynput_keys`**: Une liste de touches Pynput pour le raccourci.
 -   **`display_name`**: Une chaîne de caractères affichée dans le message d'aide.
 

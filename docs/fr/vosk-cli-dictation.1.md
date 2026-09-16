@@ -99,6 +99,18 @@ Une phrase de déclenchement n'est activée que lorsque la moyenne de la confian
 
 La ponctuation et la mise en forme sont également déterminées par la voix ; la liste complète, spécifique à chaque langue, est définie dans `language_settings.<lang>.punctuation` du fichier de configuration, et est affichée par le programme au démarrage.
 
+# MODES DE DÉCLENCHEMENT
+
+`interaction.mode` dans le fichier de configuration choisit comment une session de dictée démarre et s'arrête. Par défaut `toggle`, inchangé par rapport aux versions précédentes : un geste démarre, un geste distinct arrête (phrase vocale, raccourci ou sous-commande de contrôle). Deux autres modes :
+
+**maintenue**
+:   Pousser-pour-parler. La dictée dure exactement le temps où la touche configurée sous `hotkeys.push_to_talk` (par défaut `ctrl_r`, une touche simple, pas une combinaison) reste enfoncée. Best-effort X11/XWayland, comme les raccourcis ci-dessous ; sous Wayland natif, liez plutôt un outil de raccourcis capable de distinguer appui et relâchement (`sway bindsym --release`, `xbindkeys`) à **\--dictation-on** / **\--finalize**.
+
+**silence**
+:   Une seule pression (ou la phrase de réveil) démarre la session ; elle s'arrête et se copie seule une fois `interaction.silence_timeout_ms` (par défaut `700`, surchargeable par langue) écoulé sans sortie du décodeur, dès qu'au moins un mot a été capté — une hésitation avant de parler ne finalise jamais une session vide.
+
+Dans les trois modes, la phrase d'arrêt vocale et **\--finalize** / **\--cancel** restent actifs comme filet de sécurité.
+
 # TOUCHE DE RACCORTAGE
 
 Les raccourcis globaux `pynput` sont activés dès qu'un serveur X est joignable et quand `hotkeys.pynput_enabled` est vrai. `pynput` observe le serveur X : sous Wayland les raccourcis n'atteignent que les fenêtres passant par XWayland (beaucoup d'applications Electron et anciennes), jamais une fenêtre Wayland native active ; les sous-commandes de contrôle liées à un raccourci de bureau couvrent toutes les fenêtres. L'écouteur `pynput` ne consomme pas non plus l'événement clavier : la combinaison atteint aussi la fenêtre active, donc l'utiliser alors que le curseur est dans un terminal insère une séquence d'échappement (par exemple `^[s` pour **Alt+S**). Pour un arrêt propre depuis n'importe quelle fenêtre, liez plutôt **\--finalize** (ou **\--toggle**, **\--sleep-toggle**) à un raccourci clavier de bureau. La configuration par défaut définit :
@@ -117,6 +129,8 @@ Les raccourcis globaux `pynput` sont activés dès qu'un serveur X est joignable
 :   Quitter le programme.
 
 Les trois premiers raccourcis clavier sont configurables dans la section `hotkeys` du fichier de configuration. **Ctrl+C** ne l'est pas : c'est le signal d'interruption standard, toujours actif et qui ne peut jamais être modifié via la configuration.
+
+`hotkeys.push_to_talk` (par défaut `ctrl_r`) est une quatrième entrée, à touche unique, utilisée seulement quand `interaction.mode` vaut `maintenue` — voir MODES DE DÉCLENCHEMENT ci-dessus.
 
 # COMMANDES MANUELLES
 

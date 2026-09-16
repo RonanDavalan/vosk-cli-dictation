@@ -252,6 +252,23 @@ Replaces what used to be a hard-coded French branch. Per language:
 -   **`quote_open`** / **`quote_close`**: opening and closing quotation marks (`« »` for French, `„ "` for German).
 
 
+### `interaction`
+
+How a dictation session starts and stops. Three modes, one active at a time:
+
+```yaml
+interaction:
+  mode: toggle
+  silence_timeout_ms: 700
+```
+
+-   **`mode`** (`toggle` | `maintenue` | `silence`, default `toggle`): the shipped default is unchanged from earlier releases — one gesture starts, a separate gesture stops (wake/stop voice phrase, `--dictation-on` / `--dictation-off` / `--finalize`).
+    -   **`maintenue`** (push-to-talk): the dictation lasts exactly as long as the key configured under `hotkeys.push_to_talk` is held down. See `hotkeys` below.
+    -   **`silence`**: a single press (or the wake phrase) starts the session; it stops and copies itself once `silence_timeout_ms` passes with no decoder output, as soon as at least one word has been captured. A hesitation before speaking never finalizes an empty session.
+-   **`silence_timeout_ms`** (integer, default `700`): silence delay for the `silence` mode. Overridable per language under `language_settings.<lang>.silence_timeout_ms`, the same pattern as `recognition.confidence_threshold`.
+
+In every mode, the spoken stop phrase and `--finalize` / `--cancel` keep working as a safety net — no mode removes an existing way to stop.
+
 ### `hotkeys`
 
 Global keyboard shortcuts via `pynput`. `pynput` watches the X server, so it
@@ -265,12 +282,14 @@ while the cursor is in a terminal inserts an escape sequence (`^[s` for
 settings instead.
 
 -   **`pynput_enabled`** (boolean, default `true`): honoured on every session type. Set to `false` to never start the `pynput` listener.
+-   **`push_to_talk`** (single key name, default `ctrl_r`): the key held down in `interaction.mode: maintenue` (push-to-talk). A single key, not a chord — releasing one key of a chord is ambiguous. Same best-effort X11/XWayland reach as the shortcuts below; under native Wayland, bind a shortcut tool able to tell key-down from key-up (`sway bindsym --release`, `xbindkeys`) to `vosk-cli-dictation --dictation-on` / `--finalize` instead.
 -   **`pynput_keys`**: A list of Pynput keys for the shortcut.
 -   **`display_name`**: A string shown in the help message.
 
 ```yaml
 hotkeys:
   pynput_enabled: true
+  push_to_talk: "ctrl_r"
   toggle_recording:
     pynput_keys: ["alt_l", "h"]
     display_name: "[Alt+H]"

@@ -187,6 +187,23 @@ class Config:
         global_value = self.data.get('recognition', {}).get(key, default)
         return self.language_settings.get(lang_code, {}).get(key, global_value)
 
+    def interaction_setting(self, key: str, default, lang_code: str = None):
+        """Résout un réglage ``interaction.<key>`` avec surcharge par langue
+        (chantier 11), même motif que ``recognition_setting`` pour
+        ``confidence_threshold`` (D2, correctif 7 bis).
+
+        ``language_settings.<lang>.<key>`` l'emporte sur ``interaction.<key>``,
+        lui-même sur ``default``.
+        """
+        lang_code = lang_code or self.current_lang
+        global_value = self.data.get('interaction', {}).get(key, default)
+        return self.language_settings.get(lang_code, {}).get(key, global_value)
+
+    @property
+    def interaction_mode(self) -> str:
+        """``toggle`` (défaut, inchangé) | ``maintenue`` | ``silence`` (D1, chantier 11)."""
+        return self.data.get('interaction', {}).get('mode', 'toggle')
+
     def typography(self, lang_code: str = None) -> dict:
         """Typography profile for a language (chantier 7 volet F).
 

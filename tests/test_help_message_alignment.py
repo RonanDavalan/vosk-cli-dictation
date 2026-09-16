@@ -17,6 +17,18 @@ GAP = re.compile(r" {2,}")
 ENTRY = re.compile(r".+\(.*\)\s*$")
 
 
+@pytest.fixture(autouse=True)
+def _restore_default_language():
+    """config.current_lang et la traduction active (src.i18n._) sont un état
+    global partagé entre tous les tests du module. Sans remise à zéro, un
+    paramétrage sur une langue non-fr fuit dans les tests suivants qui
+    n'attendent pas cette langue (pollution constatée au chantier 11 : l'ordre
+    alphabétique des fichiers de test suffit à la faire apparaître)."""
+    yield
+    config.set_language("fr")
+    set_ui_language("fr")
+
+
 @pytest.mark.parametrize("lang", ["en", "fr", "de", "es"])
 def test_no_help_line_exceeds_80_display_columns(lang, capsys):
     config.set_language(lang)

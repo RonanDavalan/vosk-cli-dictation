@@ -45,7 +45,7 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         return
 
     try:
-        from pynput.keyboard import GlobalHotKeys
+        from pynput.keyboard import GlobalHotKeys, Key, KeyCode, Listener
     except Exception as exc:  # ImportError, or an Xlib backend failure at import
         _notice(_('Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts.'))
         print(f"{config.color_info}  ({exc}){config.RESET}")
@@ -128,9 +128,59 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         stop_event.wait()
         return
 
+    # Chantier 11, D2 : mode push-to-talk. GlobalHotKeys ne rend jamais le
+    # relâchement d'une touche ; un Listener bas niveau dédié le fait, actif
+    # seulement si interaction.mode == 'maintenue'. Cohabite avec le hotkey de
+    # bascule ci-dessus (aucune fonctionnalité existante retirée, D6).
+    ptt_listener = None
+    if config.interaction_mode == 'maintenue':
+        key_name = config.hotkeys.get('push_to_talk')
+        target_key = _parse_single_key(key_name, Key, KeyCode) if key_name else None
+        if target_key is None:
+            print(f"{config.color_warning}"
+                  f"{_('interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled.')}"
+                  f"{config.RESET}")
+        else:
+            pressed = [False]  # garde anti-répétition tant que la touche reste enfoncée
+
+            def on_press(key):
+                if key == target_key and not pressed[0]:
+                    pressed[0] = True
+                    submit('DICTATION_ON')
+
+            def on_release(key):
+                if key == target_key and pressed[0]:
+                    pressed[0] = False
+                    submit('FINALIZE_SESSION')
+
+            try:
+                ptt_listener = Listener(on_press=on_press, on_release=on_release)
+                ptt_listener.start()
+            except Exception as exc:
+                ptt_listener = None
+                print(f"{config.color_warning}"
+                      f"{_('Push-to-talk listener could not start:')} {exc}"
+                      f"{config.RESET}")
+
     # The main part of this thread will now block here until the main program
     # sets the stop_event, indicating it's time to shut down.
     stop_event.wait()
 
-    # Stop the listener thread when the program is exiting.
+    # Stop the listener thread(s) when the program is exiting.
     hotkey_listener.stop()
+    if ptt_listener is not None:
+        ptt_listener.stop()
+
+
+def _parse_single_key(name: str, Key, KeyCode):
+    """Resolves a single-key config name (e.g. ``ctrl_r``, ``f9``, ``a``) to a
+    pynput key object, for the push-to-talk listener (D2). Special keys are
+    named after ``pynput.keyboard.Key`` members; anything else is treated as a
+    single printable character. Returns None if the name is not a valid key."""
+    try:
+        return getattr(Key, name)
+    except AttributeError:
+        pass
+    if isinstance(name, str) and len(name) == 1:
+        return KeyCode.from_char(name)
+    return None

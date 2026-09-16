@@ -142,6 +142,31 @@ dictated by voice as well; the full, per-language list is defined under
 `language_settings.<lang>.punctuation` in the configuration file, and is
 printed by the program itself at startup.
 
+# TRIGGER MODES
+
+`interaction.mode` in the configuration file selects how a dictation session
+starts and stops. Default `toggle`, unchanged from earlier releases: one
+gesture starts, a separate gesture stops (voice phrase, hotkey, or control
+subcommand). Two other modes:
+
+**maintenue**
+:   Push-to-talk. The dictation lasts exactly as long as the key configured
+    under `hotkeys.push_to_talk` (default `Ctrl_R`, a single key, not a
+    chord) is held down. Best-effort X11/XWayland, like the hotkeys below;
+    under native Wayland, bind a shortcut tool able to tell key-down from
+    key-up (`sway bindsym --release`, `xbindkeys`) to
+    **\--dictation-on** / **\--finalize** instead.
+
+**silence**
+:   A single press (or the wake phrase) starts the session; it stops and
+    copies itself once `interaction.silence_timeout_ms` (default `700`,
+    overridable per language) passes with no decoder output, as soon as at
+    least one word has been captured — a hesitation before speaking never
+    finalizes an empty session.
+
+In every mode, the spoken stop phrase and **\--finalize** / **\--cancel**
+keep working as a safety net.
+
 # HOTKEYS
 
 `pynput` global hotkeys are started whenever an X server is reachable and
@@ -183,6 +208,9 @@ configuration defines:
 The first three hotkeys are configurable under the `hotkeys` section of the
 configuration file. **Ctrl+C** is not: it is the standard interrupt signal, always active,
 never remapped through configuration.
+
+`hotkeys.push_to_talk` (default `ctrl_r`) is a fourth, single-key entry used
+only when `interaction.mode` is `maintenue` — see TRIGGER MODES above.
 
 # MANUAL COMMANDS
 

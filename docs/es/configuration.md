@@ -194,11 +194,29 @@ Reemplaza lo que antes era una rama francesa codificada de forma rígida. Por id
 -   **`capitalize_sentence_start`** (booleano): capitaliza la primera palabra de cada oración. En alemán, solo se capitalizan los inicios de las oraciones; los sustantivos comunes se dejan como están, ya que la capitalización de sustantivos confiable requeriría un analizador morfológico.
 -   **`quote_open`** / **`quote_close`**: comillas de apertura y cierre (usa `« »` para francés, `„ "` para alemán).
 
+### `interaction`
+
+Cómo empieza y termina una sesión de dictado. Tres modos, uno activo a la vez:
+
+```yaml
+interaction:
+  mode: toggle
+  silence_timeout_ms: 700
+```
+
+-   **`mode`** (`toggle` | `maintenue` | `silence`, valor predeterminado `toggle`): el valor de fábrica no cambia respecto a versiones anteriores — un gesto inicia, un gesto distinto detiene (frase de voz, `--dictation-on` / `--dictation-off` / `--finalize`).
+    -   **`maintenue`** (pulsar para hablar): el dictado dura exactamente el tiempo que se mantiene pulsada la tecla configurada en `hotkeys.push_to_talk`. Véase `hotkeys` más abajo.
+    -   **`silence`**: una sola pulsación (o la frase de activación) inicia la sesión; se detiene y se copia sola una vez transcurrido `silence_timeout_ms` sin salida del decodificador, siempre que ya se haya capturado al menos una palabra. Una vacilación antes de hablar nunca finaliza una sesión vacía.
+-   **`silence_timeout_ms`** (entero, valor predeterminado `700`): retraso de silencio para el modo `silence`. Se puede sobrescribir por idioma en `language_settings.<lang>.silence_timeout_ms`, con el mismo patrón que `recognition.confidence_threshold`.
+
+En los tres modos, la frase de parada hablada y `--finalize` / `--cancel` siguen funcionando como red de seguridad — ningún modo elimina una forma existente de detener la sesión.
+
 ### `hotkeys`
 
 Atajos de teclado globales a través de `pynput`. `pynput` observa el servidor X: se inicia en cuanto hay uno accesible y, en Wayland, solo ve las teclas de las ventanas que pasan por XWayland (muchas aplicaciones Electron y antiguas), nunca las de una ventana Wayland nativa enfocada. El listener tampoco consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (`^[s` para `Alt+S`). Para un control que funcione en todas partes, vincule en su lugar los subcomandos de control (`--toggle`, `--finalize`, `--sleep-toggle`) a la configuración de atajos propios de su escritorio.
 
 -   **`pynput_enabled`** (booleano, valor predeterminado `true`): Se aplica en cualquier tipo de sesión. Establecer en `false` para que el listener de `pynput` nunca se inicie.
+-   **`push_to_talk`** (nombre de una sola tecla, valor predeterminado `ctrl_r`): la tecla mantenida pulsada en `interaction.mode: maintenue` (pulsar para hablar). Una sola tecla, no una combinación — soltar una tecla de una combinación es ambiguo. Mismo alcance best-effort X11/XWayland que los atajos de abajo; en Wayland nativo, vincule en su lugar una herramienta de atajos capaz de distinguir pulsación de liberación (`sway bindsym --release`, `xbindkeys`) a `vosk-cli-dictation --dictation-on` / `--finalize`.
 -   **`pynput_keys`**: Una lista de teclas de Pynput para el atajo.
 -   **`display_name`**: Una cadena que se muestra en el mensaje de ayuda.
 

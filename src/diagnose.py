@@ -90,6 +90,16 @@ def run_diagnose():
         ok_all &= _line(False, _("Read / write round-trip"), str(e))
 
     print()
+    print(_("Interaction mode"))
+    mode = config.interaction_mode
+    _line(True, _("Active mode"), mode)
+    if mode == "silence":
+        timeout_ms = config.interaction_setting("silence_timeout_ms", 700)
+        _line(True, _("Silence timeout"), "{} ms".format(timeout_ms))
+    elif mode == "maintenue":
+        _line(True, _("Push-to-talk key"), config.hotkeys.get("push_to_talk") or _("not set"))
+
+    print()
     print(_("Control socket"))
     from src.control_socket import socket_path, instance_running
     path = socket_path()

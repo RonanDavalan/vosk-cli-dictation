@@ -109,6 +109,18 @@ literalmente en lugar de activarla.
 
 La puntuación y la disposición también se dictan mediante la voz; la lista completa, específica para cada idioma, se define en `language_settings.<lang>.punctuation` en el archivo de configuración, y se imprime por el propio programa al iniciarse.
 
+# MODOS DE ACTIVACIÓN
+
+`interaction.mode` en el archivo de configuración elige cómo empieza y termina una sesión de dictado. Por defecto `toggle`, sin cambios respecto a versiones anteriores: un gesto inicia, un gesto distinto detiene (frase de voz, atajo o subcomando de control). Otros dos modos:
+
+**maintenue**
+:   Pulsar para hablar. El dictado dura exactamente el tiempo que se mantiene pulsada la tecla configurada en `hotkeys.push_to_talk` (por defecto `ctrl_r`, una sola tecla, no una combinación). Alcance best-effort X11/XWayland, como los atajos de abajo; en Wayland nativo, vincule en su lugar una herramienta de atajos capaz de distinguir pulsación de liberación (`sway bindsym --release`, `xbindkeys`) a **\--dictation-on** / **\--finalize**.
+
+**silence**
+:   Una sola pulsación (o la frase de activación) inicia la sesión; se detiene y se copia sola una vez transcurrido `interaction.silence_timeout_ms` (por defecto `700`, sobrescribible por idioma) sin salida del decodificador, siempre que ya se haya capturado al menos una palabra — una vacilación antes de hablar nunca finaliza una sesión vacía.
+
+En los tres modos, la frase de parada hablada y **\--finalize** / **\--cancel** siguen funcionando como red de seguridad.
+
 # TECLAS DE ACCESO RÁPIDO
 
 Los atajos de teclado globales de `pynput` se inician en cuanto un servidor X está accesible y `hotkeys.pynput_enabled` es verdadero. `pynput` observa el servidor X, así que en Wayland los atajos solo alcanzan las ventanas que pasan por XWayland (muchas aplicaciones Electron y antiguas), nunca una ventana Wayland nativa enfocada; los subcomandos de control asociados a un acceso directo del escritorio cubren todas las ventanas. El listener de `pynput` tampoco consume el evento de teclado: la combinación llega también a la ventana enfocada, por lo que usarla con el cursor en un terminal inserta una secuencia de escape (por ejemplo `^[s` para **Alt+S**). Para una parada limpia desde cualquier ventana, vincule en su lugar **\--finalize** (o **\--toggle**, **\--sleep-toggle**) a un atajo de teclado del escritorio. La configuración predeterminada define:
@@ -131,6 +143,8 @@ Los atajos de teclado globales de `pynput` se inician en cuanto un servidor X es
 Las tres primeras teclas de acceso directo son configurables en la sección `hotkeys` del
 archivo de configuración. **Ctrl+C** no lo es: es la señal de interrupción estándar, siempre activa y
 nunca remapeada a través de la configuración.
+
+`hotkeys.push_to_talk` (por defecto `ctrl_r`) es una cuarta entrada, de una sola tecla, usada solo cuando `interaction.mode` vale `maintenue` — véase MODOS DE ACTIVACIÓN más arriba.
 
 # COMANDOS MANUALES
 

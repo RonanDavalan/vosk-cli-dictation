@@ -108,6 +108,18 @@ wird sie wörtlich eingegeben, anstatt einen Auslöser zu aktivieren.
 
 Die Zeichensetzung und Anordnung von Wörtern (Komma, Punkt, Zeilenumbruch usw.) werden ebenfalls durch Sprache vorgegeben; die vollständige, sprachspezifische Liste ist unter `language_settings.<lang>.punctuation` in der Konfigurationsdatei definiert und wird vom Programm selbst beim Start ausgegeben.
 
+# AUSLÖSEMODI
+
+`interaction.mode` in der Konfigurationsdatei legt fest, wie eine Diktiersitzung startet und stoppt. Standard `toggle`, unverändert gegenüber früheren Versionen: eine Geste startet, eine eigene Geste stoppt (Sprachbefehl, Tastenkombination oder Kontroll-Unterbefehl). Zwei weitere Modi:
+
+**maintenue**
+:   Push-to-Talk. Die Diktierfunktion dauert genau so lange, wie die unter `hotkeys.push_to_talk` konfigurierte Taste (Standard `ctrl_r`, eine einzelne Taste, keine Kombination) gedrückt gehalten wird. Best-Effort X11/XWayland, wie die Tastenkombinationen unten; unter nativem Wayland stattdessen ein Tool binden, das Tastendruck von Loslassen unterscheiden kann (`sway bindsym --release`, `xbindkeys`), an **\--dictation-on** / **\--finalize**.
+
+**silence**
+:   Ein einzelner Tastendruck (oder das Aktivierungswort) startet die Sitzung; sie stoppt und kopiert sich selbst, sobald `interaction.silence_timeout_ms` (Standard `700`, pro Sprache überschreibbar) ohne Decoder-Ausgabe verstrichen ist, sofern mindestens ein Wort erfasst wurde — ein Zögern vor dem Sprechen beendet nie eine leere Sitzung.
+
+In allen drei Modi bleiben das gesprochene Stoppwort sowie **\--finalize** / **\--cancel** als Sicherheitsnetz aktiv.
+
 # TASTENBELEGUNGEN
 
 Globale `pynput`-Hotkeys werden aktiviert, sobald ein X-Server erreichbar ist und `hotkeys.pynput_enabled` wahr ist. `pynput` beobachtet den X-Server, daher erreichen die Hotkeys unter Wayland nur Fenster, die über XWayland laufen (viele Electron- und Alt-Anwendungen), niemals ein fokussiertes natives Wayland-Fenster; die an eine Desktop-Verknüpfung gebundenen Kontroll-Unterbefehle decken jedes Fenster ab. Der `pynput`-Listener verbraucht das Tastenereignis ebenfalls nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (zum Beispiel `^[s` für **Alt+S**). Für einen sauberen Stopp aus einem beliebigen Fenster binden Sie stattdessen **\--finalize** (oder **\--toggle**, **\--sleep-toggle**) an eine Desktop-Tastenkombination. Die Werkseinstellungen definieren:
@@ -127,6 +139,8 @@ Hält die aktuelle Diktierfunktion an und kopiert den erfassten Text in die Zwis
 :   Das Programm beenden.
 
 Die ersten drei Hotkeys können im Abschnitt `hotkeys` der Konfigurationsdatei konfiguriert werden. **Strg+C** ist jedoch nicht konfigurierbar: Es ist das Standard-Interrupt-Signal, das immer aktiv ist und niemals über die Konfiguration neu belegt wird.
+
+`hotkeys.push_to_talk` (Standard `ctrl_r`) ist ein vierter, einzelner Tasteneintrag, der nur verwendet wird, wenn `interaction.mode` auf `maintenue` steht — siehe AUSLÖSEMODI oben.
 
 # MANUELLE BEDIENUNGSANWEISUNGEN
 

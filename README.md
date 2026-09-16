@@ -138,6 +138,10 @@ The language model is chosen based on the following priority:
 
 Each language has a two-word **wake phrase** and **stop phrase** (factory defaults: `start dictation` / `stop dictation` in English). Two words rather than one so an ordinary sentence never triggers them by accident. Say the wake phrase to start dictating, the stop phrase to finish and copy the result. Saying a phrase twice in a row (`stop dictation stop dictation`) types it literally instead of triggering. If the stop phrase is heard but recognition confidence is low, it is swallowed rather than typed into your document — repeat it, or use `--finalize`. The phrases are configurable per language under `language_settings.<lang>.voice_commands`.
 
+### Trigger Modes
+
+`interaction.mode` (default `toggle`, unchanged from earlier releases) picks how a session starts and stops: one gesture starts, a separate gesture stops. Two other modes: `maintenue` (push-to-talk — dictation lasts as long as `hotkeys.push_to_talk` is held down) and `silence` (a single press starts; the session stops and copies itself once `interaction.silence_timeout_ms` passes with no decoder output, as soon as a word has been captured). The spoken stop phrase and `--finalize`/`--cancel` keep working as a safety net in every mode. See [`docs/configuration.md`](docs/configuration.md#interaction) for the full reference.
+
 ### Controlling a Running Session
 
 The session opens a private Unix socket at `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (mode `0600`). Running the **same command** with a control flag connects to it, performs the action, prints the state and exits:

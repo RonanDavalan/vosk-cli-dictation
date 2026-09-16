@@ -19,6 +19,52 @@ from config.config import config
 from src import keyboard_listener
 
 
+class FakeKey:
+    """Double minimal de `pynput.keyboard.Key` (chantier 11) : quelques membres
+    fixes, comme la véritable énumération — un nom absent lève AttributeError,
+    exactement le signal dont `_parse_single_key` a besoin pour retomber sur
+    KeyCode.from_char."""
+    ctrl_r = object()
+    ctrl_l = object()
+    f9 = object()
+
+
+class FakeKeyCode:
+    def __init__(self, char):
+        self.char = char
+
+    def __eq__(self, other):
+        return isinstance(other, FakeKeyCode) and other.char == self.char
+
+    def __hash__(self):
+        return hash(self.char)
+
+    @classmethod
+    def from_char(cls, c):
+        return cls(c)
+
+
+class FakeListener:
+    """Double de `pynput.keyboard.Listener` (chantier 11, D2) : ne se connecte
+    à aucun serveur X, garde les callbacks accessibles pour que les tests les
+    invoquent directement."""
+
+    instances = []
+
+    def __init__(self, on_press=None, on_release=None):
+        self.on_press = on_press
+        self.on_release = on_release
+        self.started = False
+        self.stopped = False
+        FakeListener.instances.append(self)
+
+    def start(self):
+        self.started = True
+
+    def stop(self):
+        self.stopped = True
+
+
 class FakeGlobalHotKeys:
     """Double de `pynput.keyboard.GlobalHotKeys` : n'ouvre aucune connexion X."""
 
@@ -44,6 +90,7 @@ class FakeGlobalHotKeys:
 def _reset_fake(monkeypatch):
     FakeGlobalHotKeys.instances = []
     FakeGlobalHotKeys.raise_on_init = False
+    FakeListener.instances = []
     # `src.i18n._` est un état global : un test antérieur peut l'avoir bascule
     # dans une autre langue. On assertionne sur les msgid anglais, donc on
     # neutralise la traduction pour ce module.
@@ -56,6 +103,9 @@ def fake_pynput(monkeypatch):
     """Un `pynput.keyboard` synthétique qui expose `FakeGlobalHotKeys`."""
     mod = types.ModuleType("pynput.keyboard")
     mod.GlobalHotKeys = FakeGlobalHotKeys
+    mod.Key = FakeKey
+    mod.KeyCode = FakeKeyCode
+    mod.Listener = FakeListener
     pkg = types.ModuleType("pynput")
     pkg.keyboard = mod
     monkeypatch.setitem(sys.modules, "pynput", pkg)

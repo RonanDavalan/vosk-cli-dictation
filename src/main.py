@@ -75,11 +75,30 @@ def print_help_message():
     toggle_hotkey = config.hotkeys['toggle_recording']['display_name']
     finalize_hotkey = config.hotkeys['finalize_session']['display_name']
 
-    intro_lines = (
-        _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
-        _("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
-        _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
-    )
+    # Chantier 11 : la bannière décrit le mode de déclenchement réellement actif
+    # plutôt que de toujours présenter toggle -- un banc en maintenue/silence
+    # affichant des instructions toggle induirait l'utilisateur en erreur.
+    mode = config.interaction_mode
+    if mode == 'maintenue':
+        ptt_key = config.hotkeys.get('push_to_talk') or '?'
+        intro_lines = (
+            _("  - Hold [{key}] to dictate; release to stop and copy.").format(key=ptt_key),
+            _("  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early.").format(stop_phrase=stop_phrase),
+            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+        )
+    elif mode == 'silence':
+        timeout_ms = config.interaction_setting('silence_timeout_ms', 700)
+        intro_lines = (
+            _("  - Say '{wake_phrase}' or press {hotkey} to start.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
+            _("  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early.").format(timeout_ms=timeout_ms, stop_phrase=stop_phrase, hotkey=finalize_hotkey),
+            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+        )
+    else:
+        intro_lines = (
+            _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
+            _("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
+            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+        )
     for line in intro_lines:
         print_status(_wrap_help_line(line), config.color_help_text)
 

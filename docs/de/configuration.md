@@ -194,11 +194,29 @@ Ersetzt eine bisher fest codierte französische Version. Pro Sprache:
 -   **`capitalize_sentence_start`** (boolean): Setzt den ersten Wort jedes Satzes groß. Im Deutschen werden nur Satzanfänge großgeschrieben; Eigennamen bleiben unverändert, da eine zuverlässige Großschreibung von Substantiven einen morphologischen Analysator erfordern würde.
 -   **`quote_open`** / **`quote_close`**: öffnende und schließende Anführungszeichen (`« »` für Französisch, `„ "` für Deutsch).
 
+### `interaction`
+
+Wie eine Diktiersitzung startet und stoppt. Drei Modi, jeweils einer aktiv:
+
+```yaml
+interaction:
+  mode: toggle
+  silence_timeout_ms: 700
+```
+
+-   **`mode`** (`toggle` | `maintenue` | `silence`, Standard `toggle`): der ausgelieferte Standard ist unverändert gegenüber früheren Versionen — eine Geste startet, eine eigene Geste stoppt (Sprachbefehl, `--dictation-on` / `--dictation-off` / `--finalize`).
+    -   **`maintenue`** (Push-to-Talk): Die Diktatur dauert genau so lange, wie die unter `hotkeys.push_to_talk` konfigurierte Taste gedrückt gehalten wird. Siehe `hotkeys` unten.
+    -   **`silence`**: Ein einzelner Tastendruck (oder das Aktivierungswort) startet die Sitzung; sie stoppt und kopiert sich selbst, sobald `silence_timeout_ms` ohne Decoder-Ausgabe verstrichen ist, sofern mindestens ein Wort erfasst wurde. Ein Zögern vor dem Sprechen beendet nie eine leere Sitzung.
+-   **`silence_timeout_ms`** (Ganzzahl, Standard `700`): Stille-Verzögerung für den Modus `silence`. Pro Sprache überschreibbar unter `language_settings.<lang>.silence_timeout_ms`, gleiches Muster wie `recognition.confidence_threshold`.
+
+In allen drei Modi bleiben das gesprochene Stoppwort sowie `--finalize` / `--cancel` als Sicherheitsnetz aktiv — kein Modus entfernt einen bestehenden Weg zum Stoppen.
+
 ### `hotkeys`
 
 Globale Tastenkombinationen über `pynput`. `pynput` beobachtet den X-Server: es wird gestartet, sobald einer erreichbar ist, und sieht unter Wayland Tasten nur für Fenster, die über XWayland laufen (viele Electron- und Alt-Anwendungen), niemals für ein fokussiertes natives Wayland-Fenster. Der Listener verbraucht das Tastenereignis ebenfalls nicht: die Kombination erreicht auch das fokussierte Fenster, sodass ihre Verwendung bei einem Cursor in einem Terminal eine Escape-Sequenz einfügt (`^[s` für `Alt+S`). Für eine Steuerung, die überall funktioniert, binden Sie stattdessen die Kontroll-Unterbefehle (`--toggle`, `--finalize`, `--sleep-toggle`) an die eigenen Tastenkombinationseinstellungen Ihres Desktops.
 
 -   **`pynput_enabled`** (boolesch, Standardwert: `true`): Wird bei jedem Sitzungstyp berücksichtigt. Setzen Sie den Wert auf `false`, um den `pynput` Listener nie zu starten.
+-   **`push_to_talk`** (einzelner Tastenname, Standard `ctrl_r`): die in `interaction.mode: maintenue` (Push-to-Talk) gedrückt gehaltene Taste. Eine einzelne Taste, keine Kombination — das Loslassen einer Taste innerhalb einer Kombination ist mehrdeutig. Gleiche Best-Effort-Reichweite X11/XWayland wie die Tastenkombinationen unten; unter nativem Wayland stattdessen ein Tool binden, das Tastendruck von Loslassen unterscheiden kann (`sway bindsym --release`, `xbindkeys`), an `vosk-cli-dictation --dictation-on` / `--finalize`.
 -   **`pynput_keys`**: Eine Liste von Pynput-Tasten für die Tastenkombination.
 -   **`display_name`**: Ein String, der in der Hilfenachricht angezeigt wird.
 

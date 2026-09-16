@@ -11,6 +11,7 @@ import pytest
 
 import src.ui as ui
 from config.config import config
+from src.i18n import set_ui_language
 from src.text_processing import TextProcessor
 from src.runtime_state import (
     runtime_state, STATE_LISTENING, STATE_DICTATING, STATE_SLEEPING,
@@ -29,6 +30,10 @@ def _mk_thread(monkeypatch):
 
     monkeypatch.setattr(ui, "pyperclip", _Clip)
     config.set_language("fr")
+    # Les assertions ci-dessous portent sur les msgid anglais ; src.i18n._ est
+    # un état global partagé entre modules de test, pas garanti à l'anglais
+    # sans cette fixation explicite (constaté au chantier 11).
+    set_ui_language("en")
 
     text_q = queue.Queue(maxsize=64)
     ctrl_q = queue.Queue(maxsize=32)
