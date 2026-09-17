@@ -59,15 +59,17 @@ recognition:
   wake_discard_ms: 300
 
 interaction:
-  # Dictation trigger mode. toggle (default) = one gesture starts, a
-  # separate gesture stops (voice phrase, --dictation-on/--dictation-off/
-  # --finalize). maintenue = push-to-talk, dictation lasts as long as
-  # hotkeys.push_to_talk stays held (best-effort X11/XWayland, falls back to
-  # the universal CLI subcommands under native Wayland). silence = one
-  # press starts, dictation stops and finalizes itself after
-  # silence_timeout_ms with no decoder result, once at least one word has
-  # been captured. The voice stop-phrase detector and --finalize/--cancel
-  # stay active as a safety net in all three modes.
+  # Dictation trigger mode:
+  # - toggle (default): one gesture starts, a separate gesture stops (voice
+  #   phrase, --dictation-on/--dictation-off/--finalize).
+  # - maintenue: push-to-talk, dictation lasts as long as
+  #   hotkeys.push_to_talk stays held (best-effort X11/XWayland, falls back
+  #   to the universal CLI subcommands under native Wayland).
+  # - silence: one press starts, dictation stops and finalizes itself after
+  #   silence_timeout_ms with no decoder result, once at least one word has
+  #   been captured.
+  # The voice stop-phrase detector and --finalize/--cancel stay active as a
+  # safety net in all three modes.
   mode: toggle
   # Silence delay, in milliseconds, before automatic finalization in
   # silence mode. Overridable per language via

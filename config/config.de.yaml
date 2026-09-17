@@ -63,16 +63,18 @@ recognition:
   wake_discard_ms: 300
 
 interaction:
-  # Auslösemodus des Diktats. toggle (Standard) = eine Geste startet, eine
-  # eigene Geste stoppt (Sprachbefehl, Tastenkombination
-  # --dictation-on/--dictation-off/--finalize). maintenue = Push-to-Talk, das
-  # Diktat dauert so lange, wie hotkeys.push_to_talk gedrückt gehalten wird
-  # (best-effort X11/XWayland, Rückfall auf die universellen
-  # CLI-Unterbefehle unter nativem Wayland). silence = ein Tastendruck
-  # startet, das Diktat stoppt und finalisiert sich selbst nach
-  # silence_timeout_ms ohne Erkennungsergebnis, sobald mindestens ein Wort
-  # erfasst wurde. Der Sprach-Stopp-Erkenner und --finalize/--cancel bleiben
-  # in allen drei Modi als Sicherheitsnetz aktiv.
+  # Auslösemodus des Diktats:
+  # - toggle (Standard): eine Geste startet, eine eigene Geste stoppt
+  #   (Sprachbefehl, Tastenkombination
+  #   --dictation-on/--dictation-off/--finalize).
+  # - maintenue: Push-to-Talk, das Diktat dauert so lange, wie
+  #   hotkeys.push_to_talk gedrückt gehalten wird (best-effort X11/XWayland,
+  #   Rückfall auf die universellen CLI-Unterbefehle unter nativem Wayland).
+  # - silence: ein Tastendruck startet, das Diktat stoppt und finalisiert
+  #   sich selbst nach silence_timeout_ms ohne Erkennungsergebnis, sobald
+  #   mindestens ein Wort erfasst wurde.
+  # Der Sprach-Stopp-Erkenner und --finalize/--cancel bleiben in allen drei
+  # Modi als Sicherheitsnetz aktiv.
   mode: toggle
   # Stille-Verzögerung in Millisekunden vor der automatischen Finalisierung
   # im Modus silence. Pro Sprache überschreibbar via

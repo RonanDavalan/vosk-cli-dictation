@@ -61,15 +61,16 @@ recognition:
   wake_discard_ms: 300
 
 interaction:
-  # Modo de activación del dictado. toggle (por defecto) = un gesto inicia,
-  # un gesto distinto detiene (frase de voz, atajo
-  # --dictation-on/--dictation-off/--finalize). maintenue = pulsar para
-  # hablar, el dictado dura mientras hotkeys.push_to_talk permanece
-  # pulsada (best-effort X11/XWayland, recurre a los subcomandos de la CLI
-  # universales bajo Wayland nativo). silence = una pulsación inicia, el
-  # dictado se detiene y finaliza solo tras silence_timeout_ms sin
-  # resultado del decodificador, una vez capturada al menos una palabra. El
-  # detector de frase de detención por voz y --finalize/--cancel siguen
+  # Modo de activación del dictado:
+  # - toggle (por defecto): un gesto inicia, un gesto distinto detiene
+  #   (frase de voz, atajo --dictation-on/--dictation-off/--finalize).
+  # - maintenue: pulsar para hablar, el dictado dura mientras
+  #   hotkeys.push_to_talk permanece pulsada (best-effort X11/XWayland,
+  #   recurre a los subcomandos de la CLI universales bajo Wayland nativo).
+  # - silence: una pulsación inicia, el dictado se detiene y finaliza solo
+  #   tras silence_timeout_ms sin resultado del decodificador, una vez
+  #   capturada al menos una palabra.
+  # El detector de frase de detención por voz y --finalize/--cancel siguen
   # activos como red de seguridad en los tres modos.
   mode: toggle
   # Retardo de silencio, en milisegundos, antes de la finalización
