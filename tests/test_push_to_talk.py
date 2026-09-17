@@ -1,4 +1,4 @@
-# Chantier 11, D2 — mode interaction.mode = maintenue (push-to-talk).
+# Mode interaction.mode = maintenue (appui-pour-parler).
 #
 # GlobalHotKeys ne rend jamais le relâchement d'une touche ; un second listener
 # pynput bas niveau (on_press/on_release) le fait, actif uniquement en mode
@@ -137,9 +137,9 @@ def test_press_then_release_starts_and_finalizes(monkeypatch, fake_pynput):
 
 
 def test_held_key_does_not_repeat_dictation_on(monkeypatch, fake_pynput):
-    """Garde anti-répétition (D2) : l'OS peut renvoyer plusieurs on_press pour
-    une touche maintenue (auto-répétition clavier) ; un seul DICTATION_ON doit
-    en sortir tant qu'elle n'a pas été relâchée."""
+    """Garde anti-répétition : l'OS peut renvoyer plusieurs on_press pour une
+    touche maintenue (auto-répétition clavier) ; un seul DICTATION_ON doit en
+    sortir tant qu'elle n'a pas été relâchée."""
     ctrl = queue.Queue()
     run_listener(monkeypatch, ctrl, mode="maintenue", push_to_talk="ctrl_r")
     listener = FakeListener.instances[0]

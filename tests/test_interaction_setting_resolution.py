@@ -1,6 +1,6 @@
-# Chantier 11 — résolution de interaction.mode et interaction.silence_timeout_ms
-# via Config.interaction_mode / Config.interaction_setting (même motif que
-# recognition_setting pour confidence_threshold, correctif 7 bis).
+# Résolution de interaction.mode et interaction.silence_timeout_ms via
+# Config.interaction_mode / Config.interaction_setting (même motif que
+# recognition_setting pour confidence_threshold, seuil de confiance par langue).
 
 from config.config import config
 

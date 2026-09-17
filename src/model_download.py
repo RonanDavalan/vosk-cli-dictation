@@ -1,10 +1,10 @@
 # src/model_download.py
 #
-# Chantier 9, décision 3 : auto-téléchargement du petit modèle acoustique,
-# jamais depuis le postinst Debian (téléchargement binaire silencieux proscrit
-# par la politique du paquet). Deux couches d'appel : la sous-commande
-# explicite --download-model, et un prompt interactif (isatty uniquement) au
-# premier lancement sans modèle — voir src/main.py.
+# Auto-téléchargement du petit modèle acoustique, jamais depuis le postinst
+# Debian (un téléchargement binaire silencieux est proscrit par la politique
+# du paquet). Deux couches d'appel : la sous-commande explicite
+# --download-model, et un prompt interactif (isatty uniquement) au premier
+# lancement sans modèle — voir src/main.py.
 
 import hashlib
 import os
@@ -17,9 +17,9 @@ from src.i18n import get_translation
 BASE_URL = "https://alphacephei.com/vosk/models/"
 
 # Les quatre modèles small utilisés par le projet (Apache 2.0, licence
-# vérifiée le 04/09/2026 sur alphacephei.com/vosk/models — redistribution et
+# vérifiée sur alphacephei.com/vosk/models — redistribution et
 # téléchargement automatisé licites). SHA256 et taille calculés depuis un
-# téléchargement de référence le 04/09/2026 : alphacephei.com ne publie pas
+# téléchargement de référence : alphacephei.com ne publie pas
 # de somme officielle, la valeur fait donc foi depuis ce fichier, jamais
 # récupérée en ligne.
 MODELS = {

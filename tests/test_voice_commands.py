@@ -1,4 +1,4 @@
-# Chantier 7 volet E/H — détection tokenisée des phrases de déclenchement.
+# Détection tokenisée des phrases de déclenchement.
 
 import pytest
 

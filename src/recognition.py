@@ -19,22 +19,21 @@ from src.voice_commands import (
 MODE_FULL = "full"
 MODE_LISTENING = "listening"
 
-# Chantier stabilité v0.5.1, défaut 1 (révision 09/09 soir). Une trame malformée
-# ne tue plus le thread : on reconstruit le recognizer. Mais si la
-# reconstruction ne rétablit rien — cas observé sur un Raspberry Pi, json.JSONDecodeError
-# à chaque trame, Reset() sans effet — on ne boucle pas indéfiniment : au-delà
-# de DECODE_ERROR_MAX_CONSECUTIVE trames en échec d'affilée, le thread pose
+# Reprise bornée sur trame malformée : une trame malformée ne tue plus le
+# thread, on reconstruit le recognizer. Mais si la reconstruction ne rétablit
+# rien — cas observé sur un Raspberry Pi, json.JSONDecodeError à chaque trame,
+# Reset() sans effet — on ne boucle pas indéfiniment : au-delà de
+# DECODE_ERROR_MAX_CONSECUTIVE trames en échec d'affilée, le thread pose
 # stop_event et termine la session proprement. Tout décodage réussi remet le
 # compteur à zéro.
 DECODE_ERROR_MAX_CONSECUTIVE = 5
 
 
 def force_c_numeric_locale():
-    """Chantier stabilité v0.5.1 : Vosk/Kaldi sérialise les flottants de
-    `SetWords(True)` avec le séparateur décimal de `LC_NUMERIC`. Sous une locale
-    à virgule — p. ex. `LC_ALL=fr_FR.UTF-8` — `Result()` rend
-    « "conf" : 0,822848 », JSON invalide, et `json.loads` casse (jamais reproduit
-    sous locale « C »).
+    """Vosk/Kaldi sérialise les flottants de `SetWords(True)` avec le
+    séparateur décimal de `LC_NUMERIC`. Sous une locale à virgule — p. ex.
+    `LC_ALL=fr_FR.UTF-8` — `Result()` rend « "conf" : 0,822848 », JSON
+    invalide, et `json.loads` casse (jamais reproduit sous locale « C »).
 
     Appelé au démarrage (`src/main.py`), dans `build_recognizer()`, et — parce
     qu'un essai interactif en conditions réelles (Raspberry Pi) a montré un
@@ -86,20 +85,21 @@ def _capture_malformed_result(raw: str) -> str:
         return ""
 
 
-# Chantier 7 bis : recognizer secondaire en DICTÉE, grammaire restreinte à la
-# phrase d'arrêt. Détection d'arrêt de haute confiance, indépendante du garde
-# de confiance sur le recognizer complet.
+# Recognizer secondaire en DICTÉE, à grammaire restreinte sur la phrase
+# d'arrêt. Détection d'arrêt de haute confiance, indépendante du garde de
+# confiance sur le recognizer complet.
 MODE_STOP = "stop"
 
 
 def load_model(model_name: str):
     """
-    Loads a Vosk model by its name (e.g., 'fr').
-    Returns (model, recognizer, model_name_on_disk) or (None, None, None) on failure.
+    Charge un modèle Vosk par son nom (p. ex. 'fr').
+    Retourne (model, recognizer, model_name_on_disk) ou (None, None, None) en échec.
 
-    The Model object is returned alongside the recognizer so the recognition
-    thread can rebuild a restricted-grammar recognizer for ÉCOUTE and a full
-    one for DICTÉE without reloading the model from disk (chantier 7 volet E).
+    L'objet Model est retourné avec le recognizer pour que le thread de
+    reconnaissance puisse reconstruire un recognizer à grammaire restreinte
+    pour ÉCOUTE et un complet pour DICTÉE sans recharger le modèle depuis le
+    disque.
     """
     _ = get_translation()
     model_path = config.get_model_path_by_name(model_name)
@@ -137,13 +137,13 @@ def load_model(model_name: str):
 
 
 def build_recognizer(model, mode: str):
-    """Builds a KaldiRecognizer for the given mode (chantier 7 volet E).
+    """Construit un KaldiRecognizer pour le mode donné.
 
-    - MODE_FULL: full vocabulary, used in DICTÉE (and in ÉCOUTE when the
-      restricted grammar is disabled).
-    - MODE_LISTENING: grammar restricted to the wake phrase plus "[unk]", so
-      the decoder does almost no work while idle. Rebuilt back to MODE_FULL on
-      waking.
+    - MODE_FULL : vocabulaire complet, utilisé en DICTÉE (et en ÉCOUTE quand
+      la grammaire restreinte est coupée).
+    - MODE_LISTENING : grammaire restreinte à la phrase de réveil plus
+      "[unk]", pour que le décodeur ne fasse presque rien au repos.
+      Reconstruit en MODE_FULL au réveil.
     """
     force_c_numeric_locale()
     sample_rate = config.audio['sample_rate']
@@ -161,13 +161,13 @@ def build_recognizer(model, mode: str):
 
 
 def _target_mode(state: str) -> str:
-    """Which recognizer mode a given state wants.
+    """Mode de recognizer voulu pour un état donné.
 
-    The restricted grammar in ÉCOUTE is opt-out per language: a
-    `restricted_grammar_in_listening` key under `language_settings.<lang>`
-    overrides the global `recognition.restricted_grammar_in_listening`.
-    Disabled for `es` (chantier 7, banc du 28/08 : la grammaire restreinte y
-    décode plus lentement que la grammaire complète).
+    La grammaire restreinte en ÉCOUTE est désactivable par langue : une clé
+    `restricted_grammar_in_listening` sous `language_settings.<lang>`
+    surcharge le global `recognition.restricted_grammar_in_listening`.
+    Coupée pour `es` (la grammaire restreinte y décode plus lentement que la
+    grammaire complète, mesuré au banc).
     """
     if state != STATE_LISTENING:
         return MODE_FULL
@@ -178,18 +178,18 @@ def _target_mode(state: str) -> str:
 def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: queue.Queue,
                        control_queue: queue.Queue, stop_event, display_partials_event, wake_event):
     """
-    Decodes audio and drives the voice-command semantics (chantier 7 volet E).
+    Décode l'audio et pilote la sémantique des commandes vocales.
 
-    - In DICTÉE: final results (text + per-word confidence) go to the UI thread,
-      which handles the stop phrase and typing.
-    - In ÉCOUTE: the wake phrase is matched on a final result with a
-      confidence gate (R1, 28/08 soir) — the low-latency wake on partial
-      results was removed: under the restricted grammar, partials force the
-      phrase onto ambiguous audio and woke on « active » alone. A match asks
-      the UI thread to switch to DICTÉE and Resets the recognizer so the
-      phrase is not re-emitted.
-    - In VEILLE: the thread blocks on wake_event (volet D); on waking it rebuilds
-      the recognizer for the current target state.
+    - En DICTÉE : les résultats finaux (texte + confiance par mot) vont au
+      thread UI, qui gère la phrase d'arrêt et la frappe.
+    - En ÉCOUTE : la phrase de réveil est appariée sur un résultat final avec
+      garde de confiance — le réveil à faible latence sur résultats partiels
+      est retiré : sous grammaire restreinte, les partiels forcent la phrase
+      sur de l'audio ambigu et réveillaient sur « active » seul. Un appariement
+      demande au thread UI le passage en DICTÉE et réinitialise le recognizer
+      pour ne pas réémettre la phrase.
+    - En VEILLE : le thread attend sur wake_event ; au réveil il reconstruit
+      le recognizer pour l'état courant.
     """
     _ = get_translation()
     last_partial_length = 0
@@ -197,9 +197,9 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     chunk_audio_s = config.audio['buffer_size'] / config.audio['sample_rate']
     last_rtf_warning = 0.0
-    # Chantier stabilité v0.5.1, défaut 1 : cadence fixe du log d'erreur de
-    # décodage. Une trame malformée ne tue plus le thread ; on la journalise au
-    # plus une fois toutes les DECODE_ERROR_THROTTLE_S secondes.
+    # Cadence fixe du log d'erreur de décodage. Une trame malformée ne tue
+    # plus le thread ; on la journalise au plus une fois toutes les
+    # DECODE_ERROR_THROTTLE_S secondes.
     last_decode_error_warning = 0.0
     DECODE_ERROR_THROTTLE_S = 5.0
     # Trames en échec de décodage consécutives (remis à zéro par tout décodage
@@ -209,25 +209,25 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
-    # Chantier 7 ter (T4) : après un réveil ÉCOUTE->DICTÉE, l'audio mis en file
-    # pendant la reconstruction du recognizer contient la fin de « active
-    # dictée » et du silence — décodé, il produisait un mot parasite (« Les »).
-    # On vide la file à la transition et on ignore les résultats du recognizer
-    # complet pendant cette courte fenêtre.
+    # Après un réveil ÉCOUTE->DICTÉE, l'audio mis en file pendant la
+    # reconstruction du recognizer contient la fin de « active dictée » et du
+    # silence — décodé, il produisait un mot parasite (« Les »). On vide la
+    # file à la transition et on ignore les résultats du recognizer complet
+    # pendant cette courte fenêtre.
     wake_discard_ms = config.recognition_setting('wake_discard_ms', 300)
     discard_until = 0.0
-    # Chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE.
+    # Détecteur d'arrêt à grammaire restreinte en DICTÉE.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
     restricted_stop_enabled = bool(
         config.recognition_setting('restricted_stop_in_dictation', True)
     )
 
-    # Chantier 11, D4 : mode silence — arrêt automatique en DICTÉE après
-    # silence_timeout_ms sans résultat (partiel ou final) non vide, une fois
-    # qu'au moins un mot a déjà été capté dans la session en cours (sinon une
-    # hésitation avant de parler finaliserait une session vide). Réglages
-    # figés au démarrage du thread : la langue ne change pas en cours de
-    # session (config.current_lang n'est fixé qu'au lancement, src/main.py).
+    # Mode silence — arrêt automatique en DICTÉE après silence_timeout_ms
+    # sans résultat (partiel ou final) non vide, une fois qu'au moins un mot a
+    # déjà été capté dans la session en cours (sinon une hésitation avant de
+    # parler finaliserait une session vide). Réglages figés au démarrage du
+    # thread : la langue ne change pas en cours de session
+    # (config.current_lang n'est fixé qu'au lancement, src/main.py).
     interaction_mode = config.interaction_mode
     silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
     last_dictation_result_ts = 0.0
@@ -243,8 +243,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # l'état ait réellement changé (évite les demandes en rafale, le temps que
     # le thread UI traite la control_queue).
     pending_wake = False
-    # Chantier 7 bis : recognizer d'arrêt (None hors DICTÉE ou si désactivé) et
-    # verrou anti-rafale symétrique de pending_wake.
+    # Recognizer d'arrêt (None hors DICTÉE ou si désactivé) et verrou
+    # anti-rafale symétrique de pending_wake.
     stop_rec = None
     pending_stop = False
 
@@ -277,8 +277,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                   f"{config.RESET}")
 
     def rebuild_stop_rec(state):
-        """Chantier 7 bis : (re)construit le recognizer d'arrêt en DICTÉE, le
-        libère ailleurs. Reset s'il existe déjà pour repartir d'un flux propre."""
+        """(Re)construit le recognizer d'arrêt en DICTÉE, le libère ailleurs.
+        Reset s'il existe déjà pour repartir d'un flux propre."""
         nonlocal stop_rec
         if state == STATE_DICTATING and restricted_stop_enabled:
             if stop_rec is None:
@@ -302,9 +302,9 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                   f"{config.RESET}")
 
     def check_silence_timeout():
-        """D4 : pousse FINALIZE_SESSION (même chemin que la phrase d'arrêt,
-        D4) si le mode silence est actif, qu'un mot a déjà été capté, et
-        qu'aucun résultat non vide n'est arrivé depuis silence_timeout_s."""
+        """Pousse FINALIZE_SESSION (même chemin que la phrase d'arrêt) si le
+        mode silence est actif, qu'un mot a déjà été capté, et qu'aucun
+        résultat non vide n'est arrivé depuis silence_timeout_s."""
         if (interaction_mode == 'silence' and word_captured_in_session
                 and not pending_stop
                 and time.monotonic() - last_dictation_result_ts >= silence_timeout_s):
@@ -314,7 +314,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         """Alimente le recognizer d'arrêt avec `data` et dit si la phrase d'arrêt
         vient d'être reconnue.
 
-        Conservateur (chantier 7 bis, après le faux positif du 28/08) :
+        Conservateur (un faux positif sur voix réelle l'impose) :
         - seulement sur un FINAL (les partiels sous grammaire restreinte sont
           instables et « forcent » la phrase sur de l'audio ambigu) ;
         - le texte du final doit être EXACTEMENT la phrase d'arrêt, pas la
@@ -359,8 +359,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 pending_wake = False
             if state != STATE_DICTATING:
                 pending_stop = False
-            # T4 : entrée en DICTÉE -> jeter l'audio d'avant la transition et
-            # ouvrir une fenêtre d'ignorance des résultats.
+            # Entrée en DICTÉE -> jeter l'audio d'avant la transition et ouvrir
+            # une fenêtre d'ignorance des résultats.
             if state == STATE_DICTATING and last_state == STATE_LISTENING:
                 try:
                     while True:
@@ -368,8 +368,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 except queue.Empty:
                     pass
                 discard_until = time.monotonic() + wake_discard_ms / 1000.0
-                # D4 : réarmer le minuteur de silence sur une nouvelle session,
-                # sans mot capté tant que le décodeur n'a rien rendu.
+                # Réarmer le minuteur de silence sur une nouvelle session, sans
+                # mot capté tant que le décodeur n'a rien rendu.
                 last_dictation_result_ts = time.monotonic()
                 word_captured_in_session = False
             last_state = state
@@ -377,23 +377,23 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         try:
             data = audio_queue.get(timeout=0.1)
 
-            # T4 : fenêtre d'ignorance juste après le réveil — on jette le bloc
-            # sans le décoder, pour que le recognizer complet neuf démarre sur
-            # de l'audio propre (pas la fin de « active dictée »).
+            # Fenêtre d'ignorance juste après le réveil — on jette le bloc sans
+            # le décoder, pour que le recognizer complet neuf démarre sur de
+            # l'audio propre (pas la fin de « active dictée »).
             if state == STATE_DICTATING and time.monotonic() < discard_until:
                 clear_partial()
                 continue
 
-            # Chantier stabilité v0.5.1 : garde par trame. L'essai interactif de
-            # un essai interactif en conditions réelles montre que LC_NUMERIC bascule sur
-            # une virgule APRÈS le dernier build_recognizer() — source non
-            # identifiée, une seule fois, tôt dans la session. Sans cette ligne,
-            # le premier final avec mots casse (json.loads sur « "conf" :
-            # 0,822848 »), la couche de reprise reconstruit le recognizer et se
-            # rétablit — mais l'utilisateur voit un message d'erreur et perd un
-            # final. On neutralise la locale numérique juste avant chaque
-            # Result()/PartialResult() de la boucle : coût d'un setlocale par
-            # trame (~microsecondes), plus aucune trame perdue.
+            # Garde par trame : un essai interactif en conditions réelles montre
+            # que LC_NUMERIC bascule sur une virgule APRÈS le dernier
+            # build_recognizer() — source non identifiée, une seule fois, tôt
+            # dans la session. Sans cette ligne, le premier final avec mots
+            # casse (json.loads sur « "conf" : 0,822848 »), la couche de reprise
+            # reconstruit le recognizer et se rétablit — mais l'utilisateur voit
+            # un message d'erreur et perd un final. On neutralise la locale
+            # numérique juste avant chaque Result()/PartialResult() de la
+            # boucle : coût d'un setlocale par trame (~microsecondes), plus
+            # aucune trame perdue.
             force_c_numeric_locale()
 
             t0 = time.perf_counter()
@@ -409,8 +409,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                               f"{_('Decoding is slower than real time (RTF {rtf}); latency may drift.').format(rtf=snap['rtf_mean'])}"
                               f"{config.RESET}")
 
-            # Chantier 7 bis : arrêt vocal de haute confiance via le recognizer
-            # restreint, avant même que le recognizer complet ait finalisé.
+            # Arrêt vocal de haute confiance via le recognizer restreint, avant
+            # même que le recognizer complet ait finalisé.
             if (state == STATE_DICTATING and stop_rec is not None
                     and not pending_stop and not runtime_state.in_debounce()):
                 if stop_rec_hit(data):
@@ -437,11 +437,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                         tokens = normalize_tokens(text)
                         idx = find_phrase(tokens, wake_tokens)
                         if idx != -1:
-                            # R1 (28/08 soir) : le garde de confiance s'applique
-                            # dans TOUS les modes. Avant, sous grammaire
-                            # restreinte, un final quelconque réveillait sans
-                            # garde — et le chemin des partiels (supprimé
-                            # ci-dessous) réveillait sur « active » seul.
+                            # Le garde de confiance s'applique dans TOUS les
+                            # modes. Avant, sous grammaire restreinte, un final
+                            # quelconque réveillait sans garde — et le chemin
+                            # des partiels (supprimé ci-dessous) réveillait sur
+                            # « active » seul.
                             conf = mean_confidence(words, idx, len(wake_tokens))
                             if conf >= conf_threshold:
                                 try:
@@ -471,11 +471,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     last_dictation_result_ts = time.monotonic()
                     word_captured_in_session = True
 
-                # R1 (28/08 soir) : plus de réveil sur les partiels. La
-                # grammaire restreinte force la phrase de réveil sur de l'audio
-                # ambigu (« active » seul réveillait la dictée) et aucun garde
-                # de confiance n'existe sur un partiel. Le réveil se fait
-                # uniquement sur un final avec confiance (bloc ci-dessus).
+                # Plus de réveil sur les partiels. La grammaire restreinte force
+                # la phrase de réveil sur de l'audio ambigu (« active » seul
+                # réveillait la dictée) et aucun garde de confiance n'existe
+                # sur un partiel. Le réveil se fait uniquement sur un final
+                # avec confiance (bloc ci-dessus).
 
                 if display_partials_event.is_set() and partial_text:
                     print(f"\r{' ' * last_partial_length}\r", end='', flush=True)
@@ -494,15 +494,14 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 check_silence_timeout()
             continue
         except Exception as e:
-            # Chantier stabilité v0.5.1, défaut 1 (révision 09/09 soir). Une
-            # erreur sur une trame — au premier chef une json.JSONDecodeError sur
-            # Result()/PartialResult() — ne termine plus le décodage. On
+            # Une erreur sur une trame — au premier chef une json.JSONDecodeError
+            # sur Result()/PartialResult() — ne termine plus le décodage. On
             # reconstruit le recognizer : Reset() seul s'est montré sans effet
-            # sur un Raspberry Pi (erreur à chaque trame). Si les échecs s'enchaînent
-            # au-delà de DECODE_ERROR_MAX_CONSECUTIVE, la reconstruction ne
-            # rétablit rien : on pose stop_event et on termine la session
-            # proprement plutôt que de boucler à vide. Tout décodage réussi a
-            # remis consecutive_decode_errors à zéro plus haut.
+            # sur un Raspberry Pi (erreur à chaque trame). Si les échecs
+            # s'enchaînent au-delà de DECODE_ERROR_MAX_CONSECUTIVE, la
+            # reconstruction ne rétablit rien : on pose stop_event et on termine
+            # la session proprement plutôt que de boucler à vide. Tout décodage
+            # réussi a remis consecutive_decode_errors à zéro plus haut.
             clear_partial()
             consecutive_decode_errors += 1
 

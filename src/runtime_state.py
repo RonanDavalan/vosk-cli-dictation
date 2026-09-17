@@ -1,8 +1,8 @@
 # src/runtime_state.py
 #
 # État partagé de session, protégé par un verrou. Écrit par les threads audio et
-# reconnaissance (compteurs, facteur temps réel), lu par l'UI et — chantier 7
-# volet A — par le thread de contrôle pour répondre à `--status` / `--diagnose`.
+# reconnaissance (compteurs, facteur temps réel), lu par l'UI et par le thread
+# de contrôle pour répondre à `--status` / `--diagnose`.
 #
 # Un seul objet pour tout le processus : `runtime_state`, sur le modèle de
 # `config`.
@@ -10,14 +10,14 @@
 import threading
 import time
 
-# États exposés côté CLI (chantier 7 volet D). Les identifiants d'action de
+# États exposés côté CLI. Les identifiants d'action de
 # configuration (`toggle_recording`, `sleep_toggle`, …) restent inchangés.
 STATE_DICTATING = "DICTÉE"
 STATE_LISTENING = "ÉCOUTE"
 STATE_SLEEPING = "VEILLE"
 
 _RTF_WINDOW = 30  # taille de fenêtre de la moyenne glissante du RTF
-_DEBOUNCE_S = 0.5  # anti-rebond après une transition d'état (chantier 7 volet E)
+_DEBOUNCE_S = 0.5  # anti-rebond après une transition d'état (un déclenchement vocal immédiat serait un faux positif)
 
 
 class RuntimeState:
@@ -33,7 +33,7 @@ class RuntimeState:
         self.rtf_mean = 0.0
         self._rtf_samples = 0
         # Horodatage de la dernière transition d'état, pour l'anti-rebond des
-        # déclenchements vocaux (chantier 7 volet E).
+        # déclenchements vocaux.
         self._last_transition = 0.0
 
     def set_state(self, state):

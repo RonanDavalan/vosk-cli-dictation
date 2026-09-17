@@ -26,7 +26,7 @@ from src.control_socket import (
     start_control_server, send_control_command, instance_running, socket_path,
 )
 
-# Sous-commandes de contrôle (chantier 7 volet A) : drapeau -> jeton socket.
+# Sous-commandes de contrôle : drapeau -> jeton socket.
 CONTROL_FLAGS = [
     ("toggle", "toggle"), ("dictation_on", "dictation-on"),
     ("dictation_off", "dictation-off"), ("finalize", "finalize"),
@@ -35,7 +35,7 @@ CONTROL_FLAGS = [
 ]
 
 def print_status(message, color):
-    """Print status message with color, restoring the terminal default after."""
+    """Affiche un message de statut en couleur, puis restaure le défaut du terminal."""
     print(f"{color}{message}{config.RESET}")
 
 # Glyphes typographiques que la plupart des terminaux rendent sur deux cellules
@@ -62,7 +62,7 @@ def _wrap_help_line(text, width=74):
 
 def print_help_message():
     """
-    Print a structured and logically grouped help message.
+    Affiche un message d'aide structuré et regroupé par logique.
     """
     _ = get_translation()
     separator = f"{config.color_help_text}------------------------------------------------------------------{config.RESET}"
@@ -75,9 +75,9 @@ def print_help_message():
     toggle_hotkey = config.hotkeys['toggle_recording']['display_name']
     finalize_hotkey = config.hotkeys['finalize_session']['display_name']
 
-    # Chantier 11 : la bannière décrit le mode de déclenchement réellement actif
-    # plutôt que de toujours présenter toggle -- un banc en maintenue/silence
-    # affichant des instructions toggle induirait l'utilisateur en erreur.
+    # La bannière décrit le mode de déclenchement réellement actif plutôt que
+    # de toujours présenter toggle — un banc en maintenue/silence affichant
+    # des instructions toggle induirait l'utilisateur en erreur.
     mode = config.interaction_mode
     if mode == 'maintenue':
         ptt_key = config.hotkeys.get('push_to_talk') or '?'
@@ -112,7 +112,8 @@ def print_help_message():
 
         all_punctuation_cmds = {}
         for section in punctuation_sections.values():
-            # `mode` / `trigger` are scalars, not command maps (T1).
+            # `mode` / `trigger` sont des scalaires, pas des tables de commandes
+            # (mode de saisie de la ponctuation par langue).
             if isinstance(section, dict):
                 all_punctuation_cmds.update(section)
 
@@ -144,11 +145,10 @@ def print_help_message():
 
 
 def supervise_threads(supervised, stop_event):
-    """Chantier stabilité v0.5.1, défaut 1 : si l'un des threads cœur
-    (`recognition`, `audio`, `ui`) meurt sans que `stop_event` soit posé, on
-    pose `stop_event` et on retourne son nom pour que la boucle principale
-    termine la session proprement au lieu de tourner à vide. Retourne None si
-    tout va bien ou si l'arrêt est déjà demandé.
+    """Si l'un des threads cœur (`recognition`, `audio`, `ui`) meurt sans que
+    `stop_event` soit posé, on pose `stop_event` et on retourne son nom pour
+    que la boucle principale termine la session proprement au lieu de tourner
+    à vide. Retourne None si tout va bien ou si l'arrêt est déjà demandé.
     """
     if stop_event.is_set():
         return None
@@ -160,7 +160,7 @@ def supervise_threads(supervised, stop_event):
 
 
 def exit_cleanup():
-    """Clean exit function"""
+    """Fonction de sortie propre."""
     _ = get_translation()
     try:
         msg = _("\nProgram stopped cleanly.")
@@ -169,17 +169,17 @@ def exit_cleanup():
         print_status("\nProgram stopped cleanly.", config.color_info)
 
 def main():
-    """Main function"""
-    # Chantier stabilité v0.5.1 : neutralise LC_NUMERIC pour tout le processus
-    # avant que Vosk ne sérialise le moindre Result(). Sous une locale à virgule
-    # (p. ex. fr_FR.UTF-8), les flottants de SetWords(True) sortent en
-    # « 1,000000 » et cassent json.loads à chaque final avec mots. Répété
-    # défensivement dans src/recognition.py avant chaque KaldiRecognizer.
+    """Fonction principale."""
+    # Neutralise LC_NUMERIC pour tout le processus avant que Vosk ne sérialise
+    # le moindre Result(). Sous une locale à virgule (p. ex. fr_FR.UTF-8), les
+    # flottants de SetWords(True) sortent en « 1,000000 » et cassent json.loads
+    # à chaque final avec mots. Répété défensivement dans src/recognition.py
+    # avant chaque KaldiRecognizer.
     force_c_numeric_locale()
 
-    # R5 (28/08 soir) : coupe les LOG (VoskAPI...) au boot — le bruit de Vosk
-    # s'affichait après « Appuyez sur Ctrl+C pour quitter » (démarrage des
-    # threads après l'aide). --diagnose n'a pas besoin de ces logs.
+    # Coupe les LOG (VoskAPI...) au boot — le bruit de Vosk s'affichait après
+    # « Appuyez sur Ctrl+C pour quitter » (démarrage des threads après l'aide).
+    # --diagnose n'a pas besoin de ces logs.
     vosk.SetLogLevel(-1)
 
     # -l/--lang doit s'appliquer à TOUT ce qui peut s'afficher avant la fin de
@@ -246,9 +246,9 @@ def main():
     config.set_language(ui_lang)
     atexit.register(exit_cleanup)
 
-    # Instance unique (chantier 7 volet A). Une socket qui répond -> une session
-    # tourne déjà. Une socket qui refuse la connexion est un résidu : on
-    # continue, start_control_server la remplacera.
+    # Instance unique. Une socket qui répond -> une session tourne déjà. Une
+    # socket qui refuse la connexion est un résidu : on continue,
+    # start_control_server la remplacera.
     if config.data.get('control_socket', True) and instance_running():
         print_status(_("A vosk-cli-dictation session is already running (see --status)."), config.color_error)
         return
@@ -293,7 +293,7 @@ def main():
     p, stream = initialize_audio()
     if not p or not stream: return 1
 
-    # Files bornées (chantier 7 volet C). audio_queue : ~2 s d'audio ; au-delà,
+    # Files bornées. audio_queue : ~2 s d'audio ; au-delà,
     # audio_capture_thread jette le bloc le plus ancien pour interdire la dérive
     # de latence. text_queue / control_queue : un remplissage y est
     # pathologique (UI figée), signalé bruyamment, jamais masqué.
@@ -304,7 +304,7 @@ def main():
     display_partials_event = threading.Event()
     sleep_event = threading.Event()
     # wake_event : posé = éveillé (reconnaissance active), effacé = VEILLE
-    # (flux audio fermé, thread de reconnaissance bloqué). Chantier 7 volet D.
+    # (flux audio fermé, thread de reconnaissance bloqué).
     wake_event = threading.Event()
     wake_event.set()
 
@@ -321,18 +321,18 @@ def main():
         if t is not threading.current_thread():
             t.daemon = True
 
-    # Chantier stabilité v0.5.1, défaut 1 : threads cœur surveillés par la
-    # boucle principale. Le listener clavier est exclu — son absence (pynput
-    # indisponible) est un cas légitime, pas une panne.
+    # Threads cœur surveillés par la boucle principale. Le listener clavier
+    # est exclu — son absence (pynput indisponible) est un cas légitime, pas
+    # une panne.
     supervised = {
         "recognition": threads[0],
         "audio": threads[1],
         "ui": threads[3],
     }
 
-    # Socket de contrôle (chantier 7 volet A). Non bloquant si le bind échoue :
-    # l'outil reste utilisable en interactif, seules les sous-commandes CLI
-    # sont indisponibles.
+    # Socket de contrôle. Non bloquant si le bind échoue : l'outil reste
+    # utilisable en interactif, seules les sous-commandes CLI sont
+    # indisponibles.
     control_server = None
     if config.data.get('control_socket', True):
         try:
@@ -407,7 +407,7 @@ def main():
         # Attendre la sortie effective des threads *avant* de fermer le flux et
         # de terminer PortAudio : sinon audio_capture_thread peut être encore
         # dans stream.read() quand p.terminate() passe, ce qui faisait sortir
-        # le démon en code 1 sur --stop (chantier 7 volet H).
+        # le démon en code 1 sur --stop.
         for t in threads:
             if t is not threading.current_thread():
                 t.join(timeout=2.0)

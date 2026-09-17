@@ -1,7 +1,7 @@
-# Chantier 11, D4 — mode interaction.mode = silence : la boucle de
-# reconnaissance pousse elle-même FINALIZE_SESSION quand aucun résultat non
-# vide (partiel ou final) n'est arrivé depuis silence_timeout_ms, une fois
-# qu'au moins un mot a été capté dans la session en cours.
+# Mode interaction.mode = silence : la boucle de reconnaissance pousse
+# elle-même FINALIZE_SESSION quand aucun résultat non vide (partiel ou final)
+# n'est arrivé depuis silence_timeout_ms, une fois qu'au moins un mot a été
+# capté dans la session en cours.
 #
 # Même harnais que test_recognition_semantics.py (FakeRec rejoue un script,
 # aucun modèle Vosk requis) ; horloge réelle, délais en millisecondes tenus
@@ -115,7 +115,7 @@ def test_silence_mode_finalizes_after_timeout_once_a_word_was_captured(monkeypat
 
 def test_silence_mode_does_not_finalize_an_empty_session(monkeypatch):
     # Aucun mot capté -> une hésitation avant de parler ne doit pas finaliser
-    # une session vide (D4, écarté explicitement).
+    # une session vide (cas écarté explicitement).
     ctrl, _text = _run_silence(monkeypatch, [], mode="silence", timeout_ms=50)
     assert "FINALIZE_SESSION" not in _drain(ctrl)
 

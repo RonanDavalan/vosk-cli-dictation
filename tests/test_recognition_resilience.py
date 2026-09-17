@@ -1,7 +1,7 @@
-# Chantier stabilité v0.5.1, défaut 1 — le thread de reconnaissance survit à une
-# trame malformée (json.JSONDecodeError sur Result()) : il journalise, repart
-# d'un recognizer propre, continue à décoder les trames suivantes et ne pose
-# jamais stop_event de lui-même.
+# Le thread de reconnaissance survit à une trame malformée
+# (json.JSONDecodeError sur Result()) : il journalise, repart d'un recognizer
+# propre, continue à décoder les trames suivantes et ne pose jamais stop_event
+# de lui-même.
 #
 # Le recognizer Vosk est remplacé par un faux ; aucun modèle n'est requis.
 
@@ -188,7 +188,7 @@ def test_repeated_decode_errors_keep_recovering(monkeypatch):
 
 def test_permanent_decode_errors_escalate_and_end_the_session(monkeypatch):
     # Toutes les trames sont malformées et la reconstruction ne rétablit rien
-    # (cas Raspberry Pi du 09/09 : json.JSONDecodeError à chaque trame). Au-delà de
+    # (cas Raspberry Pi : json.JSONDecodeError à chaque trame). Au-delà de
     # DECODE_ERROR_MAX_CONSECUTIVE, le thread pose stop_event lui-même et sort,
     # au lieu de boucler indéfiniment sur l'erreur.
     config.set_language("fr")

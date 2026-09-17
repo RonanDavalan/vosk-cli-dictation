@@ -1,7 +1,6 @@
-# Chantier stabilité v0.5.1, défaut 3 — on ne peut plus ouvrir une DICTÉE
-# fantôme en VEILLE : toute demande de dictée (TOGGLE_RECORDING, DICTATION_ON,
-# /nl) sort d'abord de veille, puis démarre. Plus un retour périodique honnête
-# tant que la VEILLE dure.
+# On ne peut plus ouvrir une DICTÉE fantôme en VEILLE : toute demande de
+# dictée (TOGGLE_RECORDING, DICTATION_ON, /nl) sort d'abord de veille, puis
+# démarre. Plus un retour périodique honnête tant que la VEILLE dure.
 
 import queue
 import threading
@@ -32,7 +31,7 @@ def _mk_thread(monkeypatch):
     config.set_language("fr")
     # Les assertions ci-dessous portent sur les msgid anglais ; src.i18n._ est
     # un état global partagé entre modules de test, pas garanti à l'anglais
-    # sans cette fixation explicite (constaté au chantier 11).
+    # sans cette fixation explicite.
     set_ui_language("en")
 
     text_q = queue.Queue(maxsize=64)

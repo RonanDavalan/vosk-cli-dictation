@@ -84,7 +84,7 @@ sleep:
 clipboard:
   # Restaurer le presse-papiers de l'utilisateur après le collage.
   restore: true
-  # Fenêtre max, en tranches courtes, laissée à l'application cible pour lire la
+  # Fenêtre max, par courtes attentes, laissée à l'application cible pour lire la
   # sélection avant restauration. L'attente s'arrête plus tôt si le
   # presse-papiers a déjà changé (un autre propriétaire a pris la main).
   restore_delay_ms: 400

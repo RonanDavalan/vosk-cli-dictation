@@ -1,8 +1,8 @@
-# Garde de démarrage du listener pynput (COMPATIBILITE_WAYLAND.md §5,
-# v0.5.1-alpha). Le garde `XDG_SESSION_TYPE == "x11"` du Chantier 7 est retiré :
-# le listener est un confort best-effort qui démarre dès qu'un serveur X est
-# joignable, sur tout type de session, et se tait si `DISPLAY` est absent, si
-# `hotkeys.pynput_enabled` est false, ou si le backend pynput est indisponible.
+# Garde de démarrage du listener pynput (COMPATIBILITE_WAYLAND.md §5). Le garde
+# `XDG_SESSION_TYPE == "x11"` est retiré : le listener est un confort
+# best-effort qui démarre dès qu'un serveur X est joignable, sur tout type de
+# session, et se tait si `DISPLAY` est absent, si `hotkeys.pynput_enabled` est
+# false, ou si le backend pynput est indisponible.
 #
 # Ces tests couvrent la matrice (DISPLAY présent/absent × XDG_SESSION_TYPE ×
 # pynput_enabled × backend disponible/cassé) sans serveur X réel : le module
@@ -20,9 +20,9 @@ from src import keyboard_listener
 
 
 class FakeKey:
-    """Double minimal de `pynput.keyboard.Key` (chantier 11) : quelques membres
-    fixes, comme la véritable énumération — un nom absent lève AttributeError,
-    exactement le signal dont `_parse_single_key` a besoin pour retomber sur
+    """Double minimal de `pynput.keyboard.Key` : quelques membres fixes, comme
+    la véritable énumération — un nom absent lève AttributeError, exactement
+    le signal dont `_parse_single_key` a besoin pour retomber sur
     KeyCode.from_char."""
     ctrl_r = object()
     ctrl_l = object()
@@ -45,9 +45,9 @@ class FakeKeyCode:
 
 
 class FakeListener:
-    """Double de `pynput.keyboard.Listener` (chantier 11, D2) : ne se connecte
-    à aucun serveur X, garde les callbacks accessibles pour que les tests les
-    invoquent directement."""
+    """Double de `pynput.keyboard.Listener` (mode appui-pour-parler) : ne se
+    connecte à aucun serveur X, garde les callbacks accessibles pour que les
+    tests les invoquent directement."""
 
     instances = []
 

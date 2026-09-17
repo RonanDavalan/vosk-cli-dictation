@@ -1,4 +1,4 @@
-# Chantier 7 volet A/H — couche IPC : socket Unix de contrôle.
+# Couche IPC : socket Unix de contrôle.
 
 import os
 import queue

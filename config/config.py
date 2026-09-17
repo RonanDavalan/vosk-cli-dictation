@@ -9,30 +9,31 @@ colorama_init(autoreset=True)
 
 class Config:
     """
-    Handles loading and accessing the project configuration from config.yaml.
+    Charge la configuration du projet depuis config.yaml et y donne accès.
     """
 
     # Langues pour lesquelles un gabarit config.<lang>.yaml est livré.
     SUPPORTED_CONFIG_LANGS = ('en', 'fr', 'de', 'es')
 
-    # Bumped whenever a shipped template gains a section an older user file
-    # would lack; compared against the user file's own config_version to
-    # decide whether the startup notice fires (see config_is_outdated).
+    # Incrémenté chaque fois qu'un gabarit livré gagne une section qu'un
+    # fichier utilisateur ancien n'aurait pas ; comparé au config_version du
+    # fichier utilisateur pour décider si la notice de démarrage se déclenche
+    # (voir config_is_outdated).
     CURRENT_CONFIG_VERSION = 3
 
     def __init__(self):
-        # --- CONFIG FILE LOADING ---
+        # --- CHARGEMENT DU FICHIER DE CONFIGURATION ---
         self.config_path = self._get_config_path()
         if not self.config_path:
             raise FileNotFoundError("Could not find config.yaml")
-        # Set by _load_config when a sibling config_local.yaml overlay is applied.
+        # Posé par _load_config quand une surcharge sœur config_local.yaml est appliquée.
         self.local_config_path = None
         self.data = self._load_config()
 
-        # UPDATE: Initialize theme colors from the config file.
+        # Initialise les couleurs du thème depuis le fichier de configuration.
         self._initialize_theme()
 
-        # Set initial language based on the default model in the config
+        # Langue initiale d'après le modèle par défaut de la configuration.
         self.current_lang = self.data.get('default_model', 'en')
         self.set_language(self.current_lang)
 
@@ -65,33 +66,34 @@ class Config:
     @staticmethod
     def _get_config_path(project_root=None,
                          system_template_dir='/usr/share/vosk-cli-dictation'):
-        """Finds the config.yaml file via the XDG cascade (DOCUMENTATION_MULTILINGUE.md §10.2,
+        """Localise config.yaml via la cascade XDG (DOCUMENTATION_MULTILINGUE.md §10.2,
         CONFIG_PUBLIQUE_ET_LOCALISATION.md §2.3).
 
-        First matching level wins:
+        Premier niveau concordant gagne :
 
-        1. ``VOSK_CONFIG`` env var — used as-is, never auto-created.
-        2. Project-relative ``config/config.<lang>.yaml`` in a git checkout
-           (``PROJECT_ROOT/.git`` present) — used in place, so a developer's
-           edits are not shadowed by a stale XDG file.
-        3. Per-user XDG config
+        1. Variable d'env ``VOSK_CONFIG`` — prise telle quelle, jamais créée.
+        2. ``config/config.<lang>.yaml`` relatif au projet dans un checkout git
+           (``PROJECT_ROOT/.git`` présent) — utilisé en place, pour que les
+           retouches d'un développeur ne soient pas masquées par un fichier
+           XDG périmé.
+        3. Config XDG par utilisateur
            ``$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml``.
-        4. Factory template, copied to (3) on first run:
-           ``system_template_dir/config.<lang>.yaml`` dropped by the .deb, or,
-           when that is absent, ``config/config.<lang>.yaml`` bundled in the
-           tree. The bundled fallback covers a source-tarball install -- a
-           ``git archive`` has no ``.git`` (level 2 does not fire) and no
-           ``/usr/share`` template, so without it the tool could not start.
-           The copied file is always named ``config.yaml`` in the XDG
-           directory regardless of which language template seeded it.
+        4. Gabarit d'usine, copié vers (3) au premier lancement :
+           ``system_template_dir/config.<lang>.yaml`` déposé par le .deb ou,
+           à défaut, ``config/config.<lang>.yaml`` embarqué dans l'arborescence.
+           Le repli embarqué couvre une install depuis le tarball de sources —
+           une ``git archive`` n'a pas de ``.git`` (le niveau 2 ne se déclenche
+           pas) ni de gabarit ``/usr/share``, donc sans lui l'outil ne
+           démarrerait pas. Le fichier copié s'appelle toujours ``config.yaml``
+           dans le répertoire XDG, quel que soit le gabarit de langue source.
 
-        Levels 2 and 4 pick the template matching ``_detect_config_lang()``,
-        falling back to ``config.en.yaml`` if that language has no template in
-        the directory being searched.
+        Les niveaux 2 et 4 prennent le gabarit qui correspond à
+        ``_detect_config_lang()``, avec repli sur ``config.en.yaml`` si cette
+        langue n'a pas de gabarit dans le répertoire cherché.
 
-        ``project_root`` defaults to the tree holding this file; both it and
-        ``system_template_dir`` are parameters so the cascade can be
-        unit-tested in isolation.
+        ``project_root`` vaut par défaut l'arborescence qui porte ce fichier ;
+        lui et ``system_template_dir`` sont des paramètres pour que la cascade
+        reste testable unitairement en isolation.
         """
         if project_root is None:
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -130,13 +132,15 @@ class Config:
         return None
 
     def _load_config(self):
-        """Loads config.yaml, then overlays an optional sibling
-        ``config_local.yaml`` (git-ignored) for machine-local overrides.
+        """Charge config.yaml, puis applique en surcharge un éventuel
+        ``config_local.yaml`` frère (ignoré par git) pour les retouches locales
+        à la machine.
 
-        ``config_local.yaml`` sits next to the resolved config file. Its keys
-        are deep-merged over the base: two mappings under the same key merge
-        recursively, every other value (scalar, list) replaces the base one.
-        A missing or empty overlay leaves the base config untouched.
+        ``config_local.yaml`` voisine le fichier de configuration résolu. Ses
+        clés fusionnent en profondeur par-dessus la base : deux tables sous la
+        même clé fusionnent récursivement, toute autre valeur (scalaire,
+        liste) remplace celle de la base. Une surcharge absente ou vide laisse
+        la base intacte.
         """
         with open(self.config_path, 'r', encoding='utf-8') as f:
             data = yaml.safe_load(f) or {}
@@ -154,10 +158,11 @@ class Config:
 
     @staticmethod
     def _deep_merge(base: dict, override: dict) -> dict:
-        """Recursively merge ``override`` into ``base``; returns ``base``.
+        """Fusionne récursivement ``override`` dans ``base`` ; retourne ``base``.
 
-        Two mappings under the same key merge recursively; any other value in
-        ``override`` (scalar, list, or a type change) replaces the base value.
+        Deux tables sous la même clé fusionnent récursivement ; toute autre
+        valeur de ``override`` (scalaire, liste ou changement de type)
+        remplace celle de la base.
         """
         for key, value in override.items():
             base_value = base.get(key)
@@ -169,8 +174,8 @@ class Config:
 
     def _initialize_theme(self):
         """
-        Loads UI colors from config.yaml and maps them to colorama objects.
-        Provides sane defaults if the theme section is missing.
+        Charge les couleurs de l'UI depuis config.yaml et les associe aux
+        objets colorama. Fournit des défauts sains si la section theme manque.
         """
         color_map = {
             'BLACK': Fore.BLACK, 'RED': Fore.RED, 'GREEN': Fore.GREEN,
@@ -187,19 +192,18 @@ class Config:
             'info': 'RESET', 'success': 'GREEN', 'warning': 'YELLOW', 'error': 'RED',
         }
 
-        # Dynamically create attributes like self.color_ready_message
+        # Crée dynamiquement des attributs comme self.color_ready_message
         for key, default_color in defaults.items():
             color_name = user_theme.get(key, default_color).upper()
-            color_obj = color_map.get(color_name, Fore.WHITE) # Default to white on invalid color
+            color_obj = color_map.get(color_name, Fore.WHITE) # blanc par défaut si couleur invalide
             setattr(self, f"color_{key}", color_obj)
 
         # Style attributes
         self.BRIGHT = Style.BRIGHT
         self.RESET = Style.RESET_ALL
 
-    # Défauts de repli des phrases de déclenchement, par langue (chantier 7
-    # volet E/F). N'entrent en jeu que si la langue n'a pas de bloc
-    # voice_commands dans config.yaml.
+    # Défauts de repli des phrases de déclenchement, par langue. N'entrent en
+    # jeu que si la langue n'a pas de bloc voice_commands dans config.yaml.
     _WAKE_PHRASE_FALLBACK = {
         'en': 'start dictation', 'fr': 'active dictée',
         'de': 'diktat starten', 'es': 'iniciar dictado',
@@ -211,14 +215,14 @@ class Config:
 
     def set_language(self, lang_code: str):
         """
-        Sets the active language for the application.
+        Pose la langue active de l'application.
         """
         self.current_lang = lang_code
         lang_settings = self.language_settings.get(lang_code, {})
         voice_commands = lang_settings.get('voice_commands', {})
-        # Chantier 7 volet E/F : phrases de déclenchement à deux mots. Les
-        # anciennes clés mono-mot start_word / stop_word sont encore lues pour
-        # ne pas casser une config utilisateur non migrée.
+        # Phrases de déclenchement à deux mots. Les anciennes clés mono-mot
+        # start_word / stop_word sont encore lues pour ne pas casser une
+        # config utilisateur non migrée.
         default_wake = self._WAKE_PHRASE_FALLBACK.get(lang_code, 'start dictation')
         default_stop = self._STOP_PHRASE_FALLBACK.get(lang_code, 'stop dictation')
         self.WAKE_PHRASE = voice_commands.get(
@@ -229,8 +233,7 @@ class Config:
         )
 
     def recognition_setting(self, key: str, default, lang_code: str = None):
-        """Résout un réglage ``recognition.<key>`` avec surcharge par langue
-        (chantier 7 bis).
+        """Résout un réglage ``recognition.<key>`` avec surcharge par langue.
 
         ``language_settings.<lang>.<key>`` l'emporte sur ``recognition.<key>``,
         lui-même sur ``default``. Même motif que ``restricted_grammar_in_listening``
@@ -241,9 +244,9 @@ class Config:
         return self.language_settings.get(lang_code, {}).get(key, global_value)
 
     def interaction_setting(self, key: str, default, lang_code: str = None):
-        """Résout un réglage ``interaction.<key>`` avec surcharge par langue
-        (chantier 11), même motif que ``recognition_setting`` pour
-        ``confidence_threshold`` (D2, correctif 7 bis).
+        """Résout un réglage ``interaction.<key>`` avec surcharge par langue,
+        même motif que ``recognition_setting`` pour ``confidence_threshold``
+        (seuil de confiance par langue).
 
         ``language_settings.<lang>.<key>`` l'emporte sur ``interaction.<key>``,
         lui-même sur ``default``.
@@ -254,15 +257,16 @@ class Config:
 
     @property
     def interaction_mode(self) -> str:
-        """``toggle`` (défaut, inchangé) | ``maintenue`` | ``silence`` (D1, chantier 11)."""
+        """``toggle`` (défaut, inchangé) | ``maintenue`` | ``silence`` (modes de déclenchement de la dictée)."""
         return self.data.get('interaction', {}).get('mode', 'toggle')
 
     def typography(self, lang_code: str = None) -> dict:
-        """Typography profile for a language (chantier 7 volet F).
+        """Profil typographique d'une langue.
 
-        Data-driven replacement for the old hardcoded French branch in
-        text_processing. Missing keys fall back to a neutral profile
-        (no thin space, capitalize sentence starts, ASCII quotes).
+        Remplacement piloté par les données de l'ancienne branche française en
+        dur dans text_processing. Les clés manquantes replient sur un profil
+        neutre (pas d'espace fine, majuscule en début de phrase, guillemets
+        ASCII).
         """
         lang_code = lang_code or self.current_lang
         raw = self.language_settings.get(lang_code, {}).get('typography', {})
@@ -276,7 +280,7 @@ class Config:
         }
 
     def model_search_roots(self, path_relative: str) -> list[str]:
-        """Ordered list of roots searched for a model folder (§10.3), for error messages."""
+        """Liste ordonnée des racines cherchées pour un dossier de modèle (§10.3), pour les messages d'erreur."""
         nom_dossier = os.path.basename(path_relative)
         xdg_data_home = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -288,11 +292,11 @@ class Config:
 
     def get_model_path_by_name(self, model_name: str) -> str | None:
         """
-        Resolves the full path to a Vosk model directory via the multi-root
-        cascade (DOCUMENTATION_MULTILINGUE.md §10.3): an explicit absolute
-        path in config.yaml wins outright; otherwise the first existing
-        directory among $XDG_DATA_HOME/vosk-models/, /usr/share/vosk-models/,
-        and the dev-mode ./vosk-model/ of a git clone.
+        Résout le chemin complet d'un répertoire de modèle Vosk via la cascade
+        multi-racines (DOCUMENTATION_MULTILINGUE.md §10.3) : un chemin absolu
+        explicite dans config.yaml gagne d'office ; sinon le premier répertoire
+        existant parmi $XDG_DATA_HOME/vosk-models/, /usr/share/vosk-models/ et
+        le ./vosk-model/ de développement d'un clone git.
         """
         for model in self.data.get('vosk_models', []):
             if model['name'] != model_name:
@@ -308,14 +312,14 @@ class Config:
 
     def get_lang_from_model_name(self, model_name_on_disk: str) -> str | None:
         """
-        Retrieves the language code ('fr', 'en') from a model's folder name.
+        Retrouve le code de langue ('fr', 'en') depuis un nom de dossier de modèle.
         """
         for model in self.data.get('vosk_models', []):
             if model['path_relative'].endswith(model_name_on_disk):
                 return model['name']
         return None
 
-    # --- Properties to access config data easily ---
+    # --- Propriétés d'accès simple aux données de configuration ---
     @property
     def default_model(self) -> str:
         return self.data.get('default_model', 'en')
@@ -341,5 +345,5 @@ class Config:
     def sound_file(self) -> str:
         return self.data.get('sound_file', '')
 
-# Singleton instance of the configuration
+# Instance unique de la configuration
 config = Config()

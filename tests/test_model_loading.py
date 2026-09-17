@@ -1,5 +1,5 @@
-# Chantier 7 volet F/H — chargement réel des modèles des quatre langues et
-# construction de la grammaire restreinte avec le vrai vocabulaire.
+# Chargement réel des modèles des quatre langues et construction de la
+# grammaire restreinte avec le vrai vocabulaire.
 #
 # Ces tests exigent les modèles Vosk sur disque. Ils se sautent proprement
 # quand un modèle est absent (machine sans le téléchargement), pour que

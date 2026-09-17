@@ -5,7 +5,8 @@ from config.config import config
 
 def _strip_accents(s: str) -> str:
     """Minuscule sans diacritiques — pour comparer les commandes de ponctuation
-    quand le modèle Vosk rend « a la ligne » au lieu de « à la ligne » (T5)."""
+    quand le modèle Vosk rend « a la ligne » au lieu de « à la ligne »
+    (comparaison sans accents)."""
     return "".join(
         c for c in unicodedata.normalize("NFKD", s.lower())
         if not unicodedata.combining(c)
@@ -14,10 +15,10 @@ def _strip_accents(s: str) -> str:
 
 class TextProcessor:
     def __init__(self, language_code: str):
-        # Punctuation mechanics that are near-universal (bracket / quote
-        # attachment). The locale-variable parts — thin space, sentence
-        # capitalization, quote glyphs — come from the per-language
-        # `typography` block instead (chantier 7 volet F).
+        # Mécanique de ponctuation quasi universelle (collement des
+        # parenthèses et guillemets). Les parties variables par locale —
+        # espace fine, majuscule de début de phrase, glyphes de guillemets —
+        # viennent du bloc `typography` par langue.
         self.no_space_after = {'(', '[', '« ', '„', '¿', '¡'}
         self.no_space_before = {',', '.', ')', ']', '?', '!', ':', ';', '»', '…', '“'}
         # Add state to handle capitalization contextually.
@@ -25,16 +26,17 @@ class TextProcessor:
         self.update_language(language_code)
 
     def update_language(self, language_code: str):
-        """Updates the processor's settings for a new language."""
+        """Met à jour les réglages du processeur pour une nouvelle langue."""
         self.lang = language_code
         self.settings = config.language_settings.get(language_code, {})
         self.typography = config.typography(language_code)
         self.space_before = set(self.typography['space_before'])
         self.thin_space = self.typography['thin_space']
         self.capitalize_sentence_start = self.typography['capitalize_sentence_start']
-        # Merge all punctuation commands for easy lookup. The `mode` / `trigger`
-        # keys are scalars, not command maps, so only dict sections contribute
-        # (T1 : mode de saisie de la ponctuation par langue).
+        # Fusionne toutes les commandes de ponctuation pour une recherche
+        # simple. Les clés `mode` / `trigger` sont des scalaires, pas des
+        # tables de commandes : seules les sections dict contribuent (mode de
+        # saisie de la ponctuation par langue).
         self.all_punctuation_cmds = {}
         punctuation_sections = self.settings.get('punctuation', {}) or {}
         self.punctuation_mode = punctuation_sections.get('mode', 'inline')
@@ -42,42 +44,42 @@ class TextProcessor:
         for section in punctuation_sections.values():
             if isinstance(section, dict):
                 self.all_punctuation_cmds.update(section)
-        # Create a sorted list of punctuation commands for the tokenizer
+        # Trie les commandes de ponctuation pour le tokeniseur (plus longue d'abord).
         self.punctuation_keys = sorted(self.all_punctuation_cmds.keys(), key=len, reverse=True)
-        # T5 : forme normalisée (sans accents) des mots de chaque clé, pour un
+        # Forme normalisée (sans accents) des mots de chaque clé, pour un
         # appariement tolérant aux diacritiques manquants dans la sortie Vosk.
         self._key_norm_words = {
             key: [_strip_accents(w) for w in key.split()]
             for key in self.punctuation_keys
         }
         self._trigger_norm = _strip_accents(self.punctuation_trigger)
-        # Aliases, longest key first: a multi-word alias must win over any of
-        # its own single words (chantier 7 volet F).
+        # Alias, clé la plus longue d'abord : un alias multi-mots doit gagner
+        # contre chacun de ses mots isolés.
         aliases = self.settings.get('recognition_aliases', {}) or {}
         self.sorted_aliases = sorted(aliases.items(), key=lambda kv: len(kv[0]), reverse=True)
 
     def reset_state(self):
-        """Resets the processor's state, e.g., for a new session."""
+        """Réinitialise l'état du processeur, p. ex. pour une nouvelle session."""
         self.capitalize_next_word = True
 
     def process(self, raw_text: str) -> str:
         """
-        Processes a raw string of recognized text into a formatted string.
-        The `is_first_word_of_sentence` flag is now managed internally.
+        Met en forme une chaîne brute reconnue.
+        Le drapeau `is_first_word_of_sentence` est désormais géré en interne.
         """
-        # STEP 0: Pre-processing to clean up common spacing errors from Vosk.
+        # ÉTAPE 0 : prétraitement des erreurs d'espacement courantes de Vosk.
         text = re.sub(r'\s+([,.?)!\];»…])', r'\1', raw_text)
 
-        # STEP 1: Apply recognition aliases
+        # ÉTAPE 1 : appliquer les alias de reconnaissance
         text = self._apply_aliases(text.lower())
 
-        # STEP 2: Split text into words and punctuation commands
+        # ÉTAPE 2 : découper le texte en mots et commandes de ponctuation
         parts = self._tokenize(text)
 
-        # STEP 3: Format parts into a final string, managing state internally
+        # ÉTAPE 3 : assembler les parties en chaîne finale, état géré en interne
         final_string = self._format_parts(parts)
 
-        # STEP 4: Apply custom vocabulary for case correction
+        # ÉTAPE 4 : appliquer le vocabulaire personnalisé pour la casse
         final_string = self._apply_custom_vocabulary(final_string)
 
         return final_string
@@ -95,21 +97,22 @@ class TextProcessor:
         return text
 
     def _tokenize(self, text: str) -> list:
-        """Splits the text into words and recognized punctuation commands.
+        """Découpe le texte en mots et commandes de ponctuation reconnues.
 
-        A punctuation command only matches when it occupies one or more *whole*
-        tokens of the input (tokens = whitespace-separated sequences), never as
-        a prefix of a longer word. Keys are tried longest-first (by number of
-        words) so a multi-word command wins over its isolated words.
+        Une commande de ponctuation ne correspond que si elle occupe un ou
+        plusieurs tokens *entiers* de l'entrée (un token = une suite séparée
+        par des blancs), jamais comme préfixe d'un mot plus long. Les clés
+        sont essayées de la plus longue à la plus courte (en nombre de mots)
+        pour qu'une commande multi-mots gagne contre ses mots isolés.
         """
         words = text.split()
-        norm = [_strip_accents(w) for w in words]  # T5 : comparaison sans accents
-        # Order keys by number of words, descending: the longest match wins.
+        norm = [_strip_accents(w) for w in words]  # comparaison sans accents
+        # Ordonner les clés par nombre de mots, décroissant : le plus long gagne.
         keys_by_len = sorted(self.punctuation_keys, key=lambda k: k.count(' ') + 1, reverse=True)
 
-        # T1 : in `explicit` mode a punctuation command only fires when the
-        # trigger word immediately precedes it; the trigger is then consumed.
-        # Otherwise the words are emitted literally.
+        # En mode `explicit`, une commande de ponctuation ne se déclenche que
+        # si le mot déclencheur la précède immédiatement ; le déclencheur est
+        # alors consommé. Sinon les mots sont émis littéralement.
         explicit = self.punctuation_mode == 'explicit'
         trigger = self.punctuation_trigger
 
@@ -127,9 +130,9 @@ class TextProcessor:
                                 and not isinstance(tokens[-1], tuple):
                             tokens[-1] = key
                         else:
-                            # Command not triggered: emit the words literally.
-                            # A word that is also a command key is wrapped so
-                            # _format_parts does not convert it (T1).
+                            # Commande non déclenchée : émettre les mots littéralement.
+                            # Un mot qui est aussi une clé de commande est enveloppé
+                            # pour que _format_parts ne le convertisse pas (mode explicite).
                             for w in key_words:
                                 tokens.append((w,) if w in self.all_punctuation_cmds else w)
                     else:
@@ -143,21 +146,21 @@ class TextProcessor:
         return tokens
 
     def _lead_separator(self) -> str:
-        """Separator placed before a symbol listed in typography.space_before."""
+        """Séparateur placé avant un symbole listé dans typography.space_before."""
         return ' ' if self.thin_space else ' '
 
     def _format_parts(self, parts: list) -> str:
-        """Assembles words and punctuation, respecting typographical rules and state."""
+        """Assemble mots et ponctuation selon les règles typographiques et l'état."""
         output_str = ""
         for i, part in enumerate(parts):
             if part in self.all_punctuation_cmds:
                 symbol = self.all_punctuation_cmds[part]
 
-                # Remove space before punctuation that attaches to the word.
+                # Retirer l'espace devant une ponctuation collée au mot.
                 if output_str.endswith(" ") and symbol in self.no_space_before:
                     output_str = output_str.rstrip()
 
-                # Data-driven leading separator (French thin space, etc.).
+                # Séparateur d'attaque piloté par les données (espace fine française, etc.).
                 if symbol in self.space_before:
                     sep = self._lead_separator()
                     if output_str.endswith(' '):
@@ -167,28 +170,29 @@ class TextProcessor:
 
                 output_str += symbol
 
-                # Add space after punctuation that requires it
+                # Ajouter une espace après une ponctuation qui l'exige.
                 if symbol not in self.no_space_after and not symbol.endswith('\n'):
                     output_str += " "
 
-                # Set capitalization state if the punctuation marks the end of a sentence.
+                # Passer en majuscule si la ponctuation finit une phrase.
                 if symbol in ['.', '!', '?', '…', '« ', '„', '\n', '\n\n']:
                     self.capitalize_next_word = True
-            else:  # This is a normal word
+            else:  # Un mot normal
                 word = part
-                # T1 : in explicit mode a literal word that collides with a
-                # command key is wrapped in a one-item tuple by _tokenize.
+                # En mode explicite, un mot littéral qui collide avec une clé
+                # de commande est enveloppé dans un tuple à un élément par _tokenize.
                 if isinstance(word, tuple):
                     word = word[0]
                 if self.capitalize_sentence_start and self.capitalize_next_word and word:
-                    # Uppercase the first character only — never lowercase the
-                    # rest (keeps "McDonald", "iPhone" intact).
+                    # Ne mettre en majuscule que le premier caractère — jamais
+                    # le reste en minuscule (préserve "McDonald", "iPhone").
                     word = word[:1].upper() + word[1:]
                     self.capitalize_next_word = False
 
                 output_str += word
 
-                # Add a space after a word if the next part isn't punctuation that attaches to it.
+                # Ajouter une espace après un mot sauf si la partie suivante est
+                # une ponctuation collée.
                 is_last_part = (i == len(parts) - 1)
                 if not is_last_part:
                     next_part = parts[i + 1]
@@ -199,9 +203,9 @@ class TextProcessor:
                     else:
                         output_str += " "
 
-                # Set capitalization state if the word itself ends with sentence-ending punctuation.
+                # Passer en majuscule si le mot finit lui-même par une ponctuation de fin de phrase.
                 if any(word.endswith(p) for p in ['.', '!', '?']):
                     self.capitalize_next_word = True
 
-        # Clean up potential double spaces that might be introduced
+        # Éliminer les doubles espaces éventuellement introduites.
         return re.sub(r' +', ' ', output_str)

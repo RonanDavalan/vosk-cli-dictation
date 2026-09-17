@@ -1,6 +1,6 @@
-# Chantier 7 volet E/H — sémantique des commandes vocales dans le thread de
-# reconnaissance : réveil sur les partiels sous grammaire restreinte, garde de
-# confiance sur les finaux, anti-rebond, transmission du texte en DICTÉE.
+# Sémantique des commandes vocales dans le thread de reconnaissance : réveil
+# sur les partiels sous grammaire restreinte, garde de confiance sur les
+# finaux, anti-rebond, transmission du texte en DICTÉE.
 #
 # Le recognizer Vosk est remplacé par un faux qui rejoue un script de résultats,
 # donc aucun modèle n'est requis.
@@ -21,7 +21,7 @@ from src.runtime_state import (
 
 
 def test_target_mode_restricted_grammar_is_per_language():
-    # Global défaut true, es le désactive (banc du 28/08).
+    # Global défaut true, es le désactive (mesuré au banc).
     config.set_language("fr")
     assert _target_mode(STATE_LISTENING) == MODE_LISTENING
     config.set_language("en")
@@ -123,8 +123,8 @@ def _drain(q):
 
 
 def test_wake_phrase_on_partial_never_wakes(monkeypatch):
-    # R1 (28/08 soir) : un partiel ne déclenche plus le réveil — c'était la
-    # porte du faux positif « active » seul sous grammaire restreinte.
+    # Un partiel ne déclenche plus le réveil — c'était la porte du faux
+    # positif « active » seul sous grammaire restreinte.
     script = [("partial", {"partial": "active dictée"}),
               ("partial", {"partial": "active dictée"})]
     _text, ctrl, fake = _run_thread(script, STATE_LISTENING, monkeypatch)
@@ -174,9 +174,8 @@ def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
 
 
 def test_wake_on_final_needs_confidence_with_restricted_grammar(monkeypatch):
-    # R1 (28/08 soir) : sous grammaire restreinte (défaut fr), le garde de
-    # confiance s'applique aussi — avant, un final quelconque sous restreinte
-    # réveillait sans garde.
+    # Sous grammaire restreinte (défaut fr), le garde de confiance s'applique
+    # aussi — avant, un final quelconque sous restreinte réveillait sans garde.
     low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
     script = [("final", {"text": "active dictée", "result": low})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
@@ -189,8 +188,8 @@ def test_wake_on_final_needs_confidence_with_restricted_grammar(monkeypatch):
 
 
 def test_single_word_wake_phrase(monkeypatch):
-    # R3 (28/08 soir) : wake_phrase à mot unique (« démarre ») acceptée et
-    # traitée — aucune hypothèse de deux mots dans le chemin de réveil.
+    # wake_phrase à mot unique (« démarre ») acceptée et traitée — aucune
+    # hypothèse de deux mots dans le chemin de réveil.
     vc = {"wake_phrase": "démarre", "stop_phrase": "zut"}
     high = [{"word": "démarre", "conf": 0.96}]
     script = [("final", {"text": "démarre", "result": high})]
@@ -206,7 +205,7 @@ def test_single_word_wake_phrase(monkeypatch):
     assert "DICTATION_ON" not in _drain(ctrl)
 
 
-# --- chantier 7 bis : détecteur d'arrêt à grammaire restreinte en DICTÉE -----
+# --- détecteur d'arrêt à grammaire restreinte en DICTÉE -------------------------
 
 def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
     monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
@@ -219,7 +218,7 @@ def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
 
 
 def test_restricted_stop_recognizer_ignores_partials(monkeypatch):
-    # Conservateur (28/08) : un partiel « stop dictée » ne déclenche PAS —
+    # Conservateur : un partiel « stop dictée » ne déclenche PAS —
     # les partiels sous grammaire restreinte sont instables.
     monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
     stop_script = [("partial", {"partial": "stop dictée"}),
@@ -300,7 +299,7 @@ def test_dictating_text_suppressed_while_stop_pending(monkeypatch):
     assert _drain(text_q) == []
 
 
-# --- chantier 7 ter (T4) : fenêtre d'ignorance après le réveil -----------------
+# --- fenêtre d'ignorance après le réveil ---------------------------------------
 
 def test_wake_discard_window_drops_audio_buffered_before_transition(monkeypatch):
     """Après ÉCOUTE->DICTÉE, l'audio déjà en file (fin de « active dictée ») est
@@ -309,7 +308,7 @@ def test_wake_discard_window_drops_audio_buffered_before_transition(monkeypatch)
     monkeypatch.setitem(config.data["recognition"], "wake_discard_ms", 300)
 
     # Le faux recognizer complet : chaque bloc produit un final « les » (ce qui,
-    # sans la fenêtre T4, serait remonté au thread UI).
+    # sans la fenêtre d'ignorance, serait remonté au thread UI).
     full = FakeRec([("final", {"text": "les", "result": []})] * 50)
     monkeypatch.setattr(rec, "build_recognizer", lambda model, mode: full)
 

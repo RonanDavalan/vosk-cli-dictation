@@ -1,7 +1,7 @@
 # src/diagnose.py
 #
-# `vosk-cli-dictation --diagnose` (chantier 7 volet G) : vérifie en une commande
-# ce qu'il faut pour que l'outil fonctionne, au lieu d'un débogage manuel.
+# `vosk-cli-dictation --diagnose` : vérifie en une commande ce qu'il faut
+# pour que l'outil fonctionne, au lieu d'un débogage manuel.
 
 import os
 

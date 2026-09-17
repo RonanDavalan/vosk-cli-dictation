@@ -28,8 +28,8 @@ BASE = """
 
 
 def _fresh_config(tmp_path, monkeypatch, local_yaml=None):
-    # conftest sets this to isolate the suite from a dev's real overlay; here
-    # we want the overlay path exercised.
+    # conftest pose ceci pour isoler la suite de la vraie surcharge d'un
+    # développeur ; ici on veut exercer le chemin de la surcharge.
     monkeypatch.delenv("VOSK_IGNORE_LOCAL_CONFIG", raising=False)
     (tmp_path / "config.yaml").write_text(textwrap.dedent(BASE), encoding="utf-8")
     if local_yaml is not None:

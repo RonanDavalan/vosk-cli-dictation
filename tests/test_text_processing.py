@@ -1,4 +1,4 @@
-# Chantier 7 volet F/H — golden tests du TextProcessor, quatre langues.
+# Tests de référence du TextProcessor, quatre langues.
 #
 # Chaque cas est (langue, sortie Vosk brute) -> texte formaté attendu. On teste
 # la ponctuation, la capitalisation de début de phrase, l'espace fine française,
@@ -67,10 +67,11 @@ EN_CASES = [
      "Wait! Now"),
 ]
 
-# English straight quotes (" ") use the same glyph for open and close, so the
-# engine cannot decide spacing per occurrence without stateful quote tracking —
-# out of scope for volet F (data-driven typography). Languages with distinct
-# opening/closing glyphs (fr « », de „ “) are covered above.
+# Les guillemets droits anglais (" ") utilisent le même glyphe à l'ouverture
+# et à la fermeture : le moteur ne peut pas décider l'espacement par
+# occurrence sans suivi d'état des guillemets — hors périmètre de la
+# typographie pilotée par les données. Les langues à glyphes ouvrants et
+# fermants distincts (fr « », de „ “) sont couvertes ci-dessus.
 
 
 @pytest.mark.parametrize("raw,expected", EN_CASES)
@@ -193,11 +194,11 @@ def test_isolated_point_recognized_as_command():
 
 
 # --------------------------------------------------------------------------- #
-# T1 : mode de saisie de la ponctuation par langue (inline | explicit)         #
+# Mode de saisie de la ponctuation par langue (inline | explicit)             #
 # --------------------------------------------------------------------------- #
 
 def _set_fr_punctuation_mode(monkeypatch, mode, trigger=None):
-    """Force the fr punctuation mode / trigger for a single test."""
+    """Force le mode / déclencheur de ponctuation fr pour un seul test."""
     punct = config.language_settings["fr"]["punctuation"]
     monkeypatch.setitem(punct, "mode", mode)
     if trigger is not None:
@@ -243,7 +244,7 @@ def test_explicit_no_dot_inside_plain_words(monkeypatch):
 
 
 # --------------------------------------------------------------------------- #
-# T5 : appariement des commandes de ponctuation insensible aux accents        #
+# Appariement des commandes de ponctuation insensible aux accents             #
 # (le modèle Vosk rend parfois "a la ligne" pour "à la ligne")                #
 # --------------------------------------------------------------------------- #
 
@@ -259,12 +260,12 @@ def test_accent_insensitive_does_not_overmatch():
 
 
 def test_dash_homophone_aliases_ship_by_default():
-    # R2 (28/08 soir, arbitrage option 1) : les homophones de « tiret »
-    # réellement transcrits par le modèle fr (matrice Piper : « tirer »,
-    # « tirés », « tirait », « tirez ») sont livrés par défaut.
+    # Les homophones de « tiret » réellement transcrits par le modèle fr
+    # (matrice Piper : « tirer », « tirés », « tirait », « tirez ») sont
+    # livrés par défaut.
     for form in ("tirez", "tirés", "tirer", "tirait"):
         out = TextProcessor("fr").process("voici {} le texte".format(form))
         assert "–" in out, form
-    # « trait » reste un mot ordinaire (refus R2) : aucun tiret parasite.
+    # « trait » reste un mot ordinaire (cas refusé) : aucun tiret parasite.
     out = TextProcessor("fr").process("un trait de génie")
     assert "–" not in out

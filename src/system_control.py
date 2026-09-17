@@ -2,7 +2,7 @@
 #
 # Injection de texte et de touches dans la fenêtre active, plus retours sonores.
 #
-# Chantier 7 volet B — durcissement :
+# Durcissement de l'injection :
 #   - `timeout=` sur tous les sous-processus : un backend figé ne fige plus l'UI.
 #   - round-trip presse-papiers confirmé (relecture) avant le collage, délai de
 #     restauration paramétrable, presse-papiers non textuel préservé (non écrasé
@@ -43,7 +43,7 @@ _deferred_clip = {"pending": False, "value": None}
 _deferred_atexit_registered = False
 
 _RESTORE_POLL_S = 0.08  # granularité de la fenêtre de restauration adaptative
-                        # (chaque tranche sonde le presse-papiers = un sous-processus)
+                        # (chaque sondage du presse-papiers = un sous-processus)
 
 
 # --------------------------------------------------------------------------- #
@@ -51,7 +51,7 @@ _RESTORE_POLL_S = 0.08  # granularité de la fenêtre de restauration adaptative
 # --------------------------------------------------------------------------- #
 
 def check_command_exists(command: str) -> bool:
-    """Checks if an external command is available in the system's PATH."""
+    """Vrai si une commande externe est disponible dans le PATH du système."""
     return shutil.which(command) is not None
 
 
@@ -352,7 +352,7 @@ def _settle_before_restore(text: str, budget_s: float) -> bool:
 
     `_send_paste` rend la main quand l'événement Ctrl+V est remis, pas quand la
     cible a lu la sélection (lecture asynchrone sous Wayland). On attend donc
-    jusqu'à `budget_s`, en tranches courtes. Retourne True si notre `text` est
+    jusqu'à `budget_s`, par courtes attentes. Retourne True si notre `text` est
     toujours dans le presse-papiers au terme de l'attente — la restauration est
     alors pertinente ; False si un autre propriétaire (gestionnaire de
     presse-papiers, cible, utilisateur) l'a déjà remplacé, auquel cas réécrire

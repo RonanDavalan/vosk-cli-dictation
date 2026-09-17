@@ -1,10 +1,11 @@
 import os
 import sys
 
-# The suite validates the shipped configuration; a developer's local
-# config_local.yaml overlay must not change what the tests see. Tests that
-# exercise the overlay itself clear this in their own fixture.
+# La suite valide la configuration livrée ; la surcharge locale
+# config_local.yaml d'un développeur ne doit pas changer ce que voient les
+# tests. Les tests qui exercent la surcharge elle-même la réactivent dans
+# leur propre fixture.
 os.environ.setdefault("VOSK_IGNORE_LOCAL_CONFIG", "1")
 
-# Make the project root importable when pytest is run from anywhere.
+# Rend la racine du projet importable quand pytest tourne depuis n'importe où.
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

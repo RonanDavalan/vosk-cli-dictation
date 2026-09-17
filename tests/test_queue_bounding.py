@@ -1,4 +1,4 @@
-# Chantier 7 volet C/H — files bornées, politique « jeter le plus ancien ».
+# Files bornées, politique « jeter le plus ancien ».
 
 import queue
 

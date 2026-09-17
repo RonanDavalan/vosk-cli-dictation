@@ -1,6 +1,6 @@
-# Chantier stabilité v0.5.1, défaut 2 — finalize_session() ne tue plus le
-# thread UI quand pyperclip.copy lève (SSH nu, pas de presse-papiers) : le
-# texte est imprimé sur stdout, l'état repasse en ÉCOUTE, le thread survit.
+# finalize_session() ne tue plus le thread UI quand pyperclip.copy lève
+# (SSH nu, pas de presse-papiers) : le texte est imprimé sur stdout, l'état
+# repasse en ÉCOUTE, le thread survit.
 
 import queue
 import threading
@@ -37,7 +37,7 @@ def harness(monkeypatch):
     config.set_language("fr")
     # Les assertions ci-dessous portent sur les msgid anglais ; src.i18n._ est
     # un état global partagé entre modules de test, pas garanti à l'anglais
-    # sans cette fixation explicite (constaté au chantier 11).
+    # sans cette fixation explicite.
     set_ui_language("en")
 
     text_q = queue.Queue(maxsize=64)

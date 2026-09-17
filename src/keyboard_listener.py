@@ -8,27 +8,27 @@ from src.i18n import get_translation
 
 
 def _notice(text: str, color=None) -> None:
-    """Print a one-paragraph notice, wrapped to 76 columns."""
+    """Affiche un avis d'un paragraphe, enrobé à 76 colonnes."""
     colour = config.color_info if color is None else color
     print(f"{colour}{textwrap.fill(text, width=76)}{config.RESET}")
 
 
 def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
     """
-    Global-hotkey listener via pynput.
+    Écoute des raccourcis globaux via pynput.
 
-    pynput on Linux watches the X server. Under a Wayland session an XWayland
-    server is almost always present and relays key events for the windows that
-    run through it (most Electron and legacy X11 apps), but never for a focused
-    native-Wayland surface. The listener is therefore a best-effort convenience
-    that starts whenever an X server is reachable, on any session type; the
-    universal control path stays the Unix socket and its CLI subcommands
-    (--toggle / --finalize / --sleep-toggle / --status).
+    Sous Linux, pynput observe le serveur X. Dans une session Wayland, un
+    serveur XWayland est presque toujours présent et relaie les touches des
+    fenêtres qui y transitent (la plupart des applis Electron et X11
+    historiques), jamais celles d'une surface Wayland native focalisée.
+    L'écoute est donc un confort best-effort qui démarre dès qu'un serveur X
+    est joignable, quel que soit le type de session ; la voie de contrôle
+    universelle reste la socket Unix et ses sous-commandes CLI (--toggle /
+    --finalize / --sleep-toggle / --status).
 
-    v0.5.1-alpha (COMPATIBILITE_WAYLAND.md §5): the earlier
-    `XDG_SESSION_TYPE == "x11"` gate is gone -- it dropped the XWayland case
-    that already worked in v0.0.4-alpha. `hotkeys.pynput_enabled: false` still
-    disables the listener, now on every session type.
+    Le garde qui limitait l'écoute aux sessions X11 est retiré : il écartait
+    le cas XWayland qui fonctionnait déjà. `hotkeys.pynput_enabled: false`
+    coupe toujours l'écoute, désormais sur tout type de session.
     """
     _ = get_translation()
 
@@ -56,11 +56,11 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         _notice(_('Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows.'))
 
     def submit(command):
-        """Push a control command without ever blocking the pynput callback.
+        """Pousse une commande de contrôle sans jamais bloquer le rappel pynput.
 
-        The queue is bounded (chantier 7 volet C); a full control queue means
-        the UI thread is stuck. Surface it loudly rather than freeze the
-        listener or drop the command in silence.
+        La file de contrôle est bornée ; une file pleine signifie que le
+        thread UI est bloqué. Le signaler bruyamment plutôt que geler
+        l'écoute ou jeter la commande en silence.
         """
         try:
             control_queue.put_nowait(command)
@@ -70,18 +70,18 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
                   f"{config.RESET}")
 
     def on_toggle():
-        """Callback for the toggle recording hotkey."""
+        """Rappel du raccourci de bascule d'enregistrement."""
         submit('TOGGLE_RECORDING')
 
     def on_finalize():
-        """Callback for the finalize session hotkey."""
+        """Rappel du raccourci de finalisation de session."""
         submit('FINALIZE_SESSION')
 
     def on_sleep_toggle():
-        """Callback for the sleep mode toggle hotkey."""
+        """Rappel du raccourci de bascule de veille."""
         submit('TOGGLE_SLEEP')
 
-    # Map action names from the config file to their callback functions.
+    # Associe les noms d'actions du fichier de configuration à leurs rappels.
     actions = {
         'toggle_recording': on_toggle,
         'finalize_session': on_finalize,
@@ -90,35 +90,35 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
 
     def format_hotkey_string(keys: list) -> str:
         """
-        Formats a list of key names into a string that pynput can parse.
-        Example: ['alt_l', 'h'] -> '<alt_l>+h'
+        Formate une liste de noms de touches en chaîne lisible par pynput.
+        Exemple : ['alt_l', 'h'] -> '<alt_l>+h'
         """
-        # A key name is considered a "special" key if its name is longer than one character.
-        # These need to be wrapped in angle brackets.
+        # Un nom de touche est "spécial" s'il fait plus d'un caractère.
+        # Ceux-là s'enveloppent dans des chevrons.
         formatted_keys = [f'<{k}>' if len(k) > 1 else k for k in keys]
         return "+".join(formatted_keys)
 
-    # Dynamically build the hotkeys dictionary for the listener.
-    # The format required by GlobalHotKeys is {'<key_combo>': callback_function}
+    # Construit dynamiquement le dictionnaire des raccourcis pour l'écoute.
+    # Le format exigé par GlobalHotKeys est {'<combo_touches>': fonction_rappel}
     hotkeys_to_listen = {}
     for action, hotkey_config in config.hotkeys.items():
         if action in actions:
             try:
-                # pynput_keys is a list from config, e.g., ['alt_l', 'h']
+                # pynput_keys est une liste venue de la config, p. ex. ['alt_l', 'h']
                 pynput_keys = hotkey_config.get('pynput_keys', [])
                 if pynput_keys:
                     hotkey_string = format_hotkey_string(pynput_keys)
                     hotkeys_to_listen[hotkey_string] = actions[action]
             except (TypeError, KeyError, AttributeError) as e:
-                # This handles cases where config might be malformed.
+                # Couvre les cas de configuration malformée.
                 print(f"{config.color_error}Could not create hotkey for action '{action}': {e}{config.RESET}")
 
     if not hotkeys_to_listen:
         print(f"{config.color_warning}No valid hotkeys found in configuration. Keyboard listener will not run.{config.RESET}")
         return
 
-    # Create and run the listener with the defined hotkeys.
-    # GlobalHotKeys runs in its own thread.
+    # Crée et lance l'écoute avec les raccourcis définis.
+    # GlobalHotKeys tourne dans son propre thread.
     try:
         hotkey_listener = GlobalHotKeys(hotkeys_to_listen)
         hotkey_listener.start()
@@ -128,10 +128,10 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         stop_event.wait()
         return
 
-    # Chantier 11, D2 : mode push-to-talk. GlobalHotKeys ne rend jamais le
-    # relâchement d'une touche ; un Listener bas niveau dédié le fait, actif
-    # seulement si interaction.mode == 'maintenue'. Cohabite avec le hotkey de
-    # bascule ci-dessus (aucune fonctionnalité existante retirée, D6).
+    # Mode appui-pour-parler : GlobalHotKeys ne rend jamais le relâchement
+    # d'une touche ; un Listener bas niveau dédié le fait, actif seulement si
+    # interaction.mode == 'maintenue'. Cohabite avec le raccourci de bascule
+    # ci-dessus (aucune fonctionnalité existante retirée).
     ptt_listener = None
     if config.interaction_mode == 'maintenue':
         key_name = config.hotkeys.get('push_to_talk')
@@ -161,21 +161,22 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
                       f"{_('Push-to-talk listener could not start:')} {exc}"
                       f"{config.RESET}")
 
-    # The main part of this thread will now block here until the main program
-    # sets the stop_event, indicating it's time to shut down.
+    # Le corps de ce thread bloque ici jusqu'à ce que le programme principal
+    # pose stop_event pour demander l'arrêt.
     stop_event.wait()
 
-    # Stop the listener thread(s) when the program is exiting.
+    # Arrête le ou les threads d'écoute à la sortie du programme.
     hotkey_listener.stop()
     if ptt_listener is not None:
         ptt_listener.stop()
 
 
 def _parse_single_key(name: str, Key, KeyCode):
-    """Resolves a single-key config name (e.g. ``ctrl_r``, ``f9``, ``a``) to a
-    pynput key object, for the push-to-talk listener (D2). Special keys are
-    named after ``pynput.keyboard.Key`` members; anything else is treated as a
-    single printable character. Returns None if the name is not a valid key."""
+    """Résout un nom de touche de configuration (p. ex. ``ctrl_r``, ``f9``,
+    ``a``) en objet touche pynput pour l'écoute appui-pour-parler. Les
+    touches spéciales portent le nom des membres de ``pynput.keyboard.Key`` ;
+    tout le reste est traité comme un caractère imprimable unique. Retourne
+    None si le nom n'est pas une touche valide."""
     try:
         return getattr(Key, name)
     except AttributeError:

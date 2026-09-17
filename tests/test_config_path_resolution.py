@@ -5,8 +5,7 @@
 # depuis le tarball des sources : un `git archive` n'a pas de .git (le niveau
 # « mode développement » ne se déclenche pas) ni de /usr/share/.../config.<lang>.yaml
 # (pas de .deb). Sans ce repli, `python3 src/main.py` levait
-# FileNotFoundError hors clone git (constaté au round-trip du 03/09/2026,
-# Debian 13).
+# FileNotFoundError hors clone git (constaté en round-trip réel, Debian 13).
 
 import pytest
 

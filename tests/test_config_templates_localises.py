@@ -1,8 +1,8 @@
-# Les quatre gabarits config.<lang>.yaml livrés (CONFIG_PUBLIQUE_ET_LOCALISATION.md,
-# Chantier 13) doivent rester structurellement identiques -- seuls les
-# commentaires et default_model varient par langue -- et exempts de jargon de
-# gestion de projet interne (chantier/volet/décision codée), qui n'a rien à
-# faire dans un artefact livré à l'utilisateur final.
+# Les quatre gabarits config.<lang>.yaml livrés (CONFIG_PUBLIQUE_ET_LOCALISATION.md)
+# doivent rester structurellement identiques -- seuls les commentaires et
+# default_model varient par langue -- et exempts de vocabulaire de pilotage
+# interne (voir JARGON_PATTERN ci-dessous), qui n'a rien à faire dans un
+# artefact livré à l'utilisateur final.
 
 import re
 from pathlib import Path

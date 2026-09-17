@@ -1,12 +1,12 @@
 # src/voice_commands.py
 #
-# Détection tokenisée des phrases de déclenchement (chantier 7 volet E).
+# Détection tokenisée des phrases de déclenchement.
 #
 # Remplace l'ancien test de sous-chaîne `config.STOP_WORD in raw_text_lower`
 # (src/ui.py) par une correspondance sur la suite de tokens : la phrase-clé ne
 # se déclenche que si ses mots apparaissent, dans l'ordre, comme une sous-suite
 # contiguë du texte reconnu. Fonctions pures, sans dépendance au reste de
-# l'application — testables directement (volet H).
+# l'application — testables directement.
 
 import re
 

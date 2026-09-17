@@ -1,4 +1,4 @@
-# Chantier 7 bis — résolution par langue des réglages recognition.* via
+# Résolution par langue des réglages recognition.* via
 # Config.recognition_setting (surcharge language_settings.<lang>.<clé>).
 
 from config.config import config
@@ -37,10 +37,10 @@ def test_uses_current_language_when_lang_code_omitted(monkeypatch):
 
 
 def test_shipped_defaults():
-    # Les valeurs livrées par config.yaml après le chantier 7 bis.
+    # Les valeurs livrées par config.yaml.
     assert config.data["recognition"]["confidence_threshold"] == 0.55
     # restricted_stop_in_dictation : false par défaut (expérimental — faux
-    # positifs sur voix réelle constatés le 28/08).
+    # positifs sur voix réelle).
     assert config.data["recognition"]["restricted_stop_in_dictation"] is False
 
 

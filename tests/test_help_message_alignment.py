@@ -1,4 +1,4 @@
-# Chantier « lisibilité de la sortie de démarrage » — la colonne de droite du
+# Lisibilité de la sortie de démarrage — la colonne de droite du
 # tableau de ponctuation de print_help_message() est alignée sur une seule
 # abscisse dans les quatre langues. Régression : le calcul de largeur se faisait
 # avec len() (points de code), alors qu'un terminal rend « „ » « — » « … » sur
@@ -22,7 +22,7 @@ def _restore_default_language():
     """config.current_lang et la traduction active (src.i18n._) sont un état
     global partagé entre tous les tests du module. Sans remise à zéro, un
     paramétrage sur une langue non-fr fuit dans les tests suivants qui
-    n'attendent pas cette langue (pollution constatée au chantier 11 : l'ordre
+    n'attendent pas cette langue (pollution déjà constatée : l'ordre
     alphabétique des fichiers de test suffit à la faire apparaître)."""
     yield
     config.set_language("fr")

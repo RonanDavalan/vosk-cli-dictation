@@ -1,8 +1,8 @@
-# Chantier stabilité v0.5.1 — Vosk/Kaldi sérialise les flottants de
-# SetWords(True) avec le séparateur décimal de LC_NUMERIC. Sous fr_FR.UTF-8
-# (locale à virgule), Result() rend « "conf" : 1,000000 » et json.loads casse à chaque
-# final avec mots. Le correctif force LC_NUMERIC du processus à « C » au
-# démarrage (src/main.py) et défensivement dans build_recognizer().
+# Vosk/Kaldi sérialise les flottants de SetWords(True) avec le séparateur
+# décimal de LC_NUMERIC. Sous fr_FR.UTF-8 (locale à virgule), Result() rend
+# « "conf" : 1,000000 » et json.loads casse à chaque final avec mots. Le
+# correctif force LC_NUMERIC du processus à « C » au démarrage (src/main.py)
+# et défensivement dans build_recognizer().
 #
 # Ces tests exigent qu'une locale à virgule décimale soit installée sur la
 # machine ; ils se sautent proprement sinon (CI, conteneur minimal).

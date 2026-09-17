@@ -1,5 +1,5 @@
-# Chantier 7 bis — la phrase d'arrêt sous le seuil de confiance est ABSORBÉE
-# (ni tapée, ni finalisée) au lieu d'être écrite dans le document.
+# La phrase d'arrêt sous le seuil de confiance est ABSORBÉE (ni tapée, ni
+# finalisée) au lieu d'être écrite dans le document.
 
 import queue
 import threading
@@ -94,8 +94,8 @@ def test_text_before_low_confidence_stop_is_kept(harness):
 
 
 def test_single_word_stop_phrase(monkeypatch):
-    # R3 (28/08 soir) : stop_phrase à mot unique (« zut ») — le garde d'arrêt
-    # du thread UI fonctionne sur un seul token.
+    # stop_phrase à mot unique (« zut ») — le garde d'arrêt du thread UI
+    # fonctionne sur un seul token.
     typed, copied = [], []
     monkeypatch.setattr(ui, "type_text", lambda s: (typed.append(s), True)[1])
     monkeypatch.setattr(ui, "press_key", lambda *a, **k: True)

@@ -1,4 +1,4 @@
-# Correctif de collage (v0.5.1-alpha) — src/system_control.type_text :
+# Correctif de collage — src/system_control.type_text :
 #   - chemin par défaut : restauration APRÈS le collage, jamais avant, dans une
 #     fenêtre bornée par clipboard.restore_delay_ms ;
 #   - abandon anticipé : si le presse-papiers a déjà changé pendant l'attente,

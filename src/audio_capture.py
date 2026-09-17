@@ -8,11 +8,13 @@ from src.i18n import get_translation
 from src.runtime_state import runtime_state
 
 def put_drop_oldest(q, item) -> bool:
-    """Enqueue `item`; if the queue is full, drop its oldest entry first.
+    """Met `item` en file ; si la file est pleine, jette d'abord son entrée
+    la plus ancienne.
 
-    Returns True iff an entry had to be dropped (overflow). This is the
-    "jeter le plus ancien" policy of chantier 7 volet C, factored out so it
-    can be unit-tested without PortAudio.
+    Retourne True si une entrée a dû être jetée (débordement). Quand le
+    thread de reconnaissance prend du retard, le bloc le plus ancien est
+    jeté plutôt que de laisser la latence dériver. Extraite pour pouvoir
+    être testée sans PortAudio.
     """
     try:
         q.put_nowait(item)
@@ -30,11 +32,11 @@ def put_drop_oldest(q, item) -> bool:
 
 
 def open_stream(p):
-    """Opens an input stream on an existing PyAudio instance.
+    """Ouvre un flux d'entrée sur une instance PyAudio existante.
 
-    Kept separate from initialize_audio() so the capture thread can reopen the
-    stream after a deep-sleep close (chantier 7 volet D) without recreating the
-    PyAudio instance.
+    Séparée de initialize_audio() pour que le thread de capture puisse
+    rouvrir le flux après une fermeture en veille profonde sans recréer
+    l'instance PyAudio.
     """
     return p.open(
         format=pyaudio.paInt16,
@@ -47,7 +49,7 @@ def open_stream(p):
 
 def initialize_audio():
     """
-    Initializes and opens a PyAudio stream for audio input.
+    Initialise et ouvre un flux PyAudio pour l'entrée audio.
     """
     _ = get_translation()
     try:
@@ -55,7 +57,7 @@ def initialize_audio():
         stream = open_stream(p)
         return p, stream
     except Exception as e:
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         print(f"{config.color_error}{_('Critical error during audio initialization:')} {e}{config.RESET}")
         if "Invalid input device" in str(e) or "No Default Input Device" in str(e):
             print(f"{config.color_info}{_('TIP: This can happen if no microphone is connected or selected.')}{config.RESET}")
@@ -64,18 +66,18 @@ def initialize_audio():
 
 def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_event):
     """
-    Captures audio and feeds the bounded queue.
+    Capture l'audio et alimente la file bornée.
 
-    Bounded queue (chantier 7 volet C): when the recognition thread falls
-    behind, the oldest chunk is dropped rather than letting latency drift. A
-    read backlog inside PortAudio is detected and counted, since
-    exception_on_overflow=False hides it.
+    File bornée : quand le thread de reconnaissance prend du retard, le bloc
+    le plus ancien est jeté plutôt que de laisser la latence dériver. Un
+    retard de lecture interne à PortAudio est détecté et compté, car
+    exception_on_overflow=False le masque.
 
-    Deep sleep (chantier 7 volet D): on entering VEILLE the stream is stopped
-    and, by default (`sleep.releases_device`), fully closed so the microphone
-    is released and its LED goes off. On waking, the stream is reopened and
-    the first ~200 ms of audio is discarded to avoid a stale-buffer artefact.
-    `wake_event` gates the recognition thread symmetrically.
+    Veille profonde : à l'entrée en VEILLE le flux est arrêté puis, par
+    défaut (`sleep.releases_device`), entièrement fermé pour libérer le
+    micro (sa LED s'éteint). Au réveil, le flux est rouvert et les ~200
+    premières ms d'audio sont jetées pour éviter un artefact de tampon
+    périmé. `wake_event` cadence symétriquement le thread de reconnaissance.
     """
     _ = get_translation()
     buffer_size = config.audio['buffer_size']
@@ -142,12 +144,12 @@ def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_e
                           f"{_('Recognition is falling behind; dropping audio.')}"
                           f"{config.RESET}")
         except IOError as e:
-            # UPDATE: Use theme colors from config
+            # Couleurs du thème depuis la configuration
             print(f"{config.color_error}{_('Audio read error (IOError):')} {e}{config.RESET}")
             stop_event.set()
             break
         except Exception as e:
-            # UPDATE: Use theme colors from config
+            # Couleurs du thème depuis la configuration
             print(f"{config.color_error}{_('Unexpected error in audio capture:')} {e}{config.RESET}")
             stop_event.set()
             break

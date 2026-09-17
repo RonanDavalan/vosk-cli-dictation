@@ -18,9 +18,9 @@ from src.voice_commands import (
     strip_one_repetition, remove_phrase_and_after, mean_confidence,
 )
 
-# Chantier stabilité v0.5.1, défaut 3 : cadence du rappel « micro en veille »
-# tant que la VEILLE dure. Assez espacé pour ne pas harceler, assez fréquent
-# pour qu'un utilisateur qui dicte dans le vide s'en aperçoive vite.
+# Cadence du rappel « micro en veille » tant que la VEILLE dure. Assez espacé
+# pour ne pas harceler, assez fréquent pour qu'un utilisateur qui dicte dans
+# le vide s'en aperçoive vite.
 SLEEP_REMINDER_INTERVAL_S = 30.0
 
 def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event, wake_event):
@@ -28,9 +28,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     full_text_log = ""
     xdotool_failed_once = False
 
-    # Détection tokenisée de la phrase d'arrêt (chantier 7 volet E). Le réveil
-    # (phrase de réveil en ÉCOUTE) est piloté par le thread de reconnaissance,
-    # qui a accès aux résultats partiels et à la grammaire restreinte.
+    # Détection tokenisée de la phrase d'arrêt. Le réveil (phrase de réveil en
+    # ÉCOUTE) est piloté par le thread de reconnaissance, qui a accès aux
+    # résultats partiels et à la grammaire restreinte.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     last_low_conf_hint = [0.0]  # horodatage du dernier indice, pour le throttle
@@ -39,11 +39,11 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     def start_recording():
         nonlocal recording, full_text_log, xdotool_failed_once
         _ = get_translation()
-        # Chantier stabilité v0.5.1, défaut 3 : une demande de dictée pendant la
-        # VEILLE sort d'abord de veille (rouvre le micro) AVANT de démarrer,
-        # sinon on ouvre une DICTÉE fantôme sur un périphérique fermé. La garde
-        # est portée ici pour qu'aucun chemin d'appel (TOGGLE_RECORDING,
-        # DICTATION_ON, /nl) ne puisse la contourner.
+        # Une demande de dictée pendant la VEILLE sort d'abord de veille
+        # (rouvre le micro) AVANT de démarrer, sinon on ouvre une DICTÉE
+        # fantôme sur un périphérique fermé. La garde est portée ici pour
+        # qu'aucun chemin d'appel (TOGGLE_RECORDING, DICTATION_ON, /nl) ne
+        # puisse la contourner.
         woke_from_sleep = False
         if sleep_event.is_set():
             sleep_event.clear()
@@ -56,11 +56,10 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         full_text_log = ""
         xdotool_failed_once = False
         processor.reset_state()
-        # UPDATE: Use theme colors from config
-        # Chantier stabilité v0.5.1, défaut 3 (révision 09/09 soir) : sur une
-        # sortie de veille implicite, une seule ligne cohérente au lieu de
-        # « veille désactivée » suivi de « enregistrement démarré » — deux
-        # messages qui se lisent comme contradictoires (constat réel, 09/09).
+        # Couleurs du thème depuis la configuration
+        # Sur une sortie de veille implicite, une seule ligne cohérente au lieu
+        # de « veille désactivée » suivi de « enregistrement démarré » — deux
+        # messages qui se lisent comme contradictoires.
         if woke_from_sleep:
             print(f"\n{config.color_success}{_('Waking from sleep; recording started.')}{config.RESET}")
         else:
@@ -76,7 +75,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         # Correctif de collage : fin de session de dictée -> on rend le
         # presse-papiers d'origine si clipboard.defer_restore l'a mis de côté.
         flush_deferred_clipboard()
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         print(f"\n{config.color_error}{_('Recording paused.')}{config.RESET}")
         play_sound()
 
@@ -94,12 +93,12 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         # clipboard.defer_restore) avant d'y copier le texte de session.
         flush_deferred_clipboard()
         text_to_copy = full_text_log.strip()
-        # Chantier stabilité v0.5.1, défaut 2 : sur une session sans
-        # presse-papiers accessible (SSH nu, pas de DISPLAY, pas de
-        # xclip/xsel/wl-clipboard), pyperclip.copy lève une exception qui
-        # remontait hors du thread UI et le tuait. On la capture : le texte est
-        # imprimé sur stdout et la finalisation se poursuit normalement.
-        # pyperclip reste le mécanisme de copie (acquis technique), non remplacé.
+        # Sur une session sans presse-papiers accessible (SSH nu, pas de
+        # DISPLAY, pas de xclip/xsel/wl-clipboard), pyperclip.copy lève une
+        # exception qui remontait hors du thread UI et le tuait. On la capture :
+        # le texte est imprimé sur stdout et la finalisation se poursuit
+        # normalement. pyperclip reste le mécanisme de copie (acquis
+        # technique), non remplacé.
         copied = True
         if text_to_copy:
             try:
@@ -111,7 +110,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                       f"{config.RESET}\n{text_to_copy}")
         msg = _('Recording finished. Text copied.') if copied \
             else _('Recording finished. Clipboard unavailable — text printed above.')
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         print(f"\n{config.color_error}{msg}{config.RESET}")
         full_text_log = ""
         processor.reset_state()
@@ -135,16 +134,16 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             sleep_event.set()
             wake_event.clear()
             runtime_state.set_state(STATE_SLEEPING)
-            # Défaut 3 : le premier rappel « micro en veille » attend un
-            # intervalle complet après l'entrée en VEILLE.
+            # Le premier rappel « micro en veille » attend un intervalle complet
+            # après l'entrée en VEILLE.
             last_sleep_reminder[0] = time.monotonic()
             print(f"\n{config.color_warning}{_('Sleep mode enabled — the microphone is released.')}{config.RESET}")
         play_sound()
 
     def maybe_sleep_reminder():
-        """Chantier stabilité v0.5.1, défaut 3 : tant que la VEILLE dure, un
-        rappel throttlé que le micro ne capte rien — entre le silence trompeur
-        et la boucle « audio abandonné », un retour honnête à cadence fixe."""
+        """Tant que la VEILLE dure, un rappel throttlé que le micro ne capte
+        rien — entre le silence trompeur et la boucle « audio abandonné », un
+        retour honnête à cadence fixe."""
         if not sleep_event.is_set():
             return
         now = time.monotonic()
@@ -165,7 +164,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         if not cmd_parts: return
         cmd_name = cmd_parts[0].lower()
 
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         if cmd_name == 'cancel':
             if recording: stop_recording()
             full_text_log = ""
@@ -183,8 +182,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                 print(f"{config.color_warning}{_('No text to modify.')}{config.RESET}")
         elif cmd_name == 'nl':
             to_add = '\n\n' if config.current_lang == 'fr' else '\n'
-            # Défaut 3 : /nl est une demande de dictée — en VEILLE, on réveille
-            # et on démarre l'enregistrement avant d'insérer le saut.
+            # /nl est une demande de dictée — en VEILLE, on réveille et on
+            # démarre l'enregistrement avant d'insérer le saut.
             if sleep_event.is_set():
                 start_recording()
             if recording:
@@ -198,9 +197,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             print(f"{config.color_error}{_('Unknown command:')} {command}{config.RESET}")
 
     def emit_low_conf_hint():
-        """Chantier 7 bis : indice throttlé quand la phrase d'arrêt est entendue
-        mais sous le seuil de confiance. La phrase est absorbée (pas tapée) ;
-        cet indice dit à l'utilisateur comment arrêter malgré tout."""
+        """Indice throttlé quand la phrase d'arrêt est entendue mais sous le
+        seuil de confiance. La phrase est absorbée (pas tapée) ; cet indice
+        dit à l'utilisateur comment arrêter malgré tout."""
         _ = get_translation()
         now = time.monotonic()
         if now - last_low_conf_hint[0] >= 2.0:
@@ -221,7 +220,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                  string_to_type = " "
         string_to_type += processed_text
 
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         if not xdotool_failed_once and not type_text(string_to_type):
             xdotool_failed_once = True
             msg = _('Warning: xdotool failed. Switching to log-only mode.')
@@ -246,8 +245,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     if recording: stop_recording()
                     else: start_recording()
                 elif command == 'DICTATION_ON':
-                    # Défaut 3 : plus de garde `not sleep_event` ici —
-                    # start_recording() sort de veille de lui-même.
+                    # Plus de garde `not sleep_event` ici — start_recording()
+                    # sort de veille de lui-même.
                     if not recording: start_recording()
                 elif command == 'DICTATION_OFF':
                     if recording: stop_recording()
@@ -289,12 +288,12 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     if conf >= conf_threshold:
                         finalize_session()
                     else:
-                        # Chantier 7 bis : confiance insuffisante -> la phrase et
-                        # ce qui la suit sont ABSORBÉS (ni finalisation, ni
-                        # frappe). L'ancien code la tapait dans le document —
-                        # seul résultat qu'une commande d'arrêt ne doit jamais
-                        # produire. L'utilisateur répète, ou passe par
-                        # --finalize / le raccourci.
+                        # Confiance insuffisante -> la phrase et ce qui la suit
+                        # sont ABSORBÉS (ni finalisation, ni frappe). L'ancien
+                        # code la tapait dans le document — seul résultat
+                        # qu'une commande d'arrêt ne doit jamais produire.
+                        # L'utilisateur répète, ou passe par --finalize / le
+                        # raccourci.
                         emit_low_conf_hint()
                     continue
 
@@ -306,6 +305,6 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     except KeyboardInterrupt: pass
     finally:
         if not stop_event.is_set(): stop_event.set()
-        # UPDATE: Use theme colors from config
+        # Couleurs du thème depuis la configuration
         msg = _("Stopping user interface...")
         print(f"\n{config.color_info}{msg}{config.RESET}")

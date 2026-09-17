@@ -1,6 +1,6 @@
 # src/control_socket.py
 #
-# Contrôle d'état universel (chantier 7 volet A).
+# Contrôle d'état universel.
 #
 # L'instance en cours ouvre une socket Unix privée dans $XDG_RUNTIME_DIR. Le
 # même binaire, invoqué avec un drapeau de contrôle (`--toggle`, `--sleep`,
