@@ -1,0 +1,362 @@
+# Schema dieser Datei: wird bei jeder neuen Version erhöht, die einen
+# Abschnitt hinzufügt. Dient nur dazu, zu warnen, wenn Ihre persönliche Datei
+# hinter den verfügbaren Optionen zurückliegt -- wird nie automatisch
+# überschrieben.
+config_version: 3
+
+vosk_models:
+  - name: "en"
+    path_relative: "vosk-model/vosk-model-small-en-us-0.15"
+  - name: "fr"
+    path_relative: "vosk-model/vosk-model-small-fr-0.22"
+  - name: "de"
+    path_relative: "vosk-model/vosk-model-small-de-0.15"
+  - name: "es"
+    path_relative: "vosk-model/vosk-model-small-es-0.42"
+
+default_model: "de"
+
+# Unix-Kontrollsocket in $XDG_RUNTIME_DIR: ermöglicht die Steuerung einer
+# laufenden Sitzung über die CLI-Unterbefehle (--toggle, --sleep, --status…),
+# die an globale Tastenkombinationen jedes Desktops gebunden sind.
+control_socket: true
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  frames_per_buffer: 4096
+  buffer_size: 2048
+  # Maximale Größe der Audiowarteschlange, in Blöcken von buffer_size
+  # Samples. 16 Blöcke ≈ 2 s. Darüber hinaus wird der älteste Block verworfen.
+  queue_max_chunks: 16
+
+recognition:
+  # Eine Sprachauslösung (Aufwecken oder Stopp) wird nur akzeptiert, wenn die
+  # durchschnittliche Worterkennung des Schlüsselsatzes diesen Schwellenwert
+  # erreicht. Unabhängige Absicherung von der eingeschränkten Grammatik, auch
+  # in DIKTAT aktiv. Dieser Schwellenwert steuert nur den Pfad mit vollem
+  # Wortschatz: Er schützt das Dokument (ein Schlüsselsatz unter dem
+  # Schwellenwert wird verschluckt, nicht getippt) und dient als Rückfallebene
+  # -- der zuverlässige Pfad zum Stoppen ist restricted_stop_in_dictation
+  # weiter unten.
+  # Pro Sprache überschreibbar via language_settings.<lang>.confidence_threshold.
+  confidence_threshold: 0.55
+  # In LAUSCHEN mit einer auf den Weckruf beschränkten Kaldi-Grammatik
+  # dekodieren: die CPU-Last im Ruhezustand sinkt deutlich, auf Kosten eines
+  # kompletten Neuaufbaus des Recognizers beim Aufwecken. false = vollständiger
+  # Recognizer in LAUSCHEN.
+  restricted_grammar_in_listening: true
+  # In DIKTAT ein zweiter, leichter Recognizer, beschränkt auf
+  # [stop_phrase, "[unk]"]. EXPERIMENTELL, standardmäßig false: im echten
+  # Einsatz (menschliche Stimme, echtes Mikrofon) "erzwingt" die
+  # eingeschränkte Grammatik eine Interpretation und kann mitten im Satz zu
+  # ungewollten Stopps führen. Solange kein Validierungsprotokoll gegen
+  # Fehlalarme vorhanden ist, stützt sich der Sprachstopp auf den Pfad mit
+  # vollem Wortschatz (confidence_threshold oben) und das Verschlucken unter
+  # dem Schwellenwert.
+  # Pro Sprache überschreibbar via language_settings.<lang>.restricted_stop_in_dictation.
+  restricted_stop_in_dictation: false
+  # Nach einem Aufwecken ("diktat starten") die Dauer, während der die vor dem
+  # Wechsel zu DIKTAT eingereihte Audiospur verworfen wird, ohne dekodiert zu
+  # werden -- sie enthält nur das Ende des Weckrufs und Stille. Pro Sprache
+  # überschreibbar.
+  wake_discard_ms: 300
+
+interaction:
+  # Auslösemodus des Diktats. toggle (Standard) = eine Geste startet, eine
+  # eigene Geste stoppt (Sprachbefehl, Tastenkombination
+  # --dictation-on/--dictation-off/--finalize). maintenue = Push-to-Talk, das
+  # Diktat dauert so lange, wie hotkeys.push_to_talk gedrückt gehalten wird
+  # (best-effort X11/XWayland, Rückfall auf die universellen
+  # CLI-Unterbefehle unter nativem Wayland). silence = ein Tastendruck
+  # startet, das Diktat stoppt und finalisiert sich selbst nach
+  # silence_timeout_ms ohne Erkennungsergebnis, sobald mindestens ein Wort
+  # erfasst wurde. Der Sprach-Stopp-Erkenner und --finalize/--cancel bleiben
+  # in allen drei Modi als Sicherheitsnetz aktiv.
+  mode: toggle
+  # Stille-Verzögerung in Millisekunden vor der automatischen Finalisierung
+  # im Modus silence. Pro Sprache überschreibbar via
+  # language_settings.<lang>.silence_timeout_ms, gleiches Muster wie
+  # recognition.confidence_threshold.
+  silence_timeout_ms: 700
+
+sleep:
+  # true: im RUHEZUSTAND wird der Audiostream geschlossen -- Mikrofon
+  #       freigegeben, LED aus, ~200 ms Wiedereröffnungsverzögerung beim
+  #       Aufwecken.
+  # false: der Stream wird nur pausiert, das Gerät bleibt geöffnet, schnelleres
+  #        Aufwecken.
+  releases_device: true
+
+clipboard:
+  # Die Zwischenablage des Benutzers nach dem Einfügen wiederherstellen.
+  restore: true
+  # Maximales Zeitfenster, in kurzen Abschnitten verbraucht, das der
+  # Zielanwendung bleibt, um die Auswahl vor der Wiederherstellung zu lesen.
+  # Die Wartezeit endet vorzeitig, wenn sich die Zwischenablage bereits
+  # geändert hat (ein anderer Besitzer hat übernommen).
+  restore_delay_ms: 400
+  # true: zwischen den Segmenten einer Sitzung nicht wiederherstellen; die
+  # ursprüngliche Zwischenablage wird nur einmal am Ende der Sitzung
+  # zurückgesetzt (Pause, --finalize, RUHEZUSTAND, Beenden). Beseitigt das
+  # Wettlaufproblem "alten Inhalt eingefügt" unter Wayland + GTK-Anwendungen,
+  # auf Kosten einer während des Diktats nicht wiederhergestellten
+  # Zwischenablage. Siehe den Leitfaden zur Fehlerbehebung.
+  defer_restore: false
+  # Maximale Wartezeit auf die Bestätigung, dass die Zwischenablage
+  # tatsächlich unseren Text enthält, bevor Strg+V gesendet wird.
+  confirm_timeout_ms: 500
+
+injection:
+  # Standard-Einfügekombination, und die Variante, die verwendet wird, wenn
+  # das aktive Fenster ein Terminal ist (Klassenerkennung, nur unter X11).
+  paste_combo: "ctrl+v"
+  terminal_paste_combo: "ctrl+shift+v"
+  terminal_window_classes:
+    - "konsole"
+    - "gnome-terminal-server"
+    - "xterm"
+    - "st"
+    - "alacritty"
+    - "kitty"
+    - "foot"
+  # Nur ydotool-Rückfall: physische Linux-Keycodes. Bei einem
+  # Nicht-QWERTY-Layout überschreiben, falls der ydotool-Rückfall tatsächlich
+  # verwendet wird.
+  ydotool_keycodes: {}
+
+# Zweiwortige Auslösesätze (wake_phrase / stop_phrase), datengesteuerte
+# Typografie (Block typography), werkseitige Alias-Tabelle beschränkt auf
+# allgemeine, unstrittige Korrekturen. Korrekturen, die an ein bestimmtes
+# Textkorpus gebunden sind, gehören in config.example.yaml, zum Kopieren und
+# Anpassen.
+language_settings:
+  en:
+    # Eingeschränkte Kaldi-Grammatik in LAUSCHEN. Überschreibt den globalen
+    # Schlüssel recognition.restricted_grammar_in_listening für diese Sprache.
+    restricted_grammar_in_listening: true
+    voice_commands:
+      wake_phrase: "start dictation"
+      stop_phrase: "stop dictation"
+    punctuation:
+      mode: inline            # inline | explicit
+      trigger: punctuation    # used when mode == explicit
+      simple:
+        "comma": ","
+        "period": "."
+      double:
+        "question mark": "?"
+        "exclamation mark": "!"
+        "colon": ":"
+        "semicolon": ";"
+      layout:
+        "new line": "\n"
+        "new paragraph": "\n\n"
+      special:
+        "open parenthesis": "("
+        "close parenthesis": ")"
+        "open bracket": "["
+        "close bracket": "]"
+        "dash": "–"
+        "ellipsis": "…"
+        "open quote": "\""
+        "close quote": "\""
+    typography:
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "\""
+      quote_close: "\""
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
+      "py audio": "PyAudio"
+
+  fr:
+    restricted_grammar_in_listening: true
+    voice_commands:
+      wake_phrase: "active dictée"
+      stop_phrase: "stop dictée"
+    punctuation:
+      mode: inline            # inline | explicit
+      trigger: ponctuation    # used when mode == explicit
+      simple:
+        "virgule": ","
+        "point": "."
+      double:
+        "point d'interrogation": "?"
+        "point d'exclamation": "!"
+        "deux points": ":"
+        "point virgule": ";"
+        "point-virgule": ";"
+      layout:
+        "nouvelle ligne": "\n"
+        "à la ligne": "\n"
+        "nouveau paragraphe": "\n\n"
+      special:
+        "ouvrez la parenthèse": "("
+        "fermez la parenthèse": ")"
+        "ouvrez le crochet": "["
+        "fermez le crochet": "]"
+        "tiret": "–"
+        "trois petits points": "…"
+        "ouvrez les guillemets": "« "
+        "fermez les guillemets": "»"
+    typography:
+      thin_space: true
+      space_before: ["?", "!", ":", ";", "»"]
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "« "
+      quote_close: "»"
+    recognition_aliases:
+      "fermer la parenthèse": "fermez la parenthèse"
+      "fermer le crochet": "fermez le crochet"
+      "fermer les guillemets": "fermez les guillemets"
+      "de points": "deux points"
+      # Homophone von "tiret" (Gedankenstrich), die vom französischen Modell
+      # im echten Einsatz tatsächlich erkannt werden: "tirer", "tirés",
+      # "tirait", "tirez". Standardmäßig enthalten. "trait" ist bewusst
+      # KEIN Interpunktionsbefehl ("un trait de génie" muss unverändert
+      # bleiben); "tirée" ist keine im echten Einsatz beobachtete Form und
+      # bleibt in config.example.yaml.
+      "tirer": "tiret"
+      "tirés": "tiret"
+      "tirait": "tiret"
+      "tirez": "tiret"
+    custom_vocabulary:
+      "vosk": "Vosk"
+      "gemini": "Gemini"
+      "ia": "IA"
+
+  de:
+    restricted_grammar_in_listening: true
+    voice_commands:
+      wake_phrase: "diktat starten"
+      stop_phrase: "diktat stoppen"
+    punctuation:
+      mode: inline            # inline | explicit
+      trigger: satzzeichen    # used when mode == explicit
+      simple:
+        "komma": ","
+        "punkt": "."
+      double:
+        "fragezeichen": "?"
+        "ausrufezeichen": "!"
+        "doppelpunkt": ":"
+        "semikolon": ";"
+      layout:
+        "neue zeile": "\n"
+        "neuer absatz": "\n\n"
+      special:
+        "klammer auf": "("
+        "klammer zu": ")"
+        "eckige klammer auf": "["
+        "eckige klammer zu": "]"
+        "gedankenstrich": "–"
+        "auslassungspunkte": "…"
+        "anführungszeichen auf": "„"
+        "anführungszeichen zu": "“"
+    typography:
+      # Deutsch: kein Leerzeichen vor ? ! : ; ; Anführungszeichen „ … “ ;
+      # Großschreibung nur am Satzanfang (kein morphologischer Analyzer, um
+      # Substantive zu unterscheiden).
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "„"
+      quote_close: "“"
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
+
+  es:
+    # false: auf mehreren Testrechnern (x86-Workstation, Raspberry Pi 4,
+    # einfacher x86) dekodiert die eingeschränkte Grammatik mit
+    # vosk-model-small-es-0.42 ~2× langsamer als die vollständige Grammatik.
+    # Für diese Sprache bleibt der vollständige Recognizer in LAUSCHEN aktiv;
+    # das Aufwecken erfolgt dann anhand der Endergebnisse mit der
+    # Vertrauensabsicherung.
+    restricted_grammar_in_listening: false
+    voice_commands:
+      wake_phrase: "iniciar dictado"
+      stop_phrase: "terminar dictado"
+    punctuation:
+      mode: inline            # inline | explicit
+      trigger: puntuación     # used when mode == explicit
+      simple:
+        "coma": ","
+        "punto": "."
+      double:
+        "interrogación": "?"
+        "exclamación": "!"
+        "dos puntos": ":"
+        "punto y coma": ";"
+      layout:
+        "nueva línea": "\n"
+        "nuevo párrafo": "\n\n"
+      special:
+        # Spanische Eröffnungszeichen per expliziten Befehl: keine
+        # automatische Einfügung von ¿ / ¡, was die Analyse des
+        # Satzumfangs erfordern würde.
+        "abrir interrogación": "¿"
+        "abrir exclamación": "¡"
+        "abrir paréntesis": "("
+        "cerrar paréntesis": ")"
+        "abrir corchete": "["
+        "cerrar corchete": "]"
+        "raya": "–"
+        "puntos suspensivos": "…"
+        "abrir comillas": "\""
+        "cerrar comillas": "\""
+    typography:
+      thin_space: false
+      space_before: []
+      space_after: [",", ".", ";", ":", "?", "!"]
+      capitalize_sentence_start: true
+      quote_open: "\""
+      quote_close: "\""
+    recognition_aliases: {}
+    custom_vocabulary:
+      "vosk": "Vosk"
+
+hotkeys:
+  # pynput beobachtet den X-Server: unter Wayland erreicht es nur Fenster,
+  # die über XWayland laufen (die meisten Electron- und älteren
+  # Anwendungen), nie ein natives Wayland-Fenster. Der Listener startet,
+  # sobald ein X-Server erreichbar ist, unabhängig vom Sitzungstyp. Auf
+  # false setzen, um ihn nie zu starten; für eine universelle Steuerung die
+  # CLI-Unterbefehle (--toggle / --finalize / --sleep-toggle) an die
+  # Tastenkombinationen des Desktops binden.
+  pynput_enabled: true
+  # Nur im Modus interaction.mode = maintenue: eine einzelne Taste (keine
+  # Kombination -- das Loslassen einer Tastenkombination ist mehrdeutig),
+  # abgehört bei Drücken/Loslassen. Ohne Wirkung in den anderen Modi.
+  push_to_talk: "ctrl_r"
+  toggle_recording:
+    pynput_keys: ["alt_l", "h"]
+    display_name: "[Alt+H]"
+  finalize_session:
+    pynput_keys: ["alt_l", "s"]
+    display_name: "[Alt+S]"
+  sleep_toggle:
+    pynput_keys: ["alt_l", "w"]
+    display_name: "[Alt+W]"
+
+sound_file: "/usr/share/sounds/freedesktop/stereo/audio-volume-change.oga"
+
+# Farbe markiert nur Akzente: Abschnittstitel und das "bereit"-Banner. Der
+# Fließtext (`help_text`/`info`) übernimmt die Standardfarbe des Terminals
+# über `RESET`, was sowohl in hellen als auch in dunklen Themes lesbar
+# bleibt. `BLUE` (ANSI 4) ist für laufenden Text untersagt: unlesbar oder je
+# nach Theme violett verfärbt.
+theme:
+  ready_message: "GREEN"
+  help_text: "RESET"
+  help_title: "CYAN"
+  info: "RESET"
+  success: "GREEN"
+  warning: "YELLOW"
+  error: "RED"

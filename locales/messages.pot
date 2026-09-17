@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-09-16 15:59+0200\n"
+"POT-Creation-Date: 2026-09-17 08:59+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -199,13 +199,13 @@ msgstr ""
 msgid "Control queue full; the UI thread is not responding."
 msgstr ""
 
-#: src/keyboard_listener.py:141
+#: src/keyboard_listener.py:140
 msgid ""
 "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
 "invalid; push-to-talk disabled."
 msgstr ""
 
-#: src/keyboard_listener.py:162
+#: src/keyboard_listener.py:161
 msgid "Push-to-talk listener could not start:"
 msgstr ""
 
@@ -415,21 +415,28 @@ msgstr ""
 msgid "Model directory: {path}"
 msgstr ""
 
-#: src/main.py:368
+#: src/main.py:370
+#, python-brace-format
+msgid ""
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
+msgstr ""
+
+#: src/main.py:375
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr ""
 
-#: src/main.py:379
+#: src/main.py:386
 #, python-brace-format
 msgid "The {name} thread stopped; ending the session."
 msgstr ""
 
-#: src/main.py:389
+#: src/main.py:396
 msgid "Control queue full; command ignored."
 msgstr ""
 
-#: src/main.py:394
+#: src/main.py:401
 msgid ""
 "\n"
 "Stop request received. Shutting down..."

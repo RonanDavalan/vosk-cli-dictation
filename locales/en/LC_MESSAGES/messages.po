@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-16 15:59+0200\n"
+"POT-Creation-Date: 2026-09-17 08:59+0200\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: en\n"
@@ -177,27 +177,45 @@ msgid "UI Language set to"
 msgstr "UI Language set to"
 
 #: src/keyboard_listener.py:38
-msgid "Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts."
-msgstr "Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts."
+msgid ""
+"Global hotkeys via pynput are disabled on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
+"Global hotkeys via pynput are disabled on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
 
 #: src/keyboard_listener.py:43 src/keyboard_listener.py:50
 #: src/keyboard_listener.py:126
-msgid "Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts."
-msgstr "Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts."
+msgid ""
+"Global hotkeys via pynput are not available on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
+"Global hotkeys via pynput are not available on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
 
 #: src/keyboard_listener.py:56
-msgid "Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows."
-msgstr "Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows."
+msgid ""
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
+msgstr ""
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
 
 #: src/keyboard_listener.py:69 src/recognition.py:276 src/recognition.py:301
 msgid "Control queue full; the UI thread is not responding."
 msgstr "Control queue full; the UI thread is not responding."
 
-#: src/keyboard_listener.py:141
-msgid "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled."
-msgstr "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled."
+#: src/keyboard_listener.py:140
+msgid ""
+"interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
+"invalid; push-to-talk disabled."
+msgstr ""
+"interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
+"invalid; push-to-talk disabled."
 
-#: src/keyboard_listener.py:162
+#: src/keyboard_listener.py:161
 msgid "Push-to-talk listener could not start:"
 msgstr "Push-to-talk listener could not start:"
 
@@ -208,12 +226,20 @@ msgstr "  - Hold [{key}] to dictate; release to stop and copy."
 
 #: src/main.py:86
 #, python-brace-format
-msgid "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early."
-msgstr "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early."
+msgid ""
+"  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop "
+"early."
+msgstr ""
+"  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop "
+"early."
 
 #: src/main.py:87 src/main.py:94 src/main.py:100
-msgid "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
-msgstr "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
+msgid ""
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
+msgstr ""
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
 
 #: src/main.py:92
 #, python-brace-format
@@ -222,8 +248,14 @@ msgstr "  - Say '{wake_phrase}' or press {hotkey} to start."
 
 #: src/main.py:93
 #, python-brace-format
-msgid "  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early."
-msgstr "  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early."
+msgid ""
+"  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
+msgstr ""
+"  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
 
 #: src/main.py:98
 #, python-brace-format
@@ -232,8 +264,12 @@ msgstr "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
 
 #: src/main.py:99
 #, python-brace-format
-msgid "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
-msgstr "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
+msgid ""
+"  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
+"--finalize' to stop and copy."
+msgstr ""
+"  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
+"--finalize' to stop and copy."
 
 #: src/main.py:105
 #, python-brace-format
@@ -346,8 +382,12 @@ msgid "No text-injection backend available for this session."
 msgstr "No text-injection backend available for this session."
 
 #: src/main.py:259
-msgid "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."
-msgstr "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."
+msgid ""
+"Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
+"also works."
+msgstr ""
+"Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
+"also works."
 
 #: src/main.py:262
 msgid "'paplay' not found. Sound notifications will be disabled."
@@ -369,8 +409,12 @@ msgstr "Failed. Attempting to load default model: {model_name}"
 
 #: src/main.py:275
 #, python-brace-format
-msgid "No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] "
-msgstr "No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] "
+msgid ""
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
+msgstr ""
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
 
 #: src/main.py:282
 msgid "No speech recognition model could be loaded."
@@ -400,21 +444,30 @@ msgstr "Could not open the control socket ({err}); CLI subcommands disabled."
 msgid "Model directory: {path}"
 msgstr "Model directory: {path}"
 
-#: src/main.py:368
+#: src/main.py:370
+#, python-brace-format
+msgid ""
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
+msgstr ""
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
+
+#: src/main.py:375
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr "The script is ready. Current model: {model_name}"
 
-#: src/main.py:379
+#: src/main.py:386
 #, python-brace-format
 msgid "The {name} thread stopped; ending the session."
 msgstr "The {name} thread stopped; ending the session."
 
-#: src/main.py:389
+#: src/main.py:396
 msgid "Control queue full; command ignored."
 msgstr "Control queue full; command ignored."
 
-#: src/main.py:394
+#: src/main.py:401
 msgid ""
 "\n"
 "Stop request received. Shutting down..."
@@ -519,8 +572,12 @@ msgid "Recognition error on a frame (recovering):"
 msgstr "Recognition error on a frame (recovering):"
 
 #: src/recognition.py:527
-msgid "The recognition engine is not recovering; ending the session. Please restart the tool."
-msgstr "The recognition engine is not recovering; ending the session. Please restart the tool."
+msgid ""
+"The recognition engine is not recovering; ending the session. Please "
+"restart the tool."
+msgstr ""
+"The recognition engine is not recovering; ending the session. Please "
+"restart the tool."
 
 #: src/system_control.py:144
 #, python-brace-format
@@ -600,8 +657,12 @@ msgid "Unknown command:"
 msgstr "Unknown command:"
 
 #: src/ui.py:208
-msgid "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
-msgstr "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
+msgid ""
+"Heard the stop phrase but confidence was low. Repeat it, or use the stop "
+"hotkey / --finalize."
+msgstr ""
+"Heard the stop phrase but confidence was low. Repeat it, or use the stop "
+"hotkey / --finalize."
 
 #: src/ui.py:227
 msgid "Warning: xdotool failed. Switching to log-only mode."
@@ -621,3 +682,4 @@ msgstr "Stopping user interface..."
 
 #~ msgid "Error in recognition thread:"
 #~ msgstr "Error in recognition thread:"
+

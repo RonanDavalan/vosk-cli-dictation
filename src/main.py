@@ -365,6 +365,13 @@ def main():
         config_line += f"  (+ {os.path.basename(config.local_config_path)})"
     print_status(config_line, config.color_info)
 
+    if config.config_is_outdated:
+        outdated_notice = _(
+            "Your config.yaml predates newer options (schema {current}); see the "
+            "manual for what changed. File: {path}"
+        ).format(current=config.CURRENT_CONFIG_VERSION, path=config.config_path)
+        print_status(outdated_notice, config.color_info)
+
     ready_message = _("The script is ready. Current model: {model_name}").format(model_name=loaded_model_name)
     print_status(ready_message, config.color_ready_message)
     print_help_message()

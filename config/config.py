@@ -11,6 +11,15 @@ class Config:
     """
     Handles loading and accessing the project configuration from config.yaml.
     """
+
+    # Langues pour lesquelles un gabarit config.<lang>.yaml est livré.
+    SUPPORTED_CONFIG_LANGS = ('en', 'fr', 'de', 'es')
+
+    # Bumped whenever a shipped template gains a section an older user file
+    # would lack; compared against the user file's own config_version to
+    # decide whether the startup notice fires (see config_is_outdated).
+    CURRENT_CONFIG_VERSION = 3
+
     def __init__(self):
         # --- CONFIG FILE LOADING ---
         self.config_path = self._get_config_path()
@@ -27,29 +36,62 @@ class Config:
         self.current_lang = self.data.get('default_model', 'en')
         self.set_language(self.current_lang)
 
+        # Ne vaut jamais True pour un fichier de développement (chargé en
+        # place) ou une surcharge VOSK_CONFIG explicite -- seul le fichier
+        # utilisateur XDG réel est concerné par la notice de démarrage.
+        self.config_is_outdated = (
+            os.path.abspath(self.config_path) == os.path.abspath(self._user_config_path())
+            and self.data.get('config_version', 0) < self.CURRENT_CONFIG_VERSION
+        )
+
+    @staticmethod
+    def _user_config_path() -> str:
+        xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
+        return os.path.join(xdg_config_home, 'vosk-cli-dictation', 'config.yaml')
+
+    @staticmethod
+    def _detect_config_lang() -> str:
+        """Langue de gabarit à choisir : même heuristique que
+        ``src/i18n.py::set_ui_language`` (``LANGUAGE`` puis ``LANG``), repli
+        sur ``en`` si la variable est absente ou ne correspond à aucun
+        gabarit livré (``SUPPORTED_CONFIG_LANGS``)."""
+        env_lang = os.environ.get('LANGUAGE') or os.environ.get('LANG')
+        if env_lang:
+            candidate = env_lang.split('.')[0].split('_')[0].lower()
+            if candidate in Config.SUPPORTED_CONFIG_LANGS:
+                return candidate
+        return 'en'
+
     @staticmethod
     def _get_config_path(project_root=None,
-                         system_template='/usr/share/vosk-cli-dictation/config.yaml'):
-        """Finds the config.yaml file via the XDG cascade (DOCUMENTATION_MULTILINGUE.md §10.2).
+                         system_template_dir='/usr/share/vosk-cli-dictation'):
+        """Finds the config.yaml file via the XDG cascade (DOCUMENTATION_MULTILINGUE.md §10.2,
+        CONFIG_PUBLIQUE_ET_LOCALISATION.md §2.3).
 
         First matching level wins:
 
         1. ``VOSK_CONFIG`` env var — used as-is, never auto-created.
-        2. Project-relative ``config/config.yaml`` in a git checkout
+        2. Project-relative ``config/config.<lang>.yaml`` in a git checkout
            (``PROJECT_ROOT/.git`` present) — used in place, so a developer's
            edits are not shadowed by a stale XDG file.
         3. Per-user XDG config
            ``$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml``.
-        4. Factory template, copied to (3) on first run: the system template
-           dropped by the .deb (``system_template``), or, when that is
-           absent, the ``config/config.yaml`` bundled in the tree. The
-           bundled fallback covers a source-tarball install -- a
+        4. Factory template, copied to (3) on first run:
+           ``system_template_dir/config.<lang>.yaml`` dropped by the .deb, or,
+           when that is absent, ``config/config.<lang>.yaml`` bundled in the
+           tree. The bundled fallback covers a source-tarball install -- a
            ``git archive`` has no ``.git`` (level 2 does not fire) and no
            ``/usr/share`` template, so without it the tool could not start.
+           The copied file is always named ``config.yaml`` in the XDG
+           directory regardless of which language template seeded it.
+
+        Levels 2 and 4 pick the template matching ``_detect_config_lang()``,
+        falling back to ``config.en.yaml`` if that language has no template in
+        the directory being searched.
 
         ``project_root`` defaults to the tree holding this file; both it and
-        ``system_template`` are parameters so the cascade can be unit-tested
-        in isolation.
+        ``system_template_dir`` are parameters so the cascade can be
+        unit-tested in isolation.
         """
         if project_root is None:
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -58,17 +100,28 @@ class Config:
         if env_path:
             return env_path
 
-        bundled_config = os.path.join(project_root, 'config', 'config.yaml')
-        if os.path.isdir(os.path.join(project_root, '.git')) and os.path.exists(bundled_config):
+        lang = Config._detect_config_lang()
+
+        def _template_in(directory):
+            if not directory:
+                return None
+            candidate = os.path.join(directory, f'config.{lang}.yaml')
+            if os.path.exists(candidate):
+                return candidate
+            fallback = os.path.join(directory, 'config.en.yaml')
+            return fallback if os.path.exists(fallback) else None
+
+        bundled_dir = os.path.join(project_root, 'config')
+        bundled_config = _template_in(bundled_dir)
+        if os.path.isdir(os.path.join(project_root, '.git')) and bundled_config:
             return bundled_config
 
-        xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
-        user_config = os.path.join(xdg_config_home, 'vosk-cli-dictation', 'config.yaml')
+        user_config = Config._user_config_path()
         if os.path.exists(user_config):
             return user_config
 
-        for template in (system_template, bundled_config):
-            if template and os.path.exists(template):
+        for template in (_template_in(system_template_dir), bundled_config):
+            if template:
                 os.makedirs(os.path.dirname(user_config), exist_ok=True)
                 shutil.copy(template, user_config)
                 print(f"Created default configuration at {user_config}")

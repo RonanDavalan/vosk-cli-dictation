@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-16 15:59+0200\n"
+"POT-Creation-Date: 2026-09-17 08:59+0200\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: es\n"
@@ -24,7 +24,9 @@ msgstr "Error crítico al inicializar el audio:"
 
 #: src/audio_capture.py:61
 msgid "TIP: This can happen if no microphone is connected or selected."
-msgstr "CONSEJO: esto puede ocurrir si no hay ningún micrófono conectado o seleccionado."
+msgstr ""
+"CONSEJO: esto puede ocurrir si no hay ningún micrófono conectado o "
+"seleccionado."
 
 #: src/audio_capture.py:62
 msgid "Check your system audio settings (e.g., with pavucontrol)."
@@ -177,27 +179,45 @@ msgid "UI Language set to"
 msgstr "Idioma de la interfaz establecido en"
 
 #: src/keyboard_listener.py:38
-msgid "Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts."
-msgstr "Los atajos globales mediante pynput están desactivados en esta sesión; use los subcomandos de la CLI vinculados a los atajos de su escritorio."
+msgid ""
+"Global hotkeys via pynput are disabled on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
+"Los atajos globales mediante pynput están desactivados en esta sesión; "
+"use los subcomandos de la CLI vinculados a los atajos de su escritorio."
 
 #: src/keyboard_listener.py:43 src/keyboard_listener.py:50
 #: src/keyboard_listener.py:126
-msgid "Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts."
-msgstr "Los atajos globales mediante pynput no están disponibles en esta sesión; use los subcomandos de la CLI vinculados a los atajos de su escritorio."
+msgid ""
+"Global hotkeys via pynput are not available on this session; use the CLI "
+"subcommands bound to your desktop shortcuts."
+msgstr ""
+"Los atajos globales mediante pynput no están disponibles en esta sesión; "
+"use los subcomandos de la CLI vinculados a los atajos de su escritorio."
 
 #: src/keyboard_listener.py:56
-msgid "Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows."
-msgstr "Los atajos globales mediante pynput solo alcanzan las ventanas que pasan por XWayland; vincule los subcomandos de la CLI a los atajos de su escritorio para las ventanas Wayland nativas."
+msgid ""
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
+msgstr ""
+"Los atajos globales mediante pynput solo alcanzan las ventanas que pasan "
+"por XWayland; vincule los subcomandos de la CLI a los atajos de su "
+"escritorio para las ventanas Wayland nativas."
 
 #: src/keyboard_listener.py:69 src/recognition.py:276 src/recognition.py:301
 msgid "Control queue full; the UI thread is not responding."
 msgstr "Cola de control llena; el hilo de la interfaz no responde."
 
-#: src/keyboard_listener.py:141
-msgid "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled."
-msgstr "interaction.mode es «maintenue» pero hotkeys.push_to_talk falta o no es válida; pulsar para hablar desactivado."
+#: src/keyboard_listener.py:140
+msgid ""
+"interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
+"invalid; push-to-talk disabled."
+msgstr ""
+"interaction.mode es «maintenue» pero hotkeys.push_to_talk falta o no es "
+"válida; pulsar para hablar desactivado."
 
-#: src/keyboard_listener.py:162
+#: src/keyboard_listener.py:161
 msgid "Push-to-talk listener could not start:"
 msgstr "El listener de pulsar para hablar no pudo iniciarse:"
 
@@ -208,12 +228,20 @@ msgstr "  - Mantenga pulsada [{key}] para dictar; suéltela para detener y copia
 
 #: src/main.py:86
 #, python-brace-format
-msgid "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early."
-msgstr "  - Diga «{stop_phrase}» o ejecute «vosk-cli-dictation --finalize» para detener antes."
+msgid ""
+"  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop "
+"early."
+msgstr ""
+"  - Diga «{stop_phrase}» o ejecute «vosk-cli-dictation --finalize» para "
+"detener antes."
 
 #: src/main.py:87 src/main.py:94 src/main.py:100
-msgid "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
-msgstr "  - Los atajos alcanzan la ventana enfocada y no llegan a las ventanas Wayland nativas; use --finalize."
+msgid ""
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
+msgstr ""
+"  - Los atajos alcanzan la ventana enfocada y no llegan a las ventanas "
+"Wayland nativas; use --finalize."
 
 #: src/main.py:92
 #, python-brace-format
@@ -222,8 +250,14 @@ msgstr "  - Diga «{wake_phrase}» o pulse {hotkey} para empezar."
 
 #: src/main.py:93
 #, python-brace-format
-msgid "  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early."
-msgstr "  - Se detiene y se copia sola tras {timeout_ms} ms de silencio, o diga «{stop_phrase}» / pulse {hotkey} / ejecute «vosk-cli-dictation --finalize» para detener antes."
+msgid ""
+"  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
+msgstr ""
+"  - Se detiene y se copia sola tras {timeout_ms} ms de silencio, o diga "
+"«{stop_phrase}» / pulse {hotkey} / ejecute «vosk-cli-dictation "
+"--finalize» para detener antes."
 
 #: src/main.py:98
 #, python-brace-format
@@ -232,8 +266,12 @@ msgstr "  - Diga «{wake_phrase}» o pulse {hotkey} para iniciar/detener."
 
 #: src/main.py:99
 #, python-brace-format
-msgid "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
-msgstr "  - Diga «{stop_phrase}», pulse {hotkey}, o ejecute «vosk-cli-dictation --finalize» para detener y copiar."
+msgid ""
+"  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
+"--finalize' to stop and copy."
+msgstr ""
+"  - Diga «{stop_phrase}», pulse {hotkey}, o ejecute «vosk-cli-dictation "
+"--finalize» para detener y copiar."
 
 #: src/main.py:105
 #, python-brace-format
@@ -346,8 +384,12 @@ msgid "No text-injection backend available for this session."
 msgstr "No hay ningún motor de inyección de texto disponible para esta sesión."
 
 #: src/main.py:259
-msgid "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."
-msgstr "Instale 'wtype' + 'wl-clipboard' (Wayland) o 'xdotool' (X11); 'ydotool' también funciona."
+msgid ""
+"Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
+"also works."
+msgstr ""
+"Instale 'wtype' + 'wl-clipboard' (Wayland) o 'xdotool' (X11); 'ydotool' "
+"también funciona."
 
 #: src/main.py:262
 msgid "'paplay' not found. Sound notifications will be disabled."
@@ -369,8 +411,12 @@ msgstr "Fallo. Intentando cargar el modelo por defecto: {model_name}"
 
 #: src/main.py:275
 #, python-brace-format
-msgid "No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] "
-msgstr "No se pudo cargar ningún modelo de reconocimiento de voz. ¿Descargar ahora el modelo pequeño para '{lang}'? [s/N] "
+msgid ""
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
+msgstr ""
+"No se pudo cargar ningún modelo de reconocimiento de voz. ¿Descargar "
+"ahora el modelo pequeño para '{lang}'? [s/N] "
 
 #: src/main.py:282
 msgid "No speech recognition model could be loaded."
@@ -383,7 +429,9 @@ msgstr "Ejecute «vosk-cli-dictation --download-model {lang}» para descargar un
 
 #: src/main.py:284
 msgid "Please check the model paths and integrity in your config.yaml file."
-msgstr "Compruebe las rutas y la integridad de los modelos en su archivo config.yaml."
+msgstr ""
+"Compruebe las rutas y la integridad de los modelos en su archivo "
+"config.yaml."
 
 #: src/main.py:340
 #, python-brace-format
@@ -393,28 +441,39 @@ msgstr "Socket de control: {path}"
 #: src/main.py:342
 #, python-brace-format
 msgid "Could not open the control socket ({err}); CLI subcommands disabled."
-msgstr "No se pudo abrir el socket de control ({err}); subcomandos de la CLI desactivados."
+msgstr ""
+"No se pudo abrir el socket de control ({err}); subcomandos de la CLI "
+"desactivados."
 
 #: src/main.py:362
 #, python-brace-format
 msgid "Model directory: {path}"
 msgstr "Directorio del modelo: {path}"
 
-#: src/main.py:368
+#: src/main.py:370
+#, python-brace-format
+msgid ""
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
+msgstr ""
+"Su config.yaml es anterior a opciones más recientes (esquema {current}); "
+"consulte el manual para ver qué ha cambiado. Archivo: {path}"
+
+#: src/main.py:375
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr "El script está listo. Modelo actual: {model_name}"
 
-#: src/main.py:379
+#: src/main.py:386
 #, python-brace-format
 msgid "The {name} thread stopped; ending the session."
 msgstr "El hilo {name} se detuvo; finalizando la sesión."
 
-#: src/main.py:389
+#: src/main.py:396
 msgid "Control queue full; command ignored."
 msgstr "Cola de control llena; comando ignorado."
 
-#: src/main.py:394
+#: src/main.py:401
 msgid ""
 "\n"
 "Stop request received. Shutting down..."
@@ -504,11 +563,15 @@ msgstr "[En curso]"
 #: src/recognition.py:409
 #, python-brace-format
 msgid "Decoding is slower than real time (RTF {rtf}); latency may drift."
-msgstr "La decodificación es más lenta que el tiempo real (RTF {rtf}); la latencia puede derivar."
+msgstr ""
+"La decodificación es más lenta que el tiempo real (RTF {rtf}); la "
+"latencia puede derivar."
 
 #: src/recognition.py:462
 msgid "Text queue full; the UI thread is not consuming. Dropping a result."
-msgstr "Cola de texto llena; el hilo de la interfaz no consume. Se descarta un resultado."
+msgstr ""
+"Cola de texto llena; el hilo de la interfaz no consume. Se descarta un "
+"resultado."
 
 #: src/recognition.py:515
 msgid "Malformed decoder output captured:"
@@ -519,8 +582,12 @@ msgid "Recognition error on a frame (recovering):"
 msgstr "Error de reconocimiento en un fotograma (recuperando):"
 
 #: src/recognition.py:527
-msgid "The recognition engine is not recovering; ending the session. Please restart the tool."
-msgstr "El motor de reconocimiento no se recupera; se finaliza la sesión. Reinicie la herramienta."
+msgid ""
+"The recognition engine is not recovering; ending the session. Please "
+"restart the tool."
+msgstr ""
+"El motor de reconocimiento no se recupera; se finaliza la sesión. "
+"Reinicie la herramienta."
 
 #: src/system_control.py:144
 #, python-brace-format
@@ -600,8 +667,12 @@ msgid "Unknown command:"
 msgstr "Comando desconocido:"
 
 #: src/ui.py:208
-msgid "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
-msgstr "Se oyó la frase de parada, pero la confianza era baja. Repítala, o use el atajo de parada / --finalize."
+msgid ""
+"Heard the stop phrase but confidence was low. Repeat it, or use the stop "
+"hotkey / --finalize."
+msgstr ""
+"Se oyó la frase de parada, pero la confianza era baja. Repítala, o use el"
+" atajo de parada / --finalize."
 
 #: src/ui.py:227
 msgid "Warning: xdotool failed. Switching to log-only mode."
@@ -621,3 +692,4 @@ msgstr "Deteniendo la interfaz de usuario..."
 
 #~ msgid "Error in recognition thread:"
 #~ msgstr "Error en el hilo de reconocimiento:"
+

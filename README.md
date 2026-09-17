@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.2--beta-yellow.svg" alt="Version: v0.5.2-beta"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.3--beta-yellow.svg" alt="Version: v0.5.3-beta"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
   <a href="#"><img src="https://img.shields.io/badge/OS-Debian_13-D70A53.svg" alt="Tested on Debian 13"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
@@ -49,16 +49,16 @@ environment to create:
 
 ```bash
 # Debian 12+ and derivatives (Ubuntu 24.04+, Mint 22+...)
-sudo apt install ./vosk-cli-dictation_0.5.2~beta_all.deb
+sudo apt install ./vosk-cli-dictation_0.5.3~beta_all.deb
 
 # Fedora
-sudo dnf install ./vosk-cli-dictation-0.5.2~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-0.5.3~beta-1.fc42.noarch.rpm
 
 # openSUSE (Leap)
-sudo zypper install ./vosk-cli-dictation-0.5.2~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-0.5.3~beta-1.leap156.noarch.rpm
 
 # Arch Linux
-sudo pacman -U ./vosk-cli-dictation-0.5.2_beta-1-any.pkg.tar.zst
+sudo pacman -U ./vosk-cli-dictation-0.5.3_beta-1-any.pkg.tar.zst
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
