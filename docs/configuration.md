@@ -341,8 +341,8 @@ this is the path that works everywhere:
     session through its control socket; no key event reaches the focused
     window, so nothing leaks into a terminal.
 
-If `vosk-cli-dictation` is not on `PATH` (a git checkout rather than the
-Debian package), point the shortcut at the checkout instead — adapt the path
+If `vosk-cli-dictation` is not on `PATH` (a git checkout rather than a native
+package), point the shortcut at the checkout instead — adapt the path
 to your clone:
 
 ```

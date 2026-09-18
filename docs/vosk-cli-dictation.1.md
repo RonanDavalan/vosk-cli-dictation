@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | User Commands
 % Ronan Davalan
-% 2026-09-17
+% 2026-09-18
 
 # NAME
 
@@ -44,9 +44,8 @@ two kinds of tool are needed: a keystroke simulator and a clipboard tool.
 Under Wayland this is **wtype** plus **wl-clipboard**; if **wtype** is
 missing the keystroke falls back to **ydotool** (which needs the
 `ydotoold` daemon and access to `/dev/uinput`), but **wl-clipboard** is
-still required. Under X11 it is **xdotool** plus **xclip**. The Debian
-package depends on **wl-clipboard** and recommends **xclip**; a Git
-checkout must install them itself. Without a clipboard tool the dictated
+still required. Under X11 it is **xdotool** plus **xclip**. The native packages depend on **wl-clipboard** (the Debian package also
+recommends **xclip**); a Git checkout must install them itself. Without a clipboard tool the dictated
 text never reaches the clipboard and the paste re-inserts whatever was
 last copied by hand. Adding your user to the `input` group is required
 only for the **ydotool** fallback; **wtype** and **xdotool** do not need
@@ -242,7 +241,7 @@ rule matches, the remaining rules are not consulted.
    from a Git checkout (development mode).
 3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (default
    `~/.config/vosk-cli-dictation/config.yaml`). Created automatically on
-   first run, from the factory template, when installed from the Debian
+   first run, from the factory template, when installed from a native
    package.
 4. The factory template shipped by the package, read-only.
 
@@ -256,13 +255,13 @@ reference of every configuration key.
 # FILES
 
 `~/.config/vosk-cli-dictation/config.yaml`
-:   Per-user configuration file (Debian package install).
+:   Per-user configuration file (native package install).
 
 `/usr/share/vosk-cli-dictation/config.yaml`
-:   Factory configuration template (Debian package install), read-only.
+:   Factory configuration template (native package install), read-only.
 
 `~/.local/share/vosk-models/`
-:   Default location searched for Vosk acoustic models (Debian package
+:   Default location searched for Vosk acoustic models (native package
     install).
 
 `config/config.yaml`

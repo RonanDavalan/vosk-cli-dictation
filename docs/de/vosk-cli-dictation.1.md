@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Benutzerbefehle
 % Ronan Davalan
-% 2026-09-16
+% 2026-09-18
 
 # NAME
 
@@ -27,7 +27,7 @@ Die Diktierfunktion wird entweder per Sprache (eine konfigurierbare, sprachspezi
 Es läuft jeweils nur eine Sitzung pro Benutzer gleichzeitig. Sie öffnet eine private Unix-Socket-Verbindung an `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (Modus `0600`); derselbe Befehl, der mit einem Kontrollflag aufgerufen wird (siehe STEUERUNG EINER LAUFENDEN SITZUNG), verbindet sich mit dieser Socket-Verbindung anstatt eine neue Sitzung zu starten.
 
 Text wird injiziert, indem er in die Zwischenablage kopiert und ein Einfügen simuliert wird; daher werden zwei Arten von Werkzeugen benötigt: ein Tastendruck-Simulator und ein Zwischenablage-Werkzeug.
-Unter Wayland sind das **wtype** und **wl-clipboard**; fehlt **wtype**, greift der Tastendruck auf **ydotool** zurück (welches den `ydotoold`-Daemon und Zugriff auf `/dev/uinput` benötigt), doch **wl-clipboard** bleibt erforderlich. Unter X11 sind es **xdotool** und **xclip**. Das Debian-Paket hängt von **wl-clipboard** ab und empfiehlt **xclip**; ein Git-Checkout muss sie selbst installieren. Ohne Zwischenablage-Werkzeug erreicht der diktierte Text die Zwischenablage nie, und das Einfügen fügt erneut ein, was zuletzt von Hand kopiert wurde. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
+Unter Wayland sind das **wtype** und **wl-clipboard**; fehlt **wtype**, greift der Tastendruck auf **ydotool** zurück (welches den `ydotoold`-Daemon und Zugriff auf `/dev/uinput` benötigt), doch **wl-clipboard** bleibt erforderlich. Unter X11 sind es **xdotool** und **xclip**. Die nativen Pakete hängen von **wl-clipboard** ab (das Debian-Paket empfiehlt zusätzlich **xclip**); ein Git-Checkout muss sie selbst installieren. Ohne Zwischenablage-Werkzeug erreicht der diktierte Text die Zwischenablage nie, und das Einfügen fügt erneut ein, was zuletzt von Hand kopiert wurde. Ihren Benutzer zur Gruppe `input` hinzuzufügen ist nur für den **ydotool**-Rückfall nötig; **wtype** und **xdotool** brauchen das nicht. **vosk-cli-dictation \--diagnose**
 zeigt, welche Tools, Audio-Geräte und Zwischenablage-Zugriff verfügbar sind, und beendet dann das Programm.
 
 Globale Hotkeys über `pynput` beobachten den X-Server: unter Wayland erreichen
@@ -167,7 +167,7 @@ Die Konfigurationsdatei wird anhand der ersten passenden Regel gefunden; sobald 
 
 1. Der Pfad, der in der Umgebungsvariablen **VOSK_CONFIG** angegeben ist, falls diese gesetzt ist. Wird unverändert verwendet; wird niemals automatisch erstellt.
 2. `config/config.yaml`, relativ zum Projektverzeichnis, wenn die Ausführung von einem Git-Checkout (Entwicklungsmodus) erfolgt.
-3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (Standard: `~/.config/vosk-cli-dictation/config.yaml`). Wird beim ersten Ausführen automatisch aus der Vorlage erstellt, wenn die Installation über das Debian-Paket erfolgt.
+3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (Standard: `~/.config/vosk-cli-dictation/config.yaml`). Wird beim ersten Ausführen automatisch aus der Vorlage erstellt, wenn die Installation über ein natives Paket erfolgt.
 4. Die vom Paket mitgelieferte Vorlage, schreibgeschützt.
 
 Die aktive Sprache wird in folgender Reihenfolge ausgewählt: zuerst die **\--lang** Option, falls angegeben;
@@ -180,13 +180,13 @@ Referenz aller Konfigurationsschlüssel.
 # DATEIEN
 
 `~/.config/vosk-cli-dictation/config.yaml`
-:   Konfigurationsdatei pro Benutzer (Installation des Debian-Pakets).
+:   Konfigurationsdatei pro Benutzer (Installation über ein natives Paket).
 
 `/usr/share/vosk-cli-dictation/config.yaml`
-:   Konfigurationsvorlage für die Fabrik (Installation als Debian-Paket), schreibgeschützt.
+:   Konfigurationsvorlage für die Fabrik (Installation als natives Paket), schreibgeschützt.
 
 `~/.local/share/vosk-models/`
-:   Standardmäßiger Suchpfad für Vosk-Akustikmodelle (Installation über Debian-Paket).
+:   Standardmäßiger Suchpfad für Vosk-Akustikmodelle (Installation über ein natives Paket).
 
 `config/config.yaml`
 :   Konfigurationsdatei, die verwendet wird, wenn die Anwendung von einem Git-Repository ausgeführt wird.

@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Comandos de usuario
 % Ronan Davalan
-% 2026-09-16
+% 2026-09-18
 
 # NOMBRE
 
@@ -28,7 +28,7 @@ Solo una sesión se ejecuta por usuario a la vez. Abre un socket Unix privado en
 invocado con una bandera de control (ver CONTROLANDO UNA SESIÓN EN CURSO) se conecta a ese socket en lugar de iniciar una nueva sesión.
 
 El texto se inyecta colocándolo en el portapapeles y simulando un pegado, por lo que se necesitan dos tipos de herramienta: un simulador de pulsaciones y una herramienta de portapapeles.
-Bajo Wayland son **wtype** y **wl-clipboard**; si falta **wtype**, la pulsación recurre a **ydotool** (que necesita el demonio `ydotoold` y acceso a `/dev/uinput`), pero **wl-clipboard** sigue siendo necesario. Bajo X11 son **xdotool** y **xclip**. El paquete Debian depende de **wl-clipboard** y recomienda **xclip**; una copia de Git debe instalarlos por su cuenta. Sin una herramienta de portapapeles, el texto dictado nunca llega al portapapeles y el pegado reinserta lo último que se copió a mano. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
+Bajo Wayland son **wtype** y **wl-clipboard**; si falta **wtype**, la pulsación recurre a **ydotool** (que necesita el demonio `ydotoold` y acceso a `/dev/uinput`), pero **wl-clipboard** sigue siendo necesario. Bajo X11 son **xdotool** y **xclip**. Los paquetes nativos dependen de **wl-clipboard** (el paquete Debian recomienda además **xclip**); una copia de Git debe instalarlos por su cuenta. Sin una herramienta de portapapeles, el texto dictado nunca llega al portapapeles y el pegado reinserta lo último que se copió a mano. Añadir su usuario al grupo `input` solo es necesario para el respaldo de **ydotool**; **wtype** y **xdotool** no lo necesitan. **vosk-cli-dictation \--diagnose**
 informa qué herramientas, dispositivo de audio y acceso al portapapeles están disponibles, y luego finaliza.
 
 Las combinaciones de teclas globales a través de `pynput` observan el servidor
@@ -172,7 +172,7 @@ El archivo de configuración se encuentra mediante la primera regla que coincida
 1. La ruta especificada en la variable de entorno **VOSK_CONFIG**, si está definida. Se utiliza tal cual; nunca se crea automáticamente.
 2. `config/config.yaml`, relativa al directorio del proyecto, cuando se ejecuta desde un repositorio Git (modo de desarrollo).
 3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (predeterminado
-   `~/.config/vosk-cli-dictation/config.yaml`). Se crea automáticamente en la primera ejecución, a partir de la plantilla predeterminada, cuando se instala desde el paquete Debian.
+   `~/.config/vosk-cli-dictation/config.yaml`). Se crea automáticamente en la primera ejecución, a partir de la plantilla predeterminada, cuando se instala desde un paquete nativo.
 4. La plantilla predeterminada incluida en el paquete, de solo lectura.
 
 El idioma activo se elige, en el siguiente orden: la opción **--lang**, si se proporciona; de lo contrario, el idioma detectado por el sistema operativo; de lo contrario, el valor **`default_model`** del archivo de configuración.
@@ -183,13 +183,13 @@ referencia completa de cada clave de configuración.
 # ARCHIVOS
 
 `~/.config/vosk-cli-dictation/config.yaml`
-:   Archivo de configuración por usuario (instalación del paquete Debian).
+:   Archivo de configuración por usuario (instalación desde un paquete nativo).
 
 `/usr/share/vosk-cli-dictation/config.yaml`
-:   Plantilla de configuración de fábrica (instalación de paquete Debian), de solo lectura.
+:   Plantilla de configuración de fábrica (instalación desde un paquete nativo), de solo lectura.
 
 `~/.local/share/vosk-models/`
-:   Ubicación predeterminada donde se buscan los modelos acústicos de Vosk (instalación del paquete Debian).
+:   Ubicación predeterminada donde se buscan los modelos acústicos de Vosk (instalación desde un paquete nativo).
 
 `config/config.yaml`
 :   Archivo de configuración utilizado al ejecutar desde un repositorio Git.

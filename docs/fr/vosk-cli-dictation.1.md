@@ -1,6 +1,6 @@
 % VOSK-CLI-DICTATION(1) vosk-cli-dictation | Commandes utilisateur
 % Ronan Davalan
-% 2026-09-16
+% 2026-09-18
 
 # NOM
 
@@ -29,7 +29,7 @@ Une seule session s'exécute par utilisateur à la fois. Elle ouvre une socket U
 utilisée avec un indicateur de contrôle (voir GESTION D'UNE SESSION EN COURS) se connecte
 à cette socket au lieu de démarrer une nouvelle session.
 
-Le texte est injecté en le plaçant dans le presse-papiers puis en simulant un collage : deux sortes d'outils sont donc nécessaires, un simulateur de frappe et un outil de presse-papiers. Sous Wayland, c'est **wtype** plus **wl-clipboard** ; si **wtype** est absent, la frappe se rabat sur **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`), mais **wl-clipboard** reste requis. Sous X11, c'est **xdotool** plus **xclip**. Le paquet Debian dépend de **wl-clipboard** et recommande **xclip** ; un clone Git doit les installer lui-même. Sans outil de presse-papiers, le texte dicté n'atteint jamais le presse-papiers et le collage réinsère le dernier contenu copié à la main. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
+Le texte est injecté en le plaçant dans le presse-papiers puis en simulant un collage : deux sortes d'outils sont donc nécessaires, un simulateur de frappe et un outil de presse-papiers. Sous Wayland, c'est **wtype** plus **wl-clipboard** ; si **wtype** est absent, la frappe se rabat sur **ydotool** (qui nécessite le démon `ydotoold` et un accès à `/dev/uinput`), mais **wl-clipboard** reste requis. Sous X11, c'est **xdotool** plus **xclip**. Les paquets natifs dépendent de **wl-clipboard** (le paquet Debian recommande en plus **xclip**) ; un clone Git doit les installer lui-même. Sans outil de presse-papiers, le texte dicté n'atteint jamais le presse-papiers et le collage réinsère le dernier contenu copié à la main. L'ajout de votre utilisateur au groupe `input` n'est nécessaire que pour le repli **ydotool** ; **wtype** et **xdotool** n'en ont pas besoin. **vosk-cli-dictation \--diagnose** indique quels outils, quel périphérique audio et quel accès au presse-papiers sont disponibles, puis se termine.
 
 Les raccourcis globaux via `pynput` observent le serveur X : sous Wayland ils
 n'atteignent que les fenêtres passant par XWayland, jamais une fenêtre Wayland
@@ -159,7 +159,7 @@ Le fichier de configuration est trouvé selon la première règle correspondante
 2. `config/config.yaml`, par rapport au répertoire du projet, lors de l'exécution
    depuis une copie Git (mode développement).
 3. `$XDG_CONFIG_HOME/vosk-cli-dictation/config.yaml` (par défaut
-   `~/.config/vosk-cli-dictation/config.yaml`). Créé automatiquement lors de la première exécution, à partir du modèle par défaut, lorsque installé à partir du paquet Debian.
+   `~/.config/vosk-cli-dictation/config.yaml`). Créé automatiquement lors de la première exécution, à partir du modèle par défaut, lorsque installé à partir d'un paquet natif.
 4. Le modèle par défaut fourni par le paquet, en lecture seule.
 
 La langue active est choisie, dans l'ordre suivant : l'**\--lang** option, si elle est spécifiée ;
@@ -172,13 +172,13 @@ référence complète de chaque clé de configuration.
 # FICHIERS
 
 `~/.config/vosk-cli-dictation/config.yaml`
-:   Fichier de configuration par utilisateur (installation du paquet Debian).
+:   Fichier de configuration par utilisateur (installation d'un paquet natif).
 
 `/usr/share/vosk-cli-dictation/config.yaml`
-:   Modèle de configuration d'usine (installation du paquet Debian), en lecture seule.
+:   Modèle de configuration d'usine (installation d'un paquet natif), en lecture seule.
 
 `~/.local/share/vosk-models/`
-:   Emplacement par défaut où les modèles acoustiques de Vosk sont recherchés (installation via le paquet Debian).
+:   Emplacement par défaut où les modèles acoustiques de Vosk sont recherchés (installation via un paquet natif).
 
 `config/config.yaml`
 :   Fichier de configuration utilisé lors de l'exécution à partir d'une copie de dépôt Git.

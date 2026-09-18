@@ -2,9 +2,9 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.3--beta-yellow.svg" alt="Version: v0.5.3-beta"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.4--beta-yellow.svg" alt="Version: v0.5.4-beta"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
-  <a href="#"><img src="https://img.shields.io/badge/OS-Debian_13-D70A53.svg" alt="Tested on Debian 13"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Linux-Debian_%C2%B7_Fedora_%C2%B7_openSUSE_%C2%B7_Arch-blue.svg" alt="Native packages for Debian, Fedora, openSUSE and Arch Linux"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
 </p>
 
@@ -49,16 +49,16 @@ environment to create:
 
 ```bash
 # Debian 12+ and derivatives (Ubuntu 24.04+, Mint 22+...)
-sudo apt install ./vosk-cli-dictation_0.5.3~beta_all.deb
+sudo apt install ./vosk-cli-dictation_0.5.4~beta_all.deb
 
 # Fedora
-sudo dnf install ./vosk-cli-dictation-0.5.3~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-0.5.4~beta-1.fc42.noarch.rpm
 
 # openSUSE (Leap)
-sudo zypper install ./vosk-cli-dictation-0.5.3~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-0.5.4~beta-1.leap156.noarch.rpm
 
 # Arch Linux
-sudo pacman -U ./vosk-cli-dictation-0.5.3_beta-1-any.pkg.tar.zst
+sudo pacman -U ./vosk-cli-dictation-0.5.4_beta-1-any.pkg.tar.zst
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
@@ -72,7 +72,7 @@ vosk-cli-dictation -l fr
 
 If you start the tool with no model installed, it offers the download interactively. A missing model is reported, not fatal, as long as one language loads. Downloaded models are verified by SHA256 and stored under `~/.local/share/vosk-models/`.
 
-The package pulls in `xdotool` (X11) or `ydotool` (Wayland fallback) for text injection. For native Wayland, also install the preferred backend:
+The package pulls in `xdotool` (X11) or `ydotool` (Wayland fallback) for text injection. For native Wayland, also install the preferred backend with your distribution's package manager (Debian example):
 
 ```bash
 sudo apt install wtype wl-clipboard
@@ -85,7 +85,7 @@ sudo apt install wtype wl-clipboard
 
 ### Install from source (for development)
 
-This path runs the code directly from a git checkout.
+This path runs the code directly from a git checkout. The system packages below are Debian's; on Fedora, openSUSE or Arch, install the equivalents with your package manager.
 
 ```bash
 sudo apt-get update && sudo apt-get install python3-pip python3-venv portaudio19-dev gettext xdotool pulseaudio-utils
