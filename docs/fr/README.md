@@ -1,0 +1,202 @@
+# Vosk-CLI-Dictation
+
+<p align="center">
+  <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/Licence-MIT-blue.svg" alt="Licence : MIT"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.4--beta-yellow.svg" alt="Version : v0.5.4-beta"></a>
+  <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Linux-Debian_%C2%B7_Fedora_%C2%B7_openSUSE_%C2%B7_Arch-blue.svg" alt="Paquets natifs pour Debian, Fedora, openSUSE et Arch Linux"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Contributions-Bienvenues-brightgreen.svg" alt="Contributions bienvenues"></a>
+</p>
+
+[English](../../README.md) | **Français** | [Deutsch](../de/README.md) | [Español](../es/README.md)
+
+<p align="center">
+  <a href="https://vosk.davalan.fr/"><strong>Visitez la page d'accueil officielle pour un tour complet !</strong></a>
+</p>
+
+<p align="center">
+  <a href="https://vosk.davalan.fr/"><strong>▶ Regardez la vidéo de démonstration sur la page d'accueil</strong></a>
+</p>
+
+Un outil de dictée en ligne de commande puissant et personnalisable pour Linux, fondé sur le moteur Vosk. Transformez votre voix en texte directement dans votre terminal et faites-le apparaître dans n'importe quelle application.
+
+---
+
+## Pourquoi ce projet ?
+
+Cet outil est né du besoin d'un système de dictée robuste, exécuté en local sous GNU/Linux, qui laisse à l'utilisateur la pleine maîtrise de ses données et du comportement du logiciel. Contrairement aux solutions dans le nuage, il fonctionne **100 % hors ligne**, ce qui garantit votre vie privée.
+
+## Fonctionnalités principales
+
+*   **Intégration à tout le système :** dictez dans n'importe quelle application active (terminal, navigateur, éditeur de code, etc.).
+*   **Prise en charge de plusieurs langues :** fonctionne dès l'installation en **anglais**, **français**, **allemand** et **espagnol**.
+*   **Contrôle universel :** une session en cours se pilote par un socket Unix privé ; la même commande liée à un raccourci du bureau (`vosk-cli-dictation --toggle`, `--sleep`, `--status`) la contrôle sur n'importe quel bureau, Wayland natif compris. Les raccourcis globaux via `pynput` restent une commodité au mieux : sous Wayland, ils n'atteignent que les fenêtres XWayland, pas les fenêtres Wayland natives.
+*   **Entièrement personnalisable :** réglez les couleurs de l'interface, les raccourcis, les phrases de déclenchement vocal, la typographie par langue et les alias de reconnaissance dans un simple fichier `config.yaml`.
+*   **Ponctuation complète :** dictez toute la gamme de ponctuation par des commandes vocales naturelles.
+*   **Privé et hors ligne :** tout s'exécute sur votre machine. Votre voix ne quitte jamais votre ordinateur.
+
+> [!NOTE]
+>
+> **Prise en charge de X11 et de Wayland.** Le texte est injecté en le copiant dans le presse-papiers puis en simulant un collage. Sous Wayland, l'outil utilise `wtype` et `wl-clipboard`, avec `ydotool` en repli (qui exige le démon `ydotoold` et l'accès à `/dev/uinput`, en général par le groupe `input` — `sudo usermod -aG input $USER`, puis fermez la session et rouvrez-la). Sous X11, il utilise `xdotool`. Au moins un moteur pour le type de session courant doit être installé ; `vosk-cli-dictation --diagnose` indique ce qui est disponible.
+>
+> **Raccourcis globaux.** `pynput` surveille le serveur X : sous Wayland, il ne voit les touches que pour les fenêtres qui passent par XWayland (beaucoup d'applications Electron et anciennes), jamais pour une fenêtre Wayland native qui a le focus. Il ne consomme pas non plus les événements : la combinaison de touches atteint aussi la fenêtre qui a le focus, de sorte que l'appuyer en tapant dans un terminal y insère une séquence d'échappement (`^[s` pour `Alt+S`). Pour un contrôle qui marche partout, liez plutôt les réglages de raccourcis de votre bureau aux sous-commandes de contrôle (`vosk-cli-dictation --toggle`, `--finalize`, `--sleep-toggle`). Voir *Contrôler une session en cours* plus bas. Sous Debian, `ydotool` est empaqueté dans `trixie-backports`, pas dans la version stable.
+
+## Pour commencer
+
+### Installer le paquet natif (recommandé)
+
+Installez le paquet construit pour votre distribution depuis la
+[page de téléchargements](https://vosk.davalan.fr/) — aucune installation manuelle,
+aucun environnement virtuel à créer :
+
+```bash
+# Debian 12+ et dérivées (Ubuntu 24.04+, Mint 22+...)
+sudo apt install ./vosk-cli-dictation_0.5.4~beta_all.deb
+
+# Fedora
+sudo dnf install ./vosk-cli-dictation-0.5.4~beta-1.fc42.noarch.rpm
+
+# openSUSE (Leap)
+sudo zypper install ./vosk-cli-dictation-0.5.4~beta-1.leap156.noarch.rpm
+
+# Arch Linux
+sudo pacman -U ./vosk-cli-dictation-0.5.4_beta-1-any.pkg.tar.zst
+```
+
+À la première configuration du paquet, un environnement virtuel privé est construit et le moteur Vosk y est installé (cette étape a besoin d'un accès au réseau).
+
+Récupérez ensuite un modèle vocal et commencez à dicter :
+
+```bash
+vosk-cli-dictation --download-model fr   # aussi : en, de, es
+vosk-cli-dictation -l fr
+```
+
+Si vous lancez l'outil sans modèle installé, il propose le téléchargement de façon interactive. Un modèle manquant est signalé sans être fatal, tant qu'une langue se charge. Les modèles téléchargés sont vérifiés par SHA256 et rangés sous `~/.local/share/vosk-models/`.
+
+Le paquet tire `xdotool` (X11) ou `ydotool` (repli Wayland) pour l'injection du texte. Pour Wayland natif, installez aussi le moteur préféré avec le gestionnaire de paquets de votre distribution (exemple Debian) :
+
+```bash
+sudo apt install wtype wl-clipboard
+```
+
+`ydotool` exige que votre utilisateur soit dans le groupe `input` (`sudo usermod -aG input $USER`, puis fermez la session et rouvrez-la) ; `xdotool` et `wtype` ne l'exigent pas. Lancez `vosk-cli-dictation --diagnose` pour voir quel moteur, quelle entrée audio et quel accès au presse-papiers sont disponibles.
+
+> [!NOTE]
+> Si `apt` affiche un avertissement de bac à sable ou de permission `_apt`, c'est que le `.deb` se trouve sous votre répertoire personnel, que l'utilisateur `_apt` ne peut pas lire. Copiez-le d'abord dans `/tmp/` et installez-le de là. L'installation réussit dans les deux cas.
+
+### Installer depuis les sources (pour le développement)
+
+Ce chemin exécute le code directement depuis une copie de travail git. Les paquets système ci-dessous sont ceux de Debian ; sous Fedora, openSUSE ou Arch, installez les équivalents avec votre gestionnaire de paquets.
+
+```bash
+sudo apt-get update && sudo apt-get install python3-pip python3-venv portaudio19-dev gettext xdotool pulseaudio-utils
+# Wayland, facultatif : sudo apt-get install wtype wl-clipboard ydotool
+
+git clone https://github.com/RonanDavalan/vosk-cli-dictation.git
+cd vosk-cli-dictation
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Récupérez un modèle et lancez le script :
+
+```bash
+python3 src/main.py --download-model fr   # aussi : en, de, es
+python3 src/main.py -l fr                 # la langue par défaut vient de config.yaml
+python3 src/main.py --diagnose            # vérifier l'environnement sans démarrer de session
+```
+
+Les modèles téléchargés ainsi atterrissent aussi dans `~/.local/share/vosk-models/`. En repli, un dossier de modèle (par exemple `vosk-model-small-fr-0.22`) déposé directement dans le répertoire `vosk-model/` du projet est aussi pris en compte.
+
+Une seule session s'exécute à la fois par utilisateur ; un second lancement est refusé et vous renvoie vers `--status`.
+
+### Astuce : créer une commande de lancement rapide (facultatif)
+
+Pour y accéder plus facilement, vous pouvez ajouter une fonction au fichier de configuration de votre interpréteur de commandes (par exemple `~/.bashrc` ou `~/.zshrc`).
+
+1.  Ouvrez votre fichier de configuration : `nano ~/.bashrc`
+2.  Ajoutez les lignes suivantes à la fin. **N'oubliez pas de remplacer `/path/to/your/vosk-cli-dictation` par le chemin absolu réel du répertoire du projet.**
+
+    ```bash
+    # Définit une commande 'vosk' pour lancer facilement le script de dictée.
+    vosk() {
+        # Vérifie que le répertoire du projet existe
+        if [ -d "/path/to/your/vosk-cli-dictation" ]; then
+            cd "/path/to/your/vosk-cli-dictation" && \
+            source venv/bin/activate && \
+            python3 src/main.py "$@" && \
+            deactivate
+        else
+            echo "Erreur : répertoire du projet introuvable : /path/to/your/vosk-cli-dictation"
+        fi
+    }
+    ```
+
+3.  Appliquez les changements avec `source ~/.bashrc` ou en ouvrant un nouveau terminal.
+4.  Vous pouvez désormais lancer l'application de n'importe où en tapant simplement `vosk` ou `vosk -l en`.
+
+## Utilisation et configuration
+
+### Choix de la langue
+
+Le modèle de langue est choisi selon l'ordre de priorité suivant :
+
+1.  **Option de ligne de commande (priorité la plus haute) :** utilisez `-l en`, `-l fr`, `-l de` ou `-l es` pour imposer une langue à la session.
+2.  **Valeur par défaut de `config.yaml` (repli) :** sans option, c'est le `default_model` de `config/config.yaml` qui est chargé.
+
+### Phrases de déclenchement vocal
+
+Chaque langue a une **phrase de réveil** et une **phrase d'arrêt** de deux mots (valeurs d'usine : `start dictation` / `stop dictation` en anglais). Deux mots plutôt qu'un, pour qu'une phrase ordinaire ne les déclenche jamais par accident. Dites la phrase de réveil pour commencer à dicter, la phrase d'arrêt pour terminer et copier le résultat. Dire une phrase deux fois de suite (`stop dictation stop dictation`) la tape littéralement au lieu de la déclencher. Si la phrase d'arrêt est entendue avec une confiance de reconnaissance faible, elle est avalée plutôt que tapée dans votre document : répétez-la, ou utilisez `--finalize`. Les phrases se configurent par langue sous `language_settings.<lang>.voice_commands`.
+
+### Modes de déclenchement
+
+`interaction.mode` (par défaut `toggle`, inchangé par rapport aux versions précédentes) choisit comment une session démarre et s'arrête : un geste démarre, un autre geste arrête. Deux autres modes : `maintenue` (appuyer pour parler : la dictée dure tant que `hotkeys.push_to_talk` reste enfoncé) et `silence` (un seul appui démarre ; la session s'arrête et copie le texte d'elle-même quand `interaction.silence_timeout_ms` s'écoule sans sortie du décodeur, dès qu'un mot a été capté). La phrase d'arrêt parlée et `--finalize`/`--cancel` restent disponibles comme filet de sécurité dans tous les modes. Voir [`configuration.md`](configuration.md#interaction) pour la référence complète.
+
+### Contrôler une session en cours
+
+La session ouvre un socket Unix privé à `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock` (mode `0600`). Lancer la **même commande** avec une option de contrôle s'y connecte, exécute l'action, affiche l'état et se termine :
+
+```bash
+vosk-cli-dictation --status          # -> OK ÉCOUTE
+vosk-cli-dictation --toggle          # démarrer/arrêter la dictée
+vosk-cli-dictation --sleep-toggle    # entrer dans le mode veille ou en sortir (libère le microphone)
+vosk-cli-dictation --finalize        # arrêter et copier le texte accumulé
+vosk-cli-dictation --stop            # arrêter la session
+```
+
+Liez ces commandes aux réglages de raccourcis clavier de votre bureau (KDE, GNOME, Sway, labwc…) pour un contrôle global qui marche partout, y compris dans les fenêtres Wayland natives que `pynput` ne peut pas voir. Les raccourcis `pynput` de la section `hotkeys` fonctionnent aussi comme commodité au mieux — sous Wayland, seulement sur les fenêtres XWayland.
+
+### Commandes manuelles
+
+Pendant que le script s'exécute dans un terminal, vous pouvez aussi saisir ces commandes et appuyer sur Entrée :
+
+*   `/cancel` : arrête la session d'enregistrement en cours sans produire de texte.
+*   `/delete-word` : supprime le dernier mot tapé.
+*   `/nl` : insère un saut de ligne (simule l'appui sur la touche Entrée).
+
+### Personnalisation
+
+Tous les réglages se modifient dans le fichier `config/config.yaml` : raccourcis, couleurs de l'interface, phrases de déclenchement vocal, typographie par langue et alias de reconnaissance. Des exemples d'alias propres à un corpus sont dans `config/config.example.yaml`. Voir [`configuration.md`](configuration.md) pour la référence complète.
+
+## Contribuer
+
+Ce projet est libre et les contributions sont vivement encouragées ! Consultez notre **[Guide de contribution](../../CONTRIBUTING.md)** et n'hésitez pas à ouvrir un ticket sur la [page des tickets](https://github.com/RonanDavalan/vosk-cli-dictation/issues).
+
+Ce projet est construit dans une collaboration asymétrique humain-LLM — voir [CONTRIBUTORS.md](../../CONTRIBUTORS.md) pour les rôles concernés.
+
+## Crédits
+
+Ce projet est construit dans une collaboration humain-LLM, dont les rôles sont écrits tels qu'ils ont été réellement tenus. La liste complète est dans [CONTRIBUTORS.md](../../CONTRIBUTORS.md).
+
+*   **Ronan Davalan** — Architecte et arbitre : vision, exigences de sécurité, validation et essais.
+*   **Claude Code (Anthropic)** — Ingénieur systèmes et développeur principal : auteur principal du code source depuis la v0.5.0-alpha, du paquetage Debian et de l'outillage.
+*   **Gemini (Google)** — Synthétiseur et conseiller stratégique.
+*   **Grok (xAI)** — Validateur externe.
+*   **GLM-5.3** — Auditeur du cœur d'interaction (audit croisé à l'aveugle).
+*   **DeepSeek V4 Flash (via OpenCode)** — Relecteur de la documentation et du site, testeur.
+
+## Licence
+
+Ce projet est distribué sous **licence MIT**. Voir le fichier [LICENSE](../../LICENSE) pour les détails.

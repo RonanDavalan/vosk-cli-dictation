@@ -199,6 +199,10 @@ Referenz aller Konfigurationsschlüssel.
     Beendigungsvorgang entfernt; ein veralteter Socket, der durch einen Absturz
     verbleibt, wird erkannt und beim nächsten Start ersetzt.
 
+# PLATTFORMEN
+
+vosk-cli-dictation wird als native Pakete ausgeliefert: **Debian** 12 und neuer sowie Ubuntu 24.04 und neuer (`sudo apt install ./vosk-cli-dictation_*_all.deb`), **Fedora** (`sudo dnf install ./vosk-cli-dictation-*.noarch.rpm`), **openSUSE** Leap (`sudo zypper install ./vosk-cli-dictation-*.noarch.rpm`) und **Arch** Linux (`sudo pacman -U ./vosk-cli-dictation-*.pkg.tar.zst`). Installation und Diagnose sind im Container validiert; ein Container belegt weder das Mikrofon noch die Tastatureingabe in einer grafischen Sitzung.
+
 # AUSGANGSZUSTAND
 
 **0**

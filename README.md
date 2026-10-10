@@ -8,6 +8,8 @@
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
 </p>
 
+**English** | [Français](docs/fr/README.md) | [Deutsch](docs/de/README.md) | [Español](docs/es/README.md)
+
 <p align="center">
   <a href="https://vosk.davalan.fr/"><strong>Visit the Official Homepage for a full tour!</strong></a>
 </p>

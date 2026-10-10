@@ -276,6 +276,10 @@ reference of every configuration key.
     exit; a stale socket left by a crash is detected and replaced at the
     next start.
 
+# PLATFORMS
+
+vosk-cli-dictation ships as native packages: **Debian** 12 and later and Ubuntu 24.04 and later (`sudo apt install ./vosk-cli-dictation_*_all.deb`), **Fedora** (`sudo dnf install ./vosk-cli-dictation-*.noarch.rpm`), **openSUSE** Leap (`sudo zypper install ./vosk-cli-dictation-*.noarch.rpm`) and **Arch** Linux (`sudo pacman -U ./vosk-cli-dictation-*.pkg.tar.zst`). Installation and diagnosis are validated in containers; a container proves neither the microphone nor the keystroke injection in a graphical session.
+
 # EXIT STATUS
 
 **0**
