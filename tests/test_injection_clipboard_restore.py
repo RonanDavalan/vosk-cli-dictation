@@ -9,7 +9,6 @@
 #   - clipboard.restore=false : ni sauvegarde ni restauration ;
 #   - collage non émis (_send_paste -> False) : restauration immédiate, sans
 #     fenêtre d'attente.
-# Spec : _CADRE/SPECIFICATIONS/CORRECTIF_INJECTION_COLLAGE.md
 
 import time
 import types

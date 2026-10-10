@@ -37,8 +37,7 @@ _last_warn = 0.0
 # Restauration différée du presse-papiers (clipboard.defer_restore).
 # On mémorise le presse-papiers d'origine — celui d'avant la première dictée
 # de la session — et on le restaure une seule fois, en fin de session
-# (src/ui.py) ou à la sortie du processus (atexit). Voir
-# _CADRE/SPECIFICATIONS/CORRECTIF_INJECTION_COLLAGE.md.
+# (src/ui.py) ou à la sortie du processus (atexit).
 _deferred_clip = {"pending": False, "value": None}
 _deferred_atexit_registered = False
 

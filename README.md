@@ -184,6 +184,17 @@ This project is open source and contributions are highly encouraged! Please chec
 
 This project is built through an asymmetric human-LLM collaboration — see [CONTRIBUTORS.md](CONTRIBUTORS.md) for the roles involved.
 
+## Credits
+
+This project is built through a human-LLM collaboration, with the roles written down as they were actually played. The full list is in [CONTRIBUTORS.md](CONTRIBUTORS.md).
+
+*   **Ronan Davalan** — Architect and arbiter: vision, security requirements, validation and testing.
+*   **Claude Code (Anthropic)** — Systems engineer and lead developer: principal author of the source code since v0.5.0-alpha, the Debian packaging and the tooling.
+*   **Gemini (Google)** — Synthesizer and strategic advisor.
+*   **Grok (xAI)** — External validator.
+*   **GLM-5.3** — Auditor of the interaction core (blind cross-audit).
+*   **DeepSeek V4 Flash (via OpenCode)** — Documentation and website reviewer, tester.
+
 ## License
 
 This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
