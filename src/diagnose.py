@@ -15,7 +15,7 @@ def _line(ok, label, detail=""):
     return bool(ok)
 
 
-def run_diagnose():
+def run_diagnose(cli_lang=None):
     _ = get_translation()
     from src import system_control as sc
     caps = sc._detect_caps()
@@ -49,6 +49,20 @@ def run_diagnose():
         path = config.get_model_path_by_name(model["name"])
         ok = bool(path) and os.path.isdir(path)
         ok_all &= _line(ok, model["name"], path or _("not found"))
+
+    print()
+    print(_("Selected values (value, origin)"))
+    from config.selection import load_selection, selection_path
+    lang, lang_source = config.startup_language(cli_lang)
+    _line(True, _("Language"), "{}  ({})".format(lang, lang_source))
+    chosen = config.installed_model(load_selection().get("model", ""), lang)
+    if chosen:
+        _line(True, _("Model"), "{}  (selection)".format(chosen["folder"]))
+    else:
+        path = config.get_model_path_by_name(lang)
+        _line(bool(path), _("Model"),
+              "{}  (config)".format(os.path.basename(path)) if path else _("not found"))
+    _line(True, _("Selection file"), selection_path())
 
     print()
     print(_("Audio input"))

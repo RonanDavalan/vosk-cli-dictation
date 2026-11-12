@@ -15,6 +15,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
 from config.config import config
+from config.selection import load_selection
 from src.i18n import set_ui_language, get_translation
 from src.system_control import check_command_exists, injection_backend_available
 from src.audio_capture import initialize_audio, audio_capture_thread
@@ -199,7 +200,7 @@ def main():
             pre_lang = token.split('=', 1)[1]
             break
 
-    set_ui_language(pre_lang or config.default_model)
+    set_ui_language(config.startup_language(pre_lang)[0])
     _ = get_translation()
 
     parser = argparse.ArgumentParser(description=_("A Vosk-based command-line dictation tool."))
@@ -223,11 +224,11 @@ def main():
 
     if args.diagnose:
         from src.diagnose import run_diagnose
-        sys.exit(run_diagnose())
+        sys.exit(run_diagnose(args.lang))
 
     if args.download_model is not None:
         from src.model_download import download_model
-        lang = args.download_model or args.lang or config.default_model
+        lang = args.download_model or config.startup_language(args.lang)[0]
         sys.exit(0 if download_model(lang) else 1)
 
     for attr, wire in CONTROL_FLAGS:
@@ -239,7 +240,7 @@ def main():
             print(reply)
             sys.exit(0 if reply.startswith("OK") else 2)
 
-    ui_lang = args.lang if args.lang else config.default_model
+    ui_lang, lang_source = config.startup_language(args.lang)
 
     if ui_lang != config.current_lang:
         set_ui_language(lang=ui_lang)
@@ -265,7 +266,8 @@ def main():
     print_status(_("Dependencies checked."), config.color_info)
 
     print_status(_("Attempting to load model for language: {lang}").format(lang=ui_lang), config.color_info)
-    model, recognizer, loaded_model_name = load_model(ui_lang)
+    selected = load_selection().get('model')
+    model, recognizer, loaded_model_name = load_model(ui_lang, selected)
 
     if not recognizer:
         default_model_name = config.default_model_name

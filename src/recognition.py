@@ -91,9 +91,10 @@ def _capture_malformed_result(raw: str) -> str:
 MODE_STOP = "stop"
 
 
-def load_model(model_name: str):
+def load_model(model_name: str, folder: str = None):
     """
-    Charge un modèle Vosk par son nom (p. ex. 'fr').
+    Charge un modèle Vosk par son nom (p. ex. 'fr'), ou par le dossier d'un
+    modèle installé (`folder`, p. ex. le choix mémorisé dans selection.yaml).
     Retourne (model, recognizer, model_name_on_disk) ou (None, None, None) en échec.
 
     L'objet Model est retourné avec le recognizer pour que le thread de
@@ -102,7 +103,17 @@ def load_model(model_name: str):
     disque.
     """
     _ = get_translation()
-    model_path = config.get_model_path_by_name(model_name)
+    model_path = None
+    if folder:
+        chosen = config.installed_model(folder, model_name)
+        model_path = chosen['path'] if chosen else None
+    model_path = model_path or config.get_model_path_by_name(model_name)
+    if not model_path:
+        # Langue sans modèle déclaré dans config.yaml : un modèle du catalogue
+        # installé pour elle (p. ex. un modèle complet téléchargé seul).
+        model_path = next((m['path'] for m in sorted(
+            config.installed_models(), key=lambda m: m['size'] != 'small')
+            if m['lang'] == model_name), None)
 
     if not model_path:
         for model in config.data.get('vosk_models', []):

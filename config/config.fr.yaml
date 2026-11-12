@@ -13,7 +13,9 @@ vosk_models:
   - name: "es"
     path_relative: "vosk-model/vosk-model-small-es-0.42"
 
-default_model: "fr"
+# Langue de la dictée : "system" suit la langue de la session (LC_MESSAGES, sinon LANG)
+# si un modèle de cette langue est installé, sinon l'anglais ; ou fr, en, de, es.
+default_model: system
 
 # Socket de contrôle Unix dans $XDG_RUNTIME_DIR : permet de piloter une
 # session en cours via les sous-commandes CLI (--toggle, --sleep, --status…)

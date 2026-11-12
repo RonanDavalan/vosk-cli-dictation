@@ -3,6 +3,7 @@
 import yaml
 import os
 import shutil
+from config.selection import load_selection, resolve_language
 from colorama import Fore, Style, init as colorama_init
 
 colorama_init(autoreset=True)
@@ -33,8 +34,9 @@ class Config:
         # Initialise les couleurs du thème depuis le fichier de configuration.
         self._initialize_theme()
 
-        # Langue initiale d'après le modèle par défaut de la configuration.
-        self.current_lang = self.data.get('default_model', 'en')
+        # Langue initiale d'après le modèle par défaut de la configuration
+        # (« system » ou clé absente : langue de la session).
+        self.current_lang = self.default_model
         self.set_language(self.current_lang)
 
         # Ne vaut jamais True pour un fichier de développement (chargé en
@@ -321,8 +323,53 @@ class Config:
 
     # --- Propriétés d'accès simple aux données de configuration ---
     @property
+    def default_model_setting(self) -> str | None:
+        """Valeur brute de ``default_model`` dans config.yaml (None si absente)."""
+        return self.data.get('default_model')
+
+    @property
     def default_model(self) -> str:
-        return self.data.get('default_model', 'en')
+        """Langue du modèle par défaut d'après config.yaml seul ; « system » ou
+        l'absence de clé donne la langue de la session (voir startup_language)."""
+        return resolve_language(
+            None, {}, self.default_model_setting, self.installed_languages())[0]
+
+    def installed_models(self) -> list[dict]:
+        """Modèles présents sur le disque : ceux du catalogue de
+        src/model_download.py (petits et complets) trouvés dans la cascade de
+        racines, puis ceux que config.yaml déclare en plus. Chaque entrée :
+        folder, path, lang, size (``small`` ou ``big``)."""
+        from src.model_download import known_folders
+        found = {}
+        for folder, (lang, size) in known_folders().items():
+            for racine in self.model_search_roots(os.path.join('vosk-model', folder)):
+                if os.path.isdir(racine):
+                    found[folder] = {'folder': folder, 'path': racine, 'lang': lang, 'size': size}
+                    break
+        for model in self.data.get('vosk_models', []):
+            path = self.get_model_path_by_name(model['name'])
+            folder = os.path.basename(path) if path else None
+            if folder and folder not in found:
+                size = 'small' if 'small' in folder else 'big'
+                found[folder] = {'folder': folder, 'path': path, 'lang': model['name'], 'size': size}
+        return list(found.values())
+
+    def installed_languages(self) -> list[str]:
+        return sorted({m['lang'] for m in self.installed_models()})
+
+    def installed_model(self, folder: str, lang: str = None) -> dict | None:
+        """Entrée d'installed_models() pour ce dossier (et cette langue si donnée)."""
+        for m in self.installed_models():
+            if m['folder'] == folder and (lang is None or m['lang'] == lang):
+                return m
+        return None
+
+    def startup_language(self, cli_lang=None):
+        """(langue, origine) au lancement : ligne de commande, sélection
+        mémorisée, config.yaml, puis langue de la session."""
+        return resolve_language(
+            cli_lang, load_selection(), self.default_model_setting,
+            self.installed_languages())
 
     @property
     def default_model_name(self) -> str | None:

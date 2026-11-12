@@ -42,9 +42,9 @@ def test_template_exists_and_parses(lang):
 
 
 @pytest.mark.parametrize("lang", Config.SUPPORTED_CONFIG_LANGS)
-def test_template_default_model_matches_its_own_language(lang):
+def test_template_default_model_follows_the_system(lang):
     data = yaml.safe_load(TEMPLATES[lang].read_text(encoding="utf-8"))
-    assert data["default_model"] == lang
+    assert data["default_model"] == "system"
 
 
 def test_all_templates_share_the_same_key_structure():
