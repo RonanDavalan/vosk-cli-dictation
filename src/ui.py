@@ -6,7 +6,7 @@ import pyperclip
 
 from config.config import config
 from src.system_control import (
-    type_text, press_key, play_sound, flush_deferred_clipboard,
+    type_text, press_key, play_sound, flush_deferred_clipboard, ensure_clipboard_text,
 )
 from src.i18n import get_translation, set_ui_language
 from src.text_processing import TextProcessor
@@ -120,6 +120,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         if text_to_copy:
             try:
                 pyperclip.copy(text_to_copy)
+                ensure_clipboard_text(text_to_copy)
             except Exception:
                 copied = False
                 print(f"\n{config.color_warning}"

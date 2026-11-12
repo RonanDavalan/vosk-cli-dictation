@@ -226,6 +226,21 @@ def _clipboard_set(text: str) -> bool:
         return False
 
 
+def ensure_clipboard_text(text: str) -> bool:
+    """Garantit que `text` est lisible dans le presse-papiers du bureau après `pyperclip.copy`.
+
+    Sous Wayland, pyperclip passe par GTK, qui ne publie pas la sélection sans fenêtre
+    d'application : le texte copié reste illisible pour les autres programmes. Si la
+    lecture ne rend pas `text`, `wl-copy` le publie.
+    """
+    caps = _detect_caps()
+    if caps["session"] != "wayland" or not caps["wl_copy"]:
+        return True
+    if _clipboard_get() == text:
+        return True
+    return _clipboard_set(text) and _clipboard_confirm(text, 500)
+
+
 def _clipboard_confirm(text: str, timeout_ms: int) -> bool:
     """Attend que le presse-papiers contienne réellement `text`."""
     deadline = time.monotonic() + timeout_ms / 1000.0
