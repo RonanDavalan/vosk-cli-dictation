@@ -220,7 +220,9 @@ def main():
     ctl.add_argument('--info', action='store_true', help=_("print the full state of the running session as one JSON line"))
     ctl.add_argument('--diagnose', action='store_true', help=_("check the environment and exit"))
     parser.add_argument('--download-model', nargs='?', const='', default=None, metavar='LANG',
-                        help=_("download the small model for LANG (or the current language) and exit"))
+                        help=_("download the model for LANG (or the current language) and exit"))
+    parser.add_argument('--model-size', choices=('small', 'big'), default='small',
+                        help=_("with --download-model: small (default) or big (full) model"))
     args = parser.parse_args()
 
     if args.diagnose:
@@ -230,7 +232,7 @@ def main():
     if args.download_model is not None:
         from src.model_download import download_model
         lang = args.download_model or config.startup_language(args.lang)[0]
-        sys.exit(0 if download_model(lang) else 1)
+        sys.exit(0 if download_model(lang, args.model_size) else 1)
 
     for attr, wire in CONTROL_FLAGS:
         if getattr(args, attr, False):
