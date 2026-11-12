@@ -62,7 +62,7 @@ The right-click menu, in this order:
 2.  turn dictation on or off; enter or leave deep sleep; finish and copy the text; cancel the session;
 3.  **Language**: follow the system, or French, English, German, Spanish; a language without an installed model reads "to download";
 4.  **Model**: light or full; a missing model shows its size, and choosing it starts its download, with a notification when it ends;
-5.  **Refinement** and **Correction**: greyed with their reason until the running dictation announces options;
+5.  **Refinement**: *None* and the Whisper sizes, each marked `GPU` or `CPU`; greyed with its reason when `faster-whisper` is missing; the first use of a size downloads its weights, with a notification at the start and at the end. **Correction**: greyed with its reason until the running dictation announces options;
 6.  revert to the configuration (forget the remembered choice);
 7.  launch or quit the dictation (launched detached from any terminal); launch the icon at login; quit the icon.
 

@@ -110,7 +110,7 @@ msgstr "Archivo de selección"
 
 #: src/diagnose.py:68 tray/vosk_cli_dictation_tray/tray.py:210
 msgid "Refinement"
-msgstr "Acabado"
+msgstr "Refinado"
 
 #: src/diagnose.py:74
 msgid "Audio input"

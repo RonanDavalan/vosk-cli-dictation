@@ -62,7 +62,7 @@ El menú del clic derecho, en este orden:
 2.  activar o desactivar el dictado; entrar en reposo profundo o salir de él; terminar y copiar el texto; cancelar la sesión;
 3.  **Idioma**: seguir el sistema, o francés, inglés, alemán, español; un idioma sin modelo instalado dice «por descargar»;
 4.  **Modelo**: ligero o completo; un modelo ausente muestra su tamaño, y elegirlo inicia su descarga, con una notificación al terminar;
-5.  **Acabado** y **Corrección**: en gris con su motivo mientras el dictado en curso no anuncie opciones;
+5.  **Refinado**: *Ninguno* y los tamaños de Whisper, cada uno marcado `GPU` o `CPU`; en gris con su motivo cuando falta `faster-whisper`; el primer uso de un tamaño descarga sus pesos, con una notificación al principio y al final. **Corrección**: en gris con su motivo mientras el dictado en curso no anuncie opciones;
 6.  volver a la configuración (olvidar la elección recordada);
 7.  iniciar o salir del dictado (iniciado separado de cualquier terminal); iniciar el icono al abrir la sesión; salir del icono.
 
