@@ -11,7 +11,8 @@
 # Protocole : une requête = « jeton[ argument] » terminé par \n. Réponse =
 # "OK <ÉTAT>" ou "ERR <raison>", terminée par \n. <ÉTAT> ∈ {DICTÉE, ÉCOUTE,
 # VEILLE}. `info` répond « OK <JSON> » sur une seule ligne ; `set-*` répond tout
-# de suite « OK <ÉTAT> » et applique le réglage en arrière-plan.
+# de suite « OK <ÉTAT> » et applique le réglage en arrière-plan ;
+# `reset-selection` (sans argument) vide le choix mémorisé et revient à la config.
 
 import json
 import os
@@ -28,6 +29,7 @@ COMMANDS = {
     "toggle", "dictation-on", "dictation-off", "finalize", "cancel",
     "sleep", "wake", "sleep-toggle", "status", "quit",
     "info", "set-lang", "set-model", "set-refine", "set-correction",
+    "reset-selection",
 }
 
 # Jetons qui prennent un argument ; les autres le refusent.
@@ -128,6 +130,9 @@ def _handle(raw: str, control_queue, controller=None) -> str:
     if token == "info":
         data = controller.info() if controller else _info_fallback()
         return "OK " + json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    if token == "reset-selection":
+        refusal = controller.request(token, "") if controller else "unsupported"
+        return "ERR " + refusal if refusal else "OK " + runtime_state.snapshot()["state"]
     if token in ARG_COMMANDS:
         if controller is None:
             return "ERR unsupported"

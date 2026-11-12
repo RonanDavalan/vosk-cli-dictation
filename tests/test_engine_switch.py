@@ -2,6 +2,7 @@
 # factice, point d'échange du fil de reconnaissance.
 
 import json
+import os
 import queue
 import threading
 import time
@@ -170,6 +171,33 @@ def test_set_lang_system_follows_the_session(monkeypatch):
     sw.commit(sw.take_ready())
     assert sw.info()["lang_source"] == "system"
     assert sel.load_selection()["lang"] == "system"
+
+
+def test_reset_selection_clears_the_choice_and_returns_to_the_session_language(monkeypatch):
+    for name in ("LC_ALL", "LC_MESSAGES", "LANGUAGE"):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("LANG", "de_DE.UTF-8")
+    monkeypatch.delitem(config.data, "default_model", raising=False)
+    sel.save_selection({"lang": "fr", "model": "vosk-model-fr-0.22"})
+    loader = FakeLoader()
+    sw = make_switch(loader)
+    assert sw.request("reset-selection", "") is None
+    assert not os.path.exists(sel.selection_path())
+    assert wait_until(sw.has_ready)
+    assert loader.paths == ["/m/de-small"]
+    sw.commit(sw.take_ready())
+    assert sw.info()["lang"] == "de"
+    assert sw.info()["lang_source"] == "system"
+    assert sel.load_selection() == {}
+
+
+def test_reset_selection_without_a_model_for_the_language_keeps_the_choice(monkeypatch):
+    monkeypatch.setenv("LC_ALL", "es_ES.UTF-8")
+    monkeypatch.setitem(config.data, "default_model", "es")
+    sel.save_selection({"lang": "fr"})
+    sw = make_switch()
+    assert sw.request("reset-selection", "") == "no-model"
+    assert sel.load_selection() == {"lang": "fr"}
 
 
 # --- point d'échange du fil de reconnaissance --------------------------------

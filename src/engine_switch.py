@@ -9,7 +9,7 @@
 import threading
 
 from config.config import config
-from config.selection import SUPPORTED_LANGS, SYSTEM, save_selection, system_language
+from config.selection import SUPPORTED_LANGS, SYSTEM, clear_selection, resolve_language, save_selection, system_language
 from src.i18n import get_translation, set_ui_language
 from src.runtime_state import runtime_state
 
@@ -92,6 +92,8 @@ class EngineSwitch:
             return self._request_lang(arg)
         if token == "set-model":
             return self._request_model(arg)
+        if token == "reset-selection":
+            return self._request_reset()
         return "unknown-command"
 
     def _request_lang(self, arg):
@@ -114,12 +116,25 @@ class EngineSwitch:
             return "no-model"
         return self._begin(target, "selection", target["lang"])
 
-    def _begin(self, target, lang_source, lang_choice):
-        updates = {"lang": lang_choice, "model": target["folder"]}
+    def _request_reset(self):
+        """Vide la sélection mémorisée et revient à ce que le lancement
+        choisirait sans elle : option de config.yaml, sinon langue du système."""
+        lang, source = resolve_language(
+            None, {}, config.default_model_setting, config.installed_languages())
+        target = choose_model(lang, "small")
+        if target is None:
+            return "no-model"
+        clear_selection()
+        return self._begin(target, source, lang, updates={})
+
+    def _begin(self, target, lang_source, lang_choice, updates=None):
+        if updates is None:
+            updates = {"lang": lang_choice, "model": target["folder"]}
         if target["folder"] == self.folder:
             with self._lock:
                 self.lang_source = lang_source
-            save_selection(updates)
+            if updates:
+                save_selection(updates)
             return None
         with self._lock:
             self.loading = True
@@ -165,7 +180,8 @@ class EngineSwitch:
         if engine.lang != config.current_lang:
             config.set_language(engine.lang)
             set_ui_language(engine.lang)
-        save_selection(engine.selection_updates)
+        if engine.selection_updates:
+            save_selection(engine.selection_updates)
         _ = get_translation()
         print(f"\n{config.color_success}"
               f"{_('Model switched: {model_name}').format(model_name=engine.folder)}"

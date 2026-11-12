@@ -190,3 +190,8 @@ def test_set_token_without_controller_is_unsupported(server):
 def test_argument_on_a_plain_token_is_unknown(server):
     assert cs.send_control_command("status now") == "ERR unknown-command"
     assert cs.send_control_command("set-unknown x") == "ERR unknown-command"
+
+
+def test_reset_selection_needs_a_controller_and_takes_no_argument(server):
+    assert cs.send_control_command("reset-selection") == "ERR unsupported"
+    assert cs.send_control_command("reset-selection now") == "ERR unknown-command"
