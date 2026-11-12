@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img">
+  <title>Microphone, dictation off</title>
+  <desc>Outlined microphone only: no dictation is running.</desc>
+  <rect x="52.5" y="14.5" width="23" height="51" rx="11.5" stroke="#2E9E4F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M36 52V58A28 28 0 0 0 92 58V52" stroke="#2E9E4F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M64 86V106M44 111H84" stroke="#2E9E4F" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

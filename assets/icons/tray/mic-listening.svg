@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img">
+  <title>Microphone, listening</title>
+  <desc>Filled microphone without waves: the microphone is open, typing is off, the tool waits for the wake phrase.</desc>
+  <rect x="48" y="10" width="32" height="60" rx="16" fill="#DB7500"/>
+  <path d="M36 52V58A28 28 0 0 0 92 58V52" stroke="#DB7500" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M64 86V106M44 111H84" stroke="#DB7500" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

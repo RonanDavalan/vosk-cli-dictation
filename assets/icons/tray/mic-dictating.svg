@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" role="img">
+  <title>Microphone, dictation on</title>
+  <desc>Filled microphone surrounded by sound waves: the microphone is open and the voice is typed.</desc>
+  <rect x="48" y="10" width="32" height="60" rx="16" fill="#E5322D"/>
+  <path d="M36 52V58A28 28 0 0 0 92 58V52" stroke="#E5322D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M64 86V106M44 111H84" stroke="#E5322D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M18.2 68.6 A54 54 0 0 1 18.2 11.4" stroke="#E5322D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M109.8 11.4 A54 54 0 0 1 109.8 68.6" stroke="#E5322D" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
