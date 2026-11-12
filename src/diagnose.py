@@ -65,6 +65,12 @@ def run_diagnose(cli_lang=None):
     _line(True, _("Selection file"), selection_path())
 
     print()
+    print(_("Refinement"))
+    from src.refine.control import diagnose_lines
+    for ok, label, detail in diagnose_lines(load_selection().get("refine")):
+        ok_all &= _line(ok, label, detail)
+
+    print()
     print(_("Audio input"))
     audio_ok = False
     try:
@@ -120,6 +126,22 @@ def run_diagnose(cli_lang=None):
     running = instance_running()
     _line(True, _("Socket path"), path)
     _line(True, _("Session running"), _("yes") if running else _("no"))
+    if running:
+        import json
+        from src.control_socket import send_control_command
+        reply = send_control_command("info") or ""
+        try:
+            info = json.loads(reply[3:])
+        except ValueError:
+            info = {}
+        if info.get("refine", "none") != "none":
+            stats = info.get("refine_stats", {})
+            _line(True, _("Refinement counters"), _(
+                "{done} refined, {timeout} too slow, {error} errors, {rejected} rejected, "
+                "{skipped} commands, {ms} ms on average").format(
+                    done=stats.get("done", 0), timeout=stats.get("timeout", 0),
+                    error=stats.get("error", 0), rejected=stats.get("rejected", 0),
+                    skipped=stats.get("skipped", 0), ms=stats.get("mean_ms", 0)))
     dir_ok = os.access(os.path.dirname(path), os.W_OK)
     ok_all &= _line(dir_ok, _("Runtime dir writable"), os.path.dirname(path))
 

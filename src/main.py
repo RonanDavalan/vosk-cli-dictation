@@ -20,7 +20,8 @@ from config.selection import load_selection
 from src.i18n import set_ui_language, get_translation
 from src.system_control import check_command_exists, injection_backend_available
 from src.audio_capture import initialize_audio, audio_capture_thread
-from src.recognition import load_model, recognition_thread, force_c_numeric_locale
+from src.recognition import load_model, recognition_thread, force_c_numeric_locale, put_text
+from src.refine.control import RefineController, settings as refine_settings
 from src.ui import ui_thread
 from src.keyboard_listener import keyboard_listener_thread
 from src.text_processing import TextProcessor
@@ -340,17 +341,21 @@ def main():
 
     processor = TextProcessor(config.current_lang)
     loaded_entry = config.installed_model(loaded_model_name) or {}
+    refine = RefineController(
+        lambda text, words, refined: put_text(text_queue, text, words, refined),
+        refine_settings(), load_selection().get('refine'))
     switch = EngineSwitch(
         config.current_lang, loaded_model_name,
         loaded_entry.get('size', 'small'),
         lang_source if config.current_lang == ui_lang else 'config',
+        refine=refine,
     )
 
     threads = [
-        threading.Thread(target=recognition_thread, args=(model, recognizer, audio_queue, text_queue, control_queue, stop_event, display_partials_event, wake_event, switch)),
+        threading.Thread(target=recognition_thread, args=(model, recognizer, audio_queue, text_queue, control_queue, stop_event, display_partials_event, wake_event, switch, refine.pipeline)),
         threading.Thread(target=audio_capture_thread, args=(p, stream, audio_queue, stop_event, sleep_event, wake_event)),
         threading.Thread(target=keyboard_listener_thread, args=(control_queue, stop_event)),
-        threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event, sleep_event, wake_event))
+        threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event, sleep_event, wake_event, refine.pipeline))
     ]
 
     for t in threads:
@@ -414,6 +419,7 @@ def main():
 
     try:
         for t in threads: t.start()
+        refine.start()
 
         while not stop_event.is_set():
             dead = supervise_threads(supervised, stop_event)
@@ -439,6 +445,7 @@ def main():
         if not stop_event.is_set():
             stop_event.set()
         wake_event.set()          # débloque le thread de reconnaissance
+        refine.shutdown()
 
         # Attendre la sortie effective des threads *avant* de fermer le flux et
         # de terminer PortAudio : sinon audio_capture_thread peut être encore

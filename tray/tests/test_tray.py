@@ -245,6 +245,33 @@ def test_error_is_notified_once(make):
     assert notes == ["Dictation error: disk full"] * 2
 
 
+def test_first_download_of_a_whisper_model_is_notified_at_start_and_end(make):
+    tray, _, notes = make()
+    tray.on_info(info(refine_download="small", loading=True))
+    tray.on_info(info(refine_download="small", loading=True))
+    tray.on_info(info(refine_download=None, loading=False, refine="whisper:small"))
+    tray.on_info(info(refine_download=None, refine="whisper:small"))
+    assert len(notes) == 2
+    assert "Whisper small" in notes[0] and "first use" in notes[0]
+    assert notes[1] == "The Whisper small model is ready."
+
+
+def test_failed_download_is_not_announced_as_ready(make):
+    tray, _, notes = make()
+    tray.on_info(info(refine_download="small", loading=True))
+    tray.on_info(info(refine_download=None, last_error="disk full"))
+    assert len(notes) == 2 and "ready" not in notes[1] and "disk full" in notes[1]
+
+
+def test_choosing_a_whisper_size_sends_set_refine(make):
+    tray, client, _ = make()
+    tray.on_info(info(device="cuda", refine_options=["none", "whisper:small", "whisper:large-v3-turbo"]))
+    assert [a.text() for a in tray.m_refine.actions()] == [
+        "None", "Whisper small (GPU)", "Whisper large-v3-turbo (GPU)"]
+    tray.m_refine.actions()[2].trigger()
+    assert client.sent == ["set-refine whisper:large-v3-turbo"]
+
+
 def test_refusals_are_notified(make):
     tray, client, notes = make()
     client.command_done.emit("set-lang de", "ERR busy")

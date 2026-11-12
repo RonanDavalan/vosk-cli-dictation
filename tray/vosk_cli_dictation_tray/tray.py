@@ -32,6 +32,7 @@ class DictationTray(QSystemTrayIcon):
         self._icons = {}
         self._download = None
         self._shown_error = None
+        self._shown_download = None
         self._dynamic_options = {}
 
         self._build_menu()
@@ -163,6 +164,7 @@ class DictationTray(QSystemTrayIcon):
         self._refresh_texts()
         self._refresh_actions()
         self._refresh_errors()
+        self._refresh_download()
 
     def _refresh_icon(self) -> None:
         name = icon_name(self.info.get("state") if self.info else None)
@@ -265,6 +267,20 @@ class DictationTray(QSystemTrayIcon):
             self._notify(self._t("Dictation error: {error}").format(error=error))
         self._shown_error = error
 
+    def _refresh_download(self) -> None:
+        """Première utilisation d'une taille de Whisper : ses poids se téléchargent
+        (`refine_download` donne la taille tant que ça dure) ; l'icône prévient au
+        début et à la fin."""
+        if self.info is None:
+            self._shown_download = None
+            return
+        size = self.info.get("refine_download")
+        if size and size != self._shown_download:
+            self._notify(self._t("Downloading the Whisper {size} model (first use, this can take a few minutes)...").format(size=size))
+        elif self._shown_download and not size and not self.info.get("last_error"):
+            self._notify(self._t("The Whisper {size} model is ready.").format(size=self._shown_download))
+        self._shown_download = size
+
     # --- gestes ------------------------------------------------------------ #
 
     def _on_activated(self, reason) -> None:
@@ -311,7 +327,8 @@ class DictationTray(QSystemTrayIcon):
         elif reply.startswith("ERR"):
             reason = reply[3:].strip()
             text = {"busy": t("A model is loading, try again in a moment."),
-                    "no-model": t("No model is installed for this choice.")}.get(
+                    "no-model": t("No model is installed for this choice."),
+                    "unsupported": t("This choice is not available in this dictation.")}.get(
                 reason, t("The dictation refused the request ({reason}).").format(reason=reason))
             self._notify(text)
 

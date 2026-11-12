@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 13:51+0100\n"
+"POT-Creation-Date: 2026-11-12 14:21+0100\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: de\n"
@@ -24,9 +24,7 @@ msgstr "Kritischer Fehler bei der Audio-Initialisierung:"
 
 #: src/audio_capture.py:63
 msgid "TIP: This can happen if no microphone is connected or selected."
-msgstr ""
-"TIPP: Das kann passieren, wenn kein Mikrofon angeschlossen oder "
-"ausgewählt ist."
+msgstr "TIPP: Das kann passieren, wenn kein Mikrofon angeschlossen oder ausgewählt ist."
 
 #: src/audio_capture.py:64
 msgid "Check your system audio settings (e.g., with pavucontrol)."
@@ -68,7 +66,7 @@ msgstr "keiner"
 msgid "Tools"
 msgstr "Werkzeuge"
 
-#: src/diagnose.py:38
+#: src/diagnose.py:38 src/refine/control.py:240
 msgid "found"
 msgstr "gefunden"
 
@@ -83,9 +81,7 @@ msgstr "Zugriff auf {path}"
 
 #: src/diagnose.py:44
 msgid "no rw access (add your user to the 'input' group)"
-msgstr ""
-"kein Lese-/Schreibzugriff (fügen Sie Ihren Benutzer der Gruppe „input“ "
-"hinzu)"
+msgstr "kein Lese-/Schreibzugriff (fügen Sie Ihren Benutzer der Gruppe „input“ hinzu)"
 
 #: src/diagnose.py:47
 msgid "Models"
@@ -99,12 +95,12 @@ msgstr "nicht gefunden"
 msgid "Selected values (value, origin)"
 msgstr "Gewählte Werte (Wert, Herkunft)"
 
-#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:133
+#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:134
 msgid "Language"
 msgstr "Sprache"
 
 #: src/diagnose.py:60 src/diagnose.py:63
-#: tray/vosk_cli_dictation_tray/tray.py:143
+#: tray/vosk_cli_dictation_tray/tray.py:144
 msgid "Model"
 msgstr "Modell"
 
@@ -112,93 +108,106 @@ msgstr "Modell"
 msgid "Selection file"
 msgstr "Auswahldatei"
 
-#: src/diagnose.py:68
+#: src/diagnose.py:68 tray/vosk_cli_dictation_tray/tray.py:210
+msgid "Refinement"
+msgstr "Verfeinerung"
+
+#: src/diagnose.py:74
 msgid "Audio input"
 msgstr "Audioeingang"
 
-#: src/diagnose.py:85 src/diagnose.py:87
+#: src/diagnose.py:91 src/diagnose.py:93
 msgid "Open an input stream"
 msgstr "Einen Eingabestream öffnen"
 
-#: src/diagnose.py:92
+#: src/diagnose.py:98
 msgid "Clipboard"
 msgstr "Zwischenablage"
 
-#: src/diagnose.py:100 src/diagnose.py:104
+#: src/diagnose.py:106 src/diagnose.py:110
 msgid "Read / write round-trip"
 msgstr "Lese-/Schreib-Rundlauf"
 
-#: src/diagnose.py:101
+#: src/diagnose.py:107
 msgid "failed (install wl-clipboard or xclip)"
 msgstr "fehlgeschlagen (installieren Sie wl-clipboard oder xclip)"
 
-#: src/diagnose.py:107
+#: src/diagnose.py:113
 msgid "Interaction mode"
 msgstr "Interaktionsmodus"
 
-#: src/diagnose.py:109
+#: src/diagnose.py:115
 msgid "Active mode"
 msgstr "Aktiver Modus"
 
-#: src/diagnose.py:112
+#: src/diagnose.py:118
 msgid "Silence timeout"
 msgstr "Stille-Zeitlimit"
 
-#: src/diagnose.py:114
+#: src/diagnose.py:120
 msgid "Push-to-talk key"
 msgstr "Push-to-Talk-Taste"
 
-#: src/diagnose.py:114
+#: src/diagnose.py:120
 msgid "not set"
 msgstr "nicht festgelegt"
 
-#: src/diagnose.py:117
+#: src/diagnose.py:123
 msgid "Control socket"
 msgstr "Steuerungs-Socket"
 
-#: src/diagnose.py:121
+#: src/diagnose.py:127
 msgid "Socket path"
 msgstr "Socket-Pfad"
 
-#: src/diagnose.py:122
+#: src/diagnose.py:128
 msgid "Session running"
 msgstr "Sitzung läuft"
 
-#: src/diagnose.py:122
+#: src/diagnose.py:128
 msgid "yes"
 msgstr "ja"
 
-#: src/diagnose.py:122
+#: src/diagnose.py:128
 msgid "no"
 msgstr "nein"
 
-#: src/diagnose.py:124
+#: src/diagnose.py:139
+msgid "Refinement counters"
+msgstr "Zähler der Verfeinerung"
+
+#: src/diagnose.py:140
+#, python-brace-format
+msgid "{done} refined, {timeout} too slow, {error} errors, {rejected} rejected, {skipped} commands, {ms} ms on average"
+msgstr "{done} verfeinert, {timeout} zu langsam, {error} Fehler, {rejected} verworfen, {skipped} Befehle, durchschnittlich {ms} ms"
+
+#: src/diagnose.py:146
 msgid "Runtime dir writable"
 msgstr "Laufzeitverzeichnis beschreibbar"
 
-#: src/diagnose.py:127 src/main.py:376
+#: src/diagnose.py:149 src/main.py:404
 #, python-brace-format
 msgid "Config file in use: {path}"
 msgstr "Verwendete Konfigurationsdatei: {path}"
 
-#: src/diagnose.py:132
+#: src/diagnose.py:154
 msgid "All checks passed."
 msgstr "Alle Prüfungen bestanden."
 
-#: src/diagnose.py:132
+#: src/diagnose.py:154
 msgid "Some checks failed (see !! above)."
 msgstr "Einige Prüfungen sind fehlgeschlagen (siehe !! oben)."
 
-#: src/engine_switch.py:149 src/recognition.py:139
+#: src/engine_switch.py:158 src/recognition.py:157
 msgid "Attempting to load model:"
 msgstr "Versuch, das Modell zu laden:"
 
-#: src/engine_switch.py:157
+#: src/engine_switch.py:166
 #, python-brace-format
 msgid "Model change failed, keeping the current model: {error}"
 msgstr "Modellwechsel fehlgeschlagen, das aktuelle Modell bleibt: {error}"
 
-#: src/engine_switch.py:187
+#: src/engine_switch.py:196
 #, python-brace-format
 msgid "Model switched: {model_name}"
 msgstr "Modell gewechselt: {model_name}"
@@ -212,107 +221,70 @@ msgid "UI Language set to"
 msgstr "Sprache der Oberfläche eingestellt auf"
 
 #: src/keyboard_listener.py:38
-msgid ""
-"Global hotkeys via pynput are disabled on this session; use the CLI "
-"subcommands bound to your desktop shortcuts."
-msgstr ""
-"Globale Tastenkombinationen über pynput sind in dieser Sitzung "
-"deaktiviert; verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-"
-"Verknüpfungen gebunden sind."
+msgid "Global hotkeys via pynput are disabled on this session; use the CLI subcommands bound to your desktop shortcuts."
+msgstr "Globale Tastenkombinationen über pynput sind in dieser Sitzung deaktiviert; verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-Verknüpfungen gebunden sind."
 
 #: src/keyboard_listener.py:43 src/keyboard_listener.py:50
 #: src/keyboard_listener.py:126
-msgid ""
-"Global hotkeys via pynput are not available on this session; use the CLI "
-"subcommands bound to your desktop shortcuts."
-msgstr ""
-"Globale Tastenkombinationen über pynput sind in dieser Sitzung nicht "
-"verfügbar; verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-"
-"Verknüpfungen gebunden sind."
+msgid "Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts."
+msgstr "Globale Tastenkombinationen über pynput sind in dieser Sitzung nicht verfügbar; verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-Verknüpfungen gebunden sind."
 
 #: src/keyboard_listener.py:56
-msgid ""
-"Global hotkeys via pynput only reach windows running through XWayland; "
-"bind the CLI subcommands to your desktop shortcuts for native Wayland "
-"windows."
-msgstr ""
-"Globale Tastenkombinationen über pynput erreichen nur Fenster, die über "
-"XWayland laufen; binden Sie die CLI-Unterbefehle an Ihre Desktop-"
-"Verknüpfungen für native Wayland-Fenster."
+msgid "Global hotkeys via pynput only reach windows running through XWayland; bind the CLI subcommands to your desktop shortcuts for native Wayland windows."
+msgstr "Globale Tastenkombinationen über pynput erreichen nur Fenster, die über XWayland laufen; binden Sie die CLI-Unterbefehle an Ihre Desktop-Verknüpfungen für native Wayland-Fenster."
 
-#: src/keyboard_listener.py:69 src/recognition.py:289 src/recognition.py:314
+#: src/keyboard_listener.py:69 src/recognition.py:311 src/recognition.py:336
 msgid "Control queue full; the UI thread is not responding."
 msgstr "Steuerungswarteschlange voll; der UI-Thread reagiert nicht."
 
 #: src/keyboard_listener.py:140
-msgid ""
-"interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
-"invalid; push-to-talk disabled."
-msgstr ""
-"interaction.mode ist „maintenue“, aber hotkeys.push_to_talk fehlt oder "
-"ist ungültig; Push-to-Talk deaktiviert."
+msgid "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or invalid; push-to-talk disabled."
+msgstr "interaction.mode ist „maintenue“, aber hotkeys.push_to_talk fehlt oder ist ungültig; Push-to-Talk deaktiviert."
 
 #: src/keyboard_listener.py:161
 msgid "Push-to-talk listener could not start:"
 msgstr "Push-to-Talk-Listener konnte nicht gestartet werden:"
 
-#: src/main.py:88
+#: src/main.py:55
+#, python-brace-format
+msgid "Refinement: {engine} ({device}), {done} refined, {fallbacks} fell back to Vosk ({timeout} too slow), {skipped} commands left as heard, {ms} ms on average"
+msgstr "Verfeinerung: {engine} ({device}), {done} Äußerungen verfeinert, {fallbacks} auf den Text von Vosk zurückgefallen ({timeout} zu langsam), {skipped} Befehle unverändert gelassen, durchschnittlich {ms} ms"
+
+#: src/main.py:110
 #, python-brace-format
 msgid "  - Hold [{key}] to dictate; release to stop and copy."
-msgstr ""
-"  - Halten Sie [{key}] gedrückt, um zu diktieren; loslassen, um zu "
-"stoppen und zu kopieren."
+msgstr "  - Halten Sie [{key}] gedrückt, um zu diktieren; loslassen, um zu stoppen und zu kopieren."
 
-#: src/main.py:89
+#: src/main.py:111
 #, python-brace-format
-msgid ""
-"  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop "
-"early."
-msgstr ""
-"  - Sagen Sie „{stop_phrase}“ oder führen Sie „vosk-cli-dictation "
-"--finalize“ aus, um vorzeitig zu stoppen."
+msgid "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early."
+msgstr "  - Sagen Sie „{stop_phrase}“ oder führen Sie „vosk-cli-dictation --finalize“ aus, um vorzeitig zu stoppen."
 
-#: src/main.py:90 src/main.py:97 src/main.py:103
-msgid ""
-"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
-" --finalize."
-msgstr ""
-"  - Tastenkombinationen erreichen das fokussierte Fenster und verfehlen "
-"native Wayland-Fenster; verwenden Sie --finalize."
+#: src/main.py:112 src/main.py:119 src/main.py:125
+msgid "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
+msgstr "  - Tastenkombinationen erreichen das fokussierte Fenster und verfehlen native Wayland-Fenster; verwenden Sie --finalize."
 
-#: src/main.py:95
+#: src/main.py:117
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start."
 msgstr "  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu starten."
 
-#: src/main.py:96
+#: src/main.py:118
 #, python-brace-format
-msgid ""
-"  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
-"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
-" stop early."
-msgstr ""
-"  - Stoppt und kopiert sich nach {timeout_ms} ms Stille von selbst, oder "
-"sagen Sie „{stop_phrase}“ / drücken Sie {hotkey} / führen Sie „vosk-cli-"
-"dictation --finalize“ aus, um vorzeitig zu stoppen."
+msgid "  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early."
+msgstr "  - Stoppt und kopiert sich nach {timeout_ms} ms Stille von selbst, oder sagen Sie „{stop_phrase}“ / drücken Sie {hotkey} / führen Sie „vosk-cli-dictation --finalize“ aus, um vorzeitig zu stoppen."
 
-#: src/main.py:101
+#: src/main.py:123
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
-msgstr ""
-"  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu "
-"starten/stoppen."
+msgstr "  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu starten/stoppen."
 
-#: src/main.py:102
+#: src/main.py:124
 #, python-brace-format
-msgid ""
-"  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
-"--finalize' to stop and copy."
-msgstr ""
-"  - Sagen Sie „{stop_phrase}“, drücken Sie {hotkey}, oder führen Sie "
-"„vosk-cli-dictation --finalize“ aus, um zu stoppen und zu kopieren."
+msgid "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
+msgstr "  - Sagen Sie „{stop_phrase}“, drücken Sie {hotkey}, oder führen Sie „vosk-cli-dictation --finalize“ aus, um zu stoppen und zu kopieren."
 
-#: src/main.py:108
+#: src/main.py:130
 #, python-brace-format
 msgid ""
 "\n"
@@ -321,11 +293,11 @@ msgstr ""
 "\n"
 "{style}  Manuelle Befehle:{reset}"
 
-#: src/main.py:109
+#: src/main.py:131
 msgid "  - '/cancel', '/delete-word', '/nl'"
 msgstr "  - '/cancel', '/delete-word', '/nl'"
 
-#: src/main.py:114
+#: src/main.py:136
 #, python-brace-format
 msgid ""
 "\n"
@@ -334,11 +306,11 @@ msgstr ""
 "\n"
 "{style}  Satzzeichen-Befehle:{reset}"
 
-#: src/main.py:147
+#: src/main.py:169
 msgid "Press Ctrl+C to exit the program."
 msgstr "Drücken Sie Strg+C, um das Programm zu beenden."
 
-#: src/main.py:169
+#: src/main.py:191
 msgid ""
 "\n"
 "Program stopped cleanly."
@@ -346,187 +318,165 @@ msgstr ""
 "\n"
 "Programm sauber beendet."
 
-#: src/main.py:207
+#: src/main.py:229
 msgid "A Vosk-based command-line dictation tool."
 msgstr "Ein Diktierwerkzeug für die Befehlszeile auf Basis von Vosk."
 
-#: src/main.py:208
+#: src/main.py:230
 msgid "Force the interface and model language."
 msgstr "Sprache der Oberfläche und des Modells erzwingen."
 
-#: src/main.py:209
+#: src/main.py:231
 msgid "control an already running session"
 msgstr "eine bereits laufende Sitzung steuern"
 
-#: src/main.py:210
+#: src/main.py:232
 msgid "toggle dictation on/off"
 msgstr "Diktat ein-/ausschalten"
 
-#: src/main.py:211
+#: src/main.py:233
 msgid "start dictation"
 msgstr "Diktat starten"
 
-#: src/main.py:212
+#: src/main.py:234
 msgid "stop dictation, keep listening"
 msgstr "Diktat stoppen, Zuhören fortsetzen"
 
-#: src/main.py:213
+#: src/main.py:235
 msgid "finalize the session and copy the text"
 msgstr "Sitzung abschließen und den Text kopieren"
 
-#: src/main.py:214
+#: src/main.py:236
 msgid "discard the current session buffer"
 msgstr "den aktuellen Sitzungspuffer verwerfen"
 
-#: src/main.py:215
+#: src/main.py:237
 msgid "enter deep sleep (release the microphone)"
 msgstr "in den Tiefschlaf wechseln (Mikrofon freigeben)"
 
-#: src/main.py:216
+#: src/main.py:238
 msgid "leave deep sleep"
 msgstr "den Tiefschlaf verlassen"
 
-#: src/main.py:217
+#: src/main.py:239
 msgid "toggle deep sleep"
 msgstr "Tiefschlaf umschalten"
 
-#: src/main.py:218
+#: src/main.py:240
 msgid "print the current state"
 msgstr "den aktuellen Zustand anzeigen"
 
-#: src/main.py:219
+#: src/main.py:241
 msgid "stop the running session"
 msgstr "die laufende Sitzung beenden"
 
-#: src/main.py:220
+#: src/main.py:242
 msgid "print the full state of the running session as one JSON line"
-msgstr ""
-"gibt den vollständigen Zustand der laufenden Sitzung als eine JSON-Zeile "
-"aus"
+msgstr "gibt den vollständigen Zustand der laufenden Sitzung als eine JSON-Zeile aus"
 
-#: src/main.py:221
+#: src/main.py:243
 msgid "check the environment and exit"
 msgstr "die Umgebung prüfen und beenden"
 
-#: src/main.py:223
+#: src/main.py:245
 msgid "download the model for LANG (or the current language) and exit"
 msgstr "lädt das Modell für LANG (oder die aktuelle Sprache) herunter und beendet"
 
-#: src/main.py:225
+#: src/main.py:247
 msgid "with --download-model: small (default) or big (full) model"
-msgstr ""
-"mit --download-model: kleines (Standard) oder großes (vollständiges) "
-"Modell"
+msgstr "mit --download-model: kleines (Standard) oder großes (vollständiges) Modell"
 
-#: src/main.py:241
+#: src/main.py:263
 msgid "No running vosk-cli-dictation session."
 msgstr "Keine laufende vosk-cli-dictation-Sitzung."
 
-#: src/main.py:259
+#: src/main.py:283
 msgid "A vosk-cli-dictation session is already running (see --status)."
 msgstr "Es läuft bereits eine vosk-cli-dictation-Sitzung (siehe --status)."
 
-#: src/main.py:262
+#: src/main.py:286
 msgid "Checking external dependencies..."
 msgstr "Externe Abhängigkeiten werden geprüft..."
 
-#: src/main.py:264
+#: src/main.py:288
 msgid "No text-injection backend available for this session."
 msgstr "Kein Backend für Texteingabe für diese Sitzung verfügbar."
 
-#: src/main.py:265
-msgid ""
-"Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
-"also works."
-msgstr ""
-"Installieren Sie 'wtype' + 'wl-clipboard' (Wayland) oder 'xdotool' (X11);"
-" 'ydotool' funktioniert auch."
+#: src/main.py:289
+msgid "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."
+msgstr "Installieren Sie 'wtype' + 'wl-clipboard' (Wayland) oder 'xdotool' (X11); 'ydotool' funktioniert auch."
 
-#: src/main.py:268
+#: src/main.py:292
 msgid "'paplay' not found. Sound notifications will be disabled."
 msgstr "'paplay' nicht gefunden. Tonbenachrichtigungen werden deaktiviert."
 
-#: src/main.py:269
+#: src/main.py:293
 msgid "Dependencies checked."
 msgstr "Abhängigkeiten geprüft."
 
-#: src/main.py:271
+#: src/main.py:295
 #, python-brace-format
 msgid "Attempting to load model for language: {lang}"
 msgstr "Versuch, das Modell für die Sprache zu laden: {lang}"
 
-#: src/main.py:278
+#: src/main.py:302
 #, python-brace-format
 msgid "Failed. Attempting to load default model: {model_name}"
 msgstr "Fehlgeschlagen. Versuch, das Standardmodell zu laden: {model_name}"
 
-#: src/main.py:282
+#: src/main.py:306
 #, python-brace-format
-msgid ""
-"No speech recognition model could be loaded. Download the small model for"
-" '{lang}' now? [y/N] "
-msgstr ""
-"Es konnte kein Spracherkennungsmodell geladen werden. Jetzt das kleine "
-"Modell für '{lang}' herunterladen? [j/N] "
+msgid "No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] "
+msgstr "Es konnte kein Spracherkennungsmodell geladen werden. Jetzt das kleine Modell für '{lang}' herunterladen? [j/N] "
 
-#: src/main.py:289
+#: src/main.py:313
 msgid "No speech recognition model could be loaded."
 msgstr "Es konnte kein Spracherkennungsmodell geladen werden."
 
-#: src/main.py:290
+#: src/main.py:314
 #, python-brace-format
 msgid "Run 'vosk-cli-dictation --download-model {lang}' to download one."
-msgstr ""
-"Führen Sie „vosk-cli-dictation --download-model {lang}“ aus, um eines "
-"herunterzuladen."
+msgstr "Führen Sie „vosk-cli-dictation --download-model {lang}“ aus, um eines herunterzuladen."
 
-#: src/main.py:291
+#: src/main.py:315
 msgid "Please check the model paths and integrity in your config.yaml file."
-msgstr ""
-"Bitte überprüfen Sie die Modellpfade und deren Integrität in Ihrer config"
-".yaml-Datei."
+msgstr "Bitte überprüfen Sie die Modellpfade und deren Integrität in Ihrer config.yaml-Datei."
 
-#: src/main.py:353
+#: src/main.py:381
 #, python-brace-format
 msgid "Control socket: {path}"
 msgstr "Steuerungs-Socket: {path}"
 
-#: src/main.py:355
+#: src/main.py:383
 #, python-brace-format
 msgid "Could not open the control socket ({err}); CLI subcommands disabled."
-msgstr ""
-"Steuerungs-Socket konnte nicht geöffnet werden ({err}); CLI-Unterbefehle "
-"deaktiviert."
+msgstr "Steuerungs-Socket konnte nicht geöffnet werden ({err}); CLI-Unterbefehle deaktiviert."
 
-#: src/main.py:375
+#: src/main.py:403
 #, python-brace-format
 msgid "Model directory: {path}"
 msgstr "Modellverzeichnis: {path}"
 
-#: src/main.py:383
+#: src/main.py:411
 #, python-brace-format
-msgid ""
-"Your config.yaml predates newer options (schema {current}); see the "
-"manual for what changed. File: {path}"
-msgstr ""
-"Ihre config.yaml stammt von vor neueren Optionen (Schema {current}); im "
-"Handbuch steht, was sich geändert hat. Datei: {path}"
+msgid "Your config.yaml predates newer options (schema {current}); see the manual for what changed. File: {path}"
+msgstr "Ihre config.yaml stammt von vor neueren Optionen (Schema {current}); im Handbuch steht, was sich geändert hat. Datei: {path}"
 
-#: src/main.py:388
+#: src/main.py:416
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr "Das Skript ist bereit. Aktuelles Modell: {model_name}"
 
-#: src/main.py:399
+#: src/main.py:428
 #, python-brace-format
 msgid "The {name} thread stopped; ending the session."
 msgstr "Der {name}-Thread wurde beendet; die Sitzung wird beendet."
 
-#: src/main.py:409
+#: src/main.py:438
 msgid "Control queue full; command ignored."
 msgstr "Steuerungswarteschlange voll; Befehl ignoriert."
 
-#: src/main.py:414
+#: src/main.py:443
 msgid ""
 "\n"
 "Stop request received. Shutting down..."
@@ -556,12 +506,8 @@ msgstr "{url} wird heruntergeladen ({size:.0f} MB)..."
 
 #: src/model_download.py:132
 #, python-brace-format
-msgid ""
-"Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB "
-"needed."
-msgstr ""
-"Nicht genug Speicherplatz in {path}: {free:.0f} MB frei, {needed:.0f} MB "
-"nötig."
+msgid "Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed."
+msgstr "Nicht genug Speicherplatz in {path}: {free:.0f} MB frei, {needed:.0f} MB nötig."
 
 #: src/model_download.py:141
 #, python-brace-format
@@ -581,73 +527,63 @@ msgstr "Unerwarteter Archivaufbau; Abbruch."
 msgid "Model installed: {path}"
 msgstr "Modell installiert: {path}"
 
-#: src/recognition.py:122
+#: src/recognition.py:108
+msgid "Text queue full; the UI thread is not consuming. Dropping a result."
+msgstr "Textwarteschlange voll; der UI-Thread verarbeitet nicht. Ergebnis wird verworfen."
+
+#: src/recognition.py:140
 msgid "No model found for"
 msgstr "Kein Modell gefunden für"
 
-#: src/recognition.py:123
+#: src/recognition.py:141
 msgid "Searched:"
 msgstr "Durchsucht:"
 
-#: src/recognition.py:126
+#: src/recognition.py:144
 msgid "Download Vosk models from:"
 msgstr "Vosk-Modelle herunterladen unter:"
 
-#: src/recognition.py:127
+#: src/recognition.py:145
 msgid "Or run:"
 msgstr "Oder führen Sie aus:"
 
-#: src/recognition.py:134
+#: src/recognition.py:152
 msgid "Error: Model folder not found:"
 msgstr "Fehler: Modellordner nicht gefunden:"
 
-#: src/recognition.py:135
+#: src/recognition.py:153
 msgid "Please check your config.yaml and ensure the model is unzipped."
-msgstr ""
-"Bitte überprüfen Sie Ihre config.yaml und stellen Sie sicher, dass das "
-"Modell entpackt ist."
+msgstr "Bitte überprüfen Sie Ihre config.yaml und stellen Sie sicher, dass das Modell entpackt ist."
 
-#: src/recognition.py:142
+#: src/recognition.py:160
 msgid "Model loaded successfully:"
 msgstr "Modell erfolgreich geladen:"
 
-#: src/recognition.py:145
+#: src/recognition.py:163
 #, python-brace-format
 msgid "Fatal error while loading model '{model_name}': {error}"
 msgstr "Schwerwiegender Fehler beim Laden des Modells '{model_name}': {error}"
 
-#: src/recognition.py:210 src/recognition.py:366
+#: src/recognition.py:232 src/recognition.py:441
 msgid "[In progress]"
 msgstr "[Läuft]"
 
-#: src/recognition.py:458
+#: src/recognition.py:538
 #, python-brace-format
 msgid "Decoding is slower than real time (RTF {rtf}); latency may drift."
-msgstr ""
-"Die Dekodierung ist langsamer als Echtzeit (RTF {rtf}); die Latenz kann "
-"driften."
+msgstr "Die Dekodierung ist langsamer als Echtzeit (RTF {rtf}); die Latenz kann driften."
 
-#: src/recognition.py:512
-msgid "Text queue full; the UI thread is not consuming. Dropping a result."
-msgstr ""
-"Textwarteschlange voll; der UI-Thread verarbeitet nicht. Ergebnis wird "
-"verworfen."
-
-#: src/recognition.py:565
+#: src/recognition.py:642
 msgid "Malformed decoder output captured:"
 msgstr "Fehlerhafte Decoder-Ausgabe erfasst:"
 
-#: src/recognition.py:572
+#: src/recognition.py:649
 msgid "Recognition error on a frame (recovering):"
 msgstr "Erkennungsfehler bei einem Frame (Wiederherstellung läuft):"
 
-#: src/recognition.py:577
-msgid ""
-"The recognition engine is not recovering; ending the session. Please "
-"restart the tool."
-msgstr ""
-"Die Spracherkennung erholt sich nicht; die Sitzung wird beendet. Bitte "
-"starten Sie das Werkzeug neu."
+#: src/recognition.py:654
+msgid "The recognition engine is not recovering; ending the session. Please restart the tool."
+msgstr "Die Spracherkennung erholt sich nicht; die Sitzung wird beendet. Bitte starten Sie das Werkzeug neu."
 
 #: src/system_control.py:144
 #, python-brace-format
@@ -656,9 +592,7 @@ msgstr "'{tool}' hat das Zeitlimit überschritten; Rückfall wird verwendet."
 
 #: src/system_control.py:417
 msgid "Clipboard holds non-text content; it will not be restored."
-msgstr ""
-"Die Zwischenablage enthält nicht-textuellen Inhalt; er wird nicht "
-"wiederhergestellt."
+msgstr "Die Zwischenablage enthält nicht-textuellen Inhalt; er wird nicht wiederhergestellt."
 
 #: src/system_control.py:420
 msgid "Could not write to the clipboard."
@@ -666,291 +600,391 @@ msgstr "In die Zwischenablage konnte nicht geschrieben werden."
 
 #: src/system_control.py:424
 msgid "Clipboard did not take the text in time; skipping paste."
-msgstr ""
-"Die Zwischenablage hat den Text nicht rechtzeitig übernommen; Einfügen "
-"übersprungen."
+msgstr "Die Zwischenablage hat den Text nicht rechtzeitig übernommen; Einfügen übersprungen."
 
-#: src/ui.py:74
+#: src/ui.py:81
 msgid "Waking from sleep; recording started."
 msgstr "Aufwachen aus dem Ruhemodus; Aufnahme gestartet."
 
-#: src/ui.py:76
+#: src/ui.py:83
 msgid "Recording started."
 msgstr "Aufnahme gestartet."
 
-#: src/ui.py:89
+#: src/ui.py:96
 msgid "Recording paused."
 msgstr "Aufnahme pausiert."
 
-#: src/ui.py:119
+#: src/ui.py:126
 msgid "Clipboard unavailable — session text below:"
 msgstr "Zwischenablage nicht verfügbar — Sitzungstext unten:"
 
-#: src/ui.py:121
+#: src/ui.py:128
 msgid "Recording finished. Text copied."
 msgstr "Aufnahme beendet. Text kopiert."
 
-#: src/ui.py:122
+#: src/ui.py:129
 msgid "Recording finished. Clipboard unavailable — text printed above."
 msgstr "Aufnahme beendet. Zwischenablage nicht verfügbar — Text oben angezeigt."
 
-#: src/ui.py:136
+#: src/ui.py:143
 msgid "Sleep mode disabled — listening resumed."
 msgstr "Ruhemodus deaktiviert — Zuhören fortgesetzt."
 
-#: src/ui.py:150
+#: src/ui.py:157
 msgid "Sleep mode enabled — the microphone is released."
 msgstr "Ruhemodus aktiviert — das Mikrofon wird freigegeben."
 
-#: src/ui.py:164
+#: src/ui.py:171
 msgid "Microphone asleep — Alt+W or --wake to resume."
 msgstr "Mikrofon im Ruhemodus — Alt+W oder --wake zum Fortsetzen."
 
-#: src/ui.py:182
+#: src/ui.py:189
 msgid "Session canceled."
 msgstr "Sitzung abgebrochen."
 
-#: src/ui.py:190
+#: src/ui.py:197
 msgid "Last word deleted (simulation)."
 msgstr "Letztes Wort gelöscht (Simulation)."
 
-#: src/ui.py:192
+#: src/ui.py:199
 msgid "No text to modify."
 msgstr "Kein Text zum Ändern."
 
-#: src/ui.py:201
+#: src/ui.py:208
 msgid "New paragraph inserted."
 msgstr "Neuer Absatz eingefügt."
 
-#: src/ui.py:205
+#: src/ui.py:212
 msgid "New paragraph added to buffer."
 msgstr "Neuer Absatz zum Puffer hinzugefügt."
 
-#: src/ui.py:207
+#: src/ui.py:214
 msgid "Unknown command:"
 msgstr "Unbekannter Befehl:"
 
-#: src/ui.py:217
-msgid ""
-"Heard the stop phrase but confidence was low. Repeat it, or use the stop "
-"hotkey / --finalize."
-msgstr ""
-"Stoppwort gehört, aber die Konfidenz war niedrig. Wiederholen Sie es, "
-"oder verwenden Sie die Stopp-Taste / --finalize."
+#: src/ui.py:224
+msgid "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
+msgstr "Stoppwort gehört, aber die Konfidenz war niedrig. Wiederholen Sie es, oder verwenden Sie die Stopp-Taste / --finalize."
 
-#: src/ui.py:236
+#: src/ui.py:243
 msgid "Warning: xdotool failed. Switching to log-only mode."
 msgstr "Achtung: xdotool ist fehlgeschlagen. Wechsel in den reinen Protokollmodus."
 
-#: src/ui.py:242
+#: src/ui.py:249
 msgid "Typed:"
 msgstr "Getippt:"
 
-#: src/ui.py:245
+#: src/ui.py:252
 msgid "[Degraded Mode] Added:"
 msgstr "[Eingeschränkter Modus] Hinzugefügt:"
 
-#: src/ui.py:321
+#: src/ui.py:349
 msgid "Stopping user interface..."
 msgstr "Benutzeroberfläche wird beendet..."
+
+#: src/refine/control.py:51
+msgid "faster-whisper is not installed in this dictation (pip install faster-whisper)"
+msgstr "faster-whisper ist in diesem Diktat nicht installiert (pip install faster-whisper)"
+
+#: src/refine/control.py:53
+msgid "device: cuda is set but no GPU is detected; use device: auto or cpu"
+msgstr "device: cuda ist gesetzt, aber keine GPU erkannt; verwenden Sie device: auto oder cpu"
+
+#: src/refine/control.py:55
+#, python-brace-format
+msgid "device: cuda is set but {lib} cannot be loaded; install it ({remedy}) or use device: cpu"
+msgstr "device: cuda ist gesetzt, aber {lib} lässt sich nicht laden; installieren Sie sie ({remedy}) oder verwenden Sie device: cpu"
+
+#: src/refine/control.py:58
+#, python-brace-format
+msgid "unknown Whisper size: {size}"
+msgstr "unbekannte Whisper-Größe: {size}"
+
+#: src/refine/control.py:60
+#, python-brace-format
+msgid "cannot load the Whisper model ({detail})"
+msgstr "Das Whisper-Modell lässt sich nicht laden ({detail})"
+
+#: src/refine/control.py:67
+msgid "Refinement is off: no Whisper size keeps up on a processor. Choose one in refine.model or in the icon menu."
+msgstr "Die Verfeinerung ist aus: Keine Whisper-Größe hält auf einem Prozessor Schritt. Wählen Sie eine in refine.model oder im Menü des Symbols."
+
+#: src/refine/control.py:68
+msgid "refine.model is not a known Whisper size; refinement is off."
+msgstr "refine.model ist keine bekannte Whisper-Größe; die Verfeinerung ist aus."
+
+#: src/refine/control.py:100
+#, python-brace-format
+msgid "Refinement failed, typing the Vosk text: {error}"
+msgstr "Verfeinerung fehlgeschlagen, der Text von Vosk wird getippt: {error}"
+
+#: src/refine/control.py:162
+#, python-brace-format
+msgid "Downloading the Whisper {size} model (first use, kept in {path})..."
+msgstr "Das Whisper-Modell {size} wird heruntergeladen (erster Gebrauch, gespeichert in {path})..."
+
+#: src/refine/control.py:166
+#, python-brace-format
+msgid "Loading the Whisper {size} model..."
+msgstr "Das Whisper-Modell {size} wird geladen..."
+
+#: src/refine/control.py:175
+#, python-brace-format
+msgid "Refinement change failed, keeping the current setting: {error}"
+msgstr "Änderung der Verfeinerung fehlgeschlagen, die aktuelle Einstellung bleibt: {error}"
+
+#: src/refine/control.py:183
+#, python-brace-format
+msgid "Refinement ready: {spec} on {device}."
+msgstr "Verfeinerung bereit: {spec} auf {device}."
+
+#: src/refine/control.py:187
+#, python-brace-format
+msgid "A GPU is present but {lib} cannot be loaded; using the processor ({remedy})."
+msgstr "Eine GPU ist vorhanden, aber {lib} lässt sich nicht laden; der Prozessor wird verwendet ({remedy})."
+
+#: src/refine/control.py:231
+msgid "Engine"
+msgstr "Engine"
+
+#: src/refine/control.py:233
+msgid "Note"
+msgstr "Hinweis"
+
+#: src/refine/control.py:238
+msgid "missing (pip install faster-whisper)"
+msgstr "fehlt (pip install faster-whisper)"
+
+#: src/refine/control.py:238
+msgid "not installed (optional)"
+msgstr "nicht installiert (optional)"
+
+#: src/refine/control.py:246
+#, python-brace-format
+msgid "GPU present but {lib} cannot be loaded ({remedy})"
+msgstr "GPU vorhanden, aber {lib} lässt sich nicht laden ({remedy})"
+
+#: src/refine/control.py:249
+msgid "no GPU detected"
+msgstr "keine GPU erkannt"
+
+#: src/refine/control.py:250
+msgid "Hardware"
+msgstr "Hardware"
+
+#: src/refine/control.py:252
+msgid "Models directory"
+msgstr "Modellordner"
+
+#: src/refine/control.py:253
+msgid "no model yet"
+msgstr "noch kein Modell"
+
+#: src/refine/control.py:254
+msgid "Typing delay limit"
+msgstr "Frist bis zum Rückfall auf Vosk"
 
 #: tray/vosk_cli_dictation_tray/app.py:43
 msgid "The icon is already running."
 msgstr "Das Symbol läuft bereits."
 
 #: tray/vosk_cli_dictation_tray/app.py:48
-msgid ""
-"No notification area found. On GNOME, enable the 'AppIndicator and "
-"KStatusNotifierItem Support' extension; desktop shortcuts on the control "
-"socket keep working."
-msgstr ""
-"Kein Benachrichtigungsbereich gefunden. Aktivieren Sie unter GNOME die "
-"Erweiterung „AppIndicator and KStatusNotifierItem Support“; die "
-"Tastenkürzel des Desktops über den Steuer-Socket funktionieren weiterhin."
+msgid "No notification area found. On GNOME, enable the 'AppIndicator and KStatusNotifierItem Support' extension; desktop shortcuts on the control socket keep working."
+msgstr "Kein Benachrichtigungsbereich gefunden. Aktivieren Sie unter GNOME die Erweiterung „AppIndicator and KStatusNotifierItem Support“; die Tastenkürzel des Desktops über den Steuer-Socket funktionieren weiterhin."
 
-#: tray/vosk_cli_dictation_tray/tray.py:96
+#: tray/vosk_cli_dictation_tray/tray.py:97
 msgid "French"
 msgstr "Französisch"
 
-#: tray/vosk_cli_dictation_tray/tray.py:96
+#: tray/vosk_cli_dictation_tray/tray.py:97
 msgid "English"
 msgstr "Englisch"
 
-#: tray/vosk_cli_dictation_tray/tray.py:97
+#: tray/vosk_cli_dictation_tray/tray.py:98
 msgid "German"
 msgstr "Deutsch"
 
-#: tray/vosk_cli_dictation_tray/tray.py:97
+#: tray/vosk_cli_dictation_tray/tray.py:98
 msgid "Spanish"
 msgstr "Spanisch"
 
-#: tray/vosk_cli_dictation_tray/tray.py:101
+#: tray/vosk_cli_dictation_tray/tray.py:102
 msgid "Dictating"
 msgstr "Diktat"
 
-#: tray/vosk_cli_dictation_tray/tray.py:101
+#: tray/vosk_cli_dictation_tray/tray.py:102
 msgid "Listening"
 msgstr "Zuhören"
 
-#: tray/vosk_cli_dictation_tray/tray.py:102
+#: tray/vosk_cli_dictation_tray/tray.py:103
 msgid "Deep sleep"
 msgstr "Tiefschlaf"
 
-#: tray/vosk_cli_dictation_tray/tray.py:108
+#: tray/vosk_cli_dictation_tray/tray.py:109
 msgid "Vosk full"
 msgstr "Vosk vollständig"
 
-#: tray/vosk_cli_dictation_tray/tray.py:108
+#: tray/vosk_cli_dictation_tray/tray.py:109
 msgid "Vosk light"
 msgstr "Vosk leicht"
 
-#: tray/vosk_cli_dictation_tray/tray.py:117
+#: tray/vosk_cli_dictation_tray/tray.py:118
 msgid "Dictation not running"
 msgstr "Diktat nicht gestartet"
 
-#: tray/vosk_cli_dictation_tray/tray.py:124
+#: tray/vosk_cli_dictation_tray/tray.py:125
 #, python-brace-format
 msgid "to download, {size}"
 msgstr "zum Herunterladen, {size}"
 
-#: tray/vosk_cli_dictation_tray/tray.py:125
+#: tray/vosk_cli_dictation_tray/tray.py:126
 msgid "to download"
 msgstr "zum Herunterladen"
 
-#: tray/vosk_cli_dictation_tray/tray.py:135
+#: tray/vosk_cli_dictation_tray/tray.py:136
 #, python-brace-format
 msgid "Follow the system ({language})"
 msgstr "Dem System folgen ({language})"
 
-#: tray/vosk_cli_dictation_tray/tray.py:145
+#: tray/vosk_cli_dictation_tray/tray.py:146
 msgid "Light model"
 msgstr "Leichtes Modell"
 
-#: tray/vosk_cli_dictation_tray/tray.py:145
+#: tray/vosk_cli_dictation_tray/tray.py:146
 msgid "Full model"
 msgstr "Vollständiges Modell"
 
-#: tray/vosk_cli_dictation_tray/tray.py:150
+#: tray/vosk_cli_dictation_tray/tray.py:151
 msgid "Revert to the configuration"
 msgstr "Zur Konfiguration zurückkehren"
 
-#: tray/vosk_cli_dictation_tray/tray.py:151
+#: tray/vosk_cli_dictation_tray/tray.py:152
 msgid "Launch the icon at login"
 msgstr "Symbol beim Anmelden starten"
 
-#: tray/vosk_cli_dictation_tray/tray.py:152
+#: tray/vosk_cli_dictation_tray/tray.py:153
 msgid "Quit the icon"
 msgstr "Symbol beenden"
 
-#: tray/vosk_cli_dictation_tray/tray.py:176
+#: tray/vosk_cli_dictation_tray/tray.py:178
 msgid "Loading model…"
 msgstr "Modell wird geladen…"
 
-#: tray/vosk_cli_dictation_tray/tray.py:185
+#: tray/vosk_cli_dictation_tray/tray.py:187
 msgid "Turn dictation off"
 msgstr "Diktat ausschalten"
 
-#: tray/vosk_cli_dictation_tray/tray.py:186
+#: tray/vosk_cli_dictation_tray/tray.py:188
 msgid "Turn dictation on"
 msgstr "Diktat einschalten"
 
-#: tray/vosk_cli_dictation_tray/tray.py:187
+#: tray/vosk_cli_dictation_tray/tray.py:189
 msgid "Leave deep sleep"
 msgstr "Tiefschlaf verlassen"
 
-#: tray/vosk_cli_dictation_tray/tray.py:187
+#: tray/vosk_cli_dictation_tray/tray.py:189
 msgid "Enter deep sleep"
 msgstr "In den Tiefschlaf wechseln"
 
-#: tray/vosk_cli_dictation_tray/tray.py:188
+#: tray/vosk_cli_dictation_tray/tray.py:190
 msgid "Finish and copy the text"
 msgstr "Beenden und Text kopieren"
 
-#: tray/vosk_cli_dictation_tray/tray.py:189
+#: tray/vosk_cli_dictation_tray/tray.py:191
 msgid "Cancel the session"
 msgstr "Sitzung abbrechen"
 
-#: tray/vosk_cli_dictation_tray/tray.py:208
-msgid "Refinement"
-msgstr "Verfeinerung"
-
-#: tray/vosk_cli_dictation_tray/tray.py:211
+#: tray/vosk_cli_dictation_tray/tray.py:213
 msgid "Correction"
 msgstr "Korrektur"
 
-#: tray/vosk_cli_dictation_tray/tray.py:215
+#: tray/vosk_cli_dictation_tray/tray.py:217
 msgid "Quit dictation"
 msgstr "Diktat beenden"
 
-#: tray/vosk_cli_dictation_tray/tray.py:215
+#: tray/vosk_cli_dictation_tray/tray.py:217
 msgid "Launch dictation"
 msgstr "Diktat starten"
 
-#: tray/vosk_cli_dictation_tray/tray.py:220
+#: tray/vosk_cli_dictation_tray/tray.py:222
 msgid "None"
 msgstr "Keine"
 
-#: tray/vosk_cli_dictation_tray/tray.py:238
+#: tray/vosk_cli_dictation_tray/tray.py:240
 msgid "not available in this dictation"
 msgstr "in diesem Diktat nicht verfügbar"
 
-#: tray/vosk_cli_dictation_tray/tray.py:265
+#: tray/vosk_cli_dictation_tray/tray.py:267
 #, python-brace-format
 msgid "Dictation error: {error}"
 msgstr "Diktatfehler: {error}"
 
-#: tray/vosk_cli_dictation_tray/tray.py:310
+#: tray/vosk_cli_dictation_tray/tray.py:279
+#, python-brace-format
+msgid "Downloading the Whisper {size} model (first use, this can take a few minutes)..."
+msgstr "Das Whisper-Modell {size} wird heruntergeladen (erster Gebrauch, das kann einige Minuten dauern)..."
+
+#: tray/vosk_cli_dictation_tray/tray.py:281
+#, python-brace-format
+msgid "The Whisper {size} model is ready."
+msgstr "Das Whisper-Modell {size} ist bereit."
+
+#: tray/vosk_cli_dictation_tray/tray.py:326
 msgid "The dictation does not answer."
 msgstr "Das Diktat antwortet nicht."
 
-#: tray/vosk_cli_dictation_tray/tray.py:313
+#: tray/vosk_cli_dictation_tray/tray.py:329
 msgid "A model is loading, try again in a moment."
 msgstr "Ein Modell wird geladen, versuchen Sie es gleich noch einmal."
 
-#: tray/vosk_cli_dictation_tray/tray.py:314
+#: tray/vosk_cli_dictation_tray/tray.py:330
 msgid "No model is installed for this choice."
 msgstr "Für diese Auswahl ist kein Modell installiert."
 
-#: tray/vosk_cli_dictation_tray/tray.py:315
+#: tray/vosk_cli_dictation_tray/tray.py:331
+msgid "This choice is not available in this dictation."
+msgstr "Diese Auswahl ist in diesem Diktat nicht verfügbar."
+
+#: tray/vosk_cli_dictation_tray/tray.py:332
 #, python-brace-format
 msgid "The dictation refused the request ({reason})."
 msgstr "Das Diktat hat die Anfrage abgelehnt ({reason})."
 
-#: tray/vosk_cli_dictation_tray/tray.py:324
-#: tray/vosk_cli_dictation_tray/tray.py:338
+#: tray/vosk_cli_dictation_tray/tray.py:341
+#: tray/vosk_cli_dictation_tray/tray.py:355
 msgid "The dictation program was not found."
 msgstr "Das Diktatprogramm wurde nicht gefunden."
 
-#: tray/vosk_cli_dictation_tray/tray.py:329
+#: tray/vosk_cli_dictation_tray/tray.py:346
 #, python-brace-format
 msgid "Could not launch the dictation: {error}"
 msgstr "Das Diktat konnte nicht gestartet werden: {error}"
 
-#: tray/vosk_cli_dictation_tray/tray.py:334
+#: tray/vosk_cli_dictation_tray/tray.py:351
 msgid "A model download is already running."
 msgstr "Ein Modelldownload läuft bereits."
 
-#: tray/vosk_cli_dictation_tray/tray.py:356
+#: tray/vosk_cli_dictation_tray/tray.py:373
 #, python-brace-format
 msgid "Downloading the model ({size}, {language})…"
 msgstr "Das Modell ({size}, {language}) wird heruntergeladen…"
 
-#: tray/vosk_cli_dictation_tray/tray.py:357
-#: tray/vosk_cli_dictation_tray/tray.py:368
+#: tray/vosk_cli_dictation_tray/tray.py:374
+#: tray/vosk_cli_dictation_tray/tray.py:385
 msgid "full"
 msgstr "vollständig"
 
-#: tray/vosk_cli_dictation_tray/tray.py:357
-#: tray/vosk_cli_dictation_tray/tray.py:368
+#: tray/vosk_cli_dictation_tray/tray.py:374
+#: tray/vosk_cli_dictation_tray/tray.py:385
 msgid "light"
 msgstr "leicht"
 
-#: tray/vosk_cli_dictation_tray/tray.py:367
+#: tray/vosk_cli_dictation_tray/tray.py:384
 #, python-brace-format
 msgid "Model download finished ({size}, {language})."
 msgstr "Modelldownload abgeschlossen ({size}, {language})."
 
-#: tray/vosk_cli_dictation_tray/tray.py:371
+#: tray/vosk_cli_dictation_tray/tray.py:388
 #, python-brace-format
 msgid "Model download failed (see {log})."
 msgstr "Modelldownload fehlgeschlagen (siehe {log})."
@@ -959,8 +993,5 @@ msgstr "Modelldownload fehlgeschlagen (siehe {log})."
 #~ msgstr "Fehler im Erkennungs-Thread:"
 
 #~ msgid "download the small model for LANG (or the current language) and exit"
-#~ msgstr ""
-#~ "das kleine Modell für LANG (oder "
-#~ "die aktuelle Sprache) herunterladen und "
-#~ "beenden"
+#~ msgstr "das kleine Modell für LANG (oder die aktuelle Sprache) herunterladen und beenden"
 

@@ -13,8 +13,9 @@ from config.selection import SUPPORTED_LANGS, SYSTEM, clear_selection, resolve_l
 from src.i18n import get_translation, set_ui_language
 from src.runtime_state import runtime_state
 
-# Réglages de finition et de correction : aucun moteur n'existe encore.
-UNSUPPORTED_TOKENS = ("set-refine", "set-correction")
+# Aucun moteur de correction n'existe encore ; `set-refine` n'est refusé que
+# sans contrôleur de finition.
+UNSUPPORTED_TOKENS = ("set-correction",)
 
 
 def default_loader(path):
@@ -48,8 +49,10 @@ class EngineSwitch:
     """Contrôleur de la socket (`info`, `set-*`) et file d'échange du fil de
     reconnaissance. `loader(path)` rend l'objet modèle (un faux dans les tests)."""
 
-    def __init__(self, lang, folder, size="small", lang_source="config", loader=default_loader):
+    def __init__(self, lang, folder, size="small", lang_source="config", loader=default_loader,
+                 refine=None):
         self._loader = loader
+        self.refine = refine
         self._lock = threading.Lock()
         self._ready = None
         self._thread = None
@@ -64,6 +67,7 @@ class EngineSwitch:
 
     def info(self) -> dict:
         installed = config.installed_models()
+        extra = self.refine.info() if self.refine is not None else {}
         with self._lock:
             return {
                 "state": runtime_state.snapshot()["state"],
@@ -77,18 +81,20 @@ class EngineSwitch:
                 "refine_stats": runtime_state.snapshot()["refine"],
                 "device": None,
                 "correction": "none",
-                "loading": self.loading,
-                "last_error": self.last_error,
-            }
+                "loading": self.loading or bool(self.refine and self.refine.loading),
+                "last_error": self.last_error or (self.refine.last_error if self.refine else None),
+            } | extra
 
     def request(self, token: str, arg: str):
         """Prend une requête `set-*`. Rend None si elle est acceptée, sinon la
         raison du refus (le mot qui suit « ERR »)."""
-        if token in UNSUPPORTED_TOKENS:
+        if token in UNSUPPORTED_TOKENS or (token == "set-refine" and self.refine is None):
             return "unsupported"
         with self._lock:
-            if self.loading:
+            if self.loading or (self.refine is not None and self.refine.loading):
                 return "busy"
+        if token == "set-refine":
+            return self.refine.request(arg)
         if token == "set-lang":
             return self._request_lang(arg)
         if token == "set-model":
@@ -126,6 +132,8 @@ class EngineSwitch:
         if target is None:
             return "no-model"
         clear_selection()
+        if self.refine is not None:
+            self.refine.reset()
         return self._begin(target, source, lang, updates={})
 
     def _begin(self, target, lang_source, lang_choice, updates=None):

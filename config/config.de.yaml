@@ -92,6 +92,34 @@ sleep:
   #        Aufwecken.
   releases_device: true
 
+refine:
+  # Verfeinerung jeder Äußerung durch ein zweites neuronales Netz. Vosk
+  # zerlegt und zeigt den Text weiter beim Sprechen; ist eine Äußerung zu Ende,
+  # geht ihr Audio an faster-whisper (Paket vosk-cli-dictation-whisper oder
+  # „pip install faster-whisper“ in der Umgebung des Diktats), dessen Text mit
+  # Groß- und Kleinschreibung und Zeichensetzung den von Vosk vor dem Tippen
+  # ersetzt. Ein Befehlssatz (Stopp, Aufwecken) wird nie verfeinert.
+  # none (Standard): nichts ändert sich; whisper: Verfeinerung aktiv.
+  # Eine Wahl im Menü des Symbols oder per „set-refine“ wird gemerkt und hat
+  # Vorrang vor dieser Datei; der Eintrag „Zur Konfiguration zurückkehren“ löscht sie.
+  engine: none
+  # auto: large-v3-turbo, wenn eine GPU nutzbar ist, keine Verfeinerung auf
+  # einem Prozessor (keine Größe schafft dort unter 500 ms pro Äußerung, und
+  # tiny wie base verderben den Text). Sonst tiny, base, small, medium oder
+  # large-v3-turbo.
+  model: auto
+  # auto: cuda, wenn CTranslate2 eine GPU sieht und libcublas.so.12 geladen
+  # wird (Debian: apt install libcublas12 libcublaslt12), sonst cpu. cpu oder
+  # cuda erzwingen die Wahl; cuda ohne libcublas wird mit diesem Rezept abgelehnt.
+  device: auto
+  # auto: float16 auf cuda, int8 auf cpu. int8_float16 spart Grafikspeicher.
+  compute_type: auto
+  # Nach dieser Frist ab Ende der Äußerung wird der Text von Vosk unverändert
+  # getippt (--status und --diagnose zählen diese Rückfälle). Die Gewichte
+  # werden beim ersten Gebrauch nach ~/.local/share/vosk-cli-dictation/whisper-models
+  # geladen.
+  timeout_ms: 2000
+
 clipboard:
   # Die Zwischenablage des Benutzers nach dem Einfügen wiederherstellen.
   restore: true

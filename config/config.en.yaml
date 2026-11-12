@@ -85,6 +85,32 @@ sleep:
   # false: the stream is only paused, device kept open, faster wake.
   releases_device: true
 
+refine:
+  # Refining every utterance with a second neural network. Vosk keeps cutting
+  # and showing the text as you speak; when an utterance ends, its audio goes
+  # to faster-whisper (the vosk-cli-dictation-whisper package, or
+  # "pip install faster-whisper" in the dictation environment), and its text,
+  # with its capitals and punctuation, replaces Vosk's before typing. A command
+  # phrase (stop, wake) is never refined.
+  # none (default): nothing changes; whisper: refinement on.
+  # A choice made in the icon menu or by "set-refine" is remembered and wins over
+  # this file; the "Revert to the configuration" entry clears it.
+  engine: none
+  # auto: large-v3-turbo when a GPU is usable, no refinement on a processor
+  # (no size keeps up under 500 ms per utterance there, and tiny and base spoil
+  # the text). Otherwise tiny, base, small, medium or large-v3-turbo.
+  model: auto
+  # auto: cuda when CTranslate2 sees a GPU and libcublas.so.12 loads (Debian:
+  # apt install libcublas12 libcublaslt12), otherwise cpu. cpu or cuda force the
+  # choice; cuda without libcublas is refused with that remedy.
+  device: auto
+  # auto: float16 on cuda, int8 on cpu. int8_float16 saves video memory.
+  compute_type: auto
+  # Past this delay after the end of the utterance, Vosk's text is typed as is
+  # (--status and --diagnose count these fallbacks). Weights download on first
+  # use under ~/.local/share/vosk-cli-dictation/whisper-models.
+  timeout_ms: 2000
+
 clipboard:
   # Restore the user's clipboard after pasting.
   restore: true

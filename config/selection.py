@@ -12,7 +12,7 @@ import yaml
 
 SYSTEM = "system"
 SUPPORTED_LANGS = ("en", "fr", "de", "es")
-SELECTION_KEYS = ("lang", "model")
+SELECTION_KEYS = ("lang", "model", "refine")
 
 
 def state_dir() -> str:

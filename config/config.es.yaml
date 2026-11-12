@@ -88,6 +88,32 @@ sleep:
   #        despertar más rápido.
   releases_device: true
 
+refine:
+  # Refinado de cada enunciado con una segunda red neuronal. Vosk sigue
+  # cortando y mostrando el texto mientras hablas; cuando un enunciado termina,
+  # su audio va a faster-whisper (paquete vosk-cli-dictation-whisper, o
+  # «pip install faster-whisper» en el entorno del dictado), cuyo texto, con sus
+  # mayúsculas y su puntuación, sustituye al de Vosk antes de teclear. Una frase
+  # de orden (parada, despertar) nunca se refina.
+  # none (por defecto): nada cambia; whisper: refinado activo.
+  # La elección hecha en el menú del icono o con «set-refine» se recuerda y
+  # prevalece sobre este archivo; la entrada «Volver a la configuración» la borra.
+  engine: none
+  # auto: large-v3-turbo cuando hay una GPU utilizable, sin refinado en un
+  # procesador (ningún tamaño llega ahí por debajo de 500 ms por enunciado, y
+  # tiny y base estropean el texto). Si no, tiny, base, small, medium o large-v3-turbo.
+  model: auto
+  # auto: cuda si CTranslate2 ve una GPU y libcublas.so.12 se carga (Debian:
+  # apt install libcublas12 libcublaslt12), si no cpu. cpu o cuda fuerzan la
+  # elección; cuda sin libcublas se rechaza con ese remedio.
+  device: auto
+  # auto: float16 en cuda, int8 en cpu. int8_float16 ahorra memoria de vídeo.
+  compute_type: auto
+  # Pasado este plazo desde el final del enunciado, se teclea el texto de Vosk
+  # tal cual (--status y --diagnose cuentan estos retrocesos). Los pesos se
+  # descargan en el primer uso en ~/.local/share/vosk-cli-dictation/whisper-models.
+  timeout_ms: 2000
+
 clipboard:
   # Restaurar el portapapeles del usuario tras pegar.
   restore: true
