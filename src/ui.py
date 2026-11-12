@@ -35,6 +35,16 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
     last_low_conf_hint = [0.0]  # horodatage du dernier indice, pour le throttle
     last_sleep_reminder = [0.0]  # horodatage du dernier rappel « micro en veille »
+    ui_lang = config.current_lang
+
+    def refresh_language():
+        """Changement de langue à chaud (src/engine_switch.py) : le
+        TextProcessor, la phrase d'arrêt et le seuil suivent la nouvelle langue."""
+        nonlocal ui_lang, stop_tokens, conf_threshold
+        ui_lang = config.current_lang
+        processor.update_language(ui_lang)
+        stop_tokens = phrase_tokens(config.STOP_PHRASE)
+        conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
 
     def start_recording():
         nonlocal recording, full_text_log, xdotool_failed_once
@@ -237,6 +247,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
 
     try:
         while not stop_event.is_set():
+            if config.current_lang != ui_lang:
+                refresh_language()
             _ = get_translation()
             maybe_sleep_reminder()
             try:

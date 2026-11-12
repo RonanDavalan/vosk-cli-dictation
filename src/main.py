@@ -23,6 +23,7 @@ from src.recognition import load_model, recognition_thread, force_c_numeric_loca
 from src.ui import ui_thread
 from src.keyboard_listener import keyboard_listener_thread
 from src.text_processing import TextProcessor
+from src.engine_switch import EngineSwitch
 from src.control_socket import (
     start_control_server, send_control_command, instance_running, socket_path,
 )
@@ -313,9 +314,15 @@ def main():
     wake_event.set()
 
     processor = TextProcessor(config.current_lang)
+    loaded_entry = config.installed_model(loaded_model_name) or {}
+    switch = EngineSwitch(
+        config.current_lang, loaded_model_name,
+        loaded_entry.get('size', 'small'),
+        lang_source if config.current_lang == ui_lang else 'config',
+    )
 
     threads = [
-        threading.Thread(target=recognition_thread, args=(model, recognizer, audio_queue, text_queue, control_queue, stop_event, display_partials_event, wake_event)),
+        threading.Thread(target=recognition_thread, args=(model, recognizer, audio_queue, text_queue, control_queue, stop_event, display_partials_event, wake_event, switch)),
         threading.Thread(target=audio_capture_thread, args=(p, stream, audio_queue, stop_event, sleep_event, wake_event)),
         threading.Thread(target=keyboard_listener_thread, args=(control_queue, stop_event)),
         threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event, sleep_event, wake_event))
@@ -340,7 +347,7 @@ def main():
     control_server = None
     if config.data.get('control_socket', True):
         try:
-            control_server = start_control_server(control_queue, stop_event)
+            control_server = start_control_server(control_queue, stop_event, switch)
             print_status(_("Control socket: {path}").format(path=socket_path()), config.color_info)
         except OSError as e:
             print_status(_("Could not open the control socket ({err}); CLI subcommands disabled.").format(err=e), config.color_warning)

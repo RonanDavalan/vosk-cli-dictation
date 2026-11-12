@@ -187,7 +187,8 @@ def _target_mode(state: str) -> str:
 
 
 def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: queue.Queue,
-                       control_queue: queue.Queue, stop_event, display_partials_event, wake_event):
+                       control_queue: queue.Queue, stop_event, display_partials_event, wake_event,
+                       switch=None):
     """
     Décode l'audio et pilote la sémantique des commandes vocales.
 
@@ -201,6 +202,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
       pour ne pas réémettre la phrase.
     - En VEILLE : le thread attend sur wake_event ; au réveil il reconstruit
       le recognizer pour l'état courant.
+    - `switch` (src/engine_switch.py) : un modèle chargé en arrière-plan est
+      pris entre deux énoncés, jamais au milieu d'un énoncé.
     """
     _ = get_translation()
     last_partial_length = 0
@@ -236,9 +239,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # Mode silence — arrêt automatique en DICTÉE après silence_timeout_ms
     # sans résultat (partiel ou final) non vide, une fois qu'au moins un mot a
     # déjà été capté dans la session en cours (sinon une hésitation avant de
-    # parler finaliserait une session vide). Réglages figés au démarrage du
-    # thread : la langue ne change pas en cours de session
-    # (config.current_lang n'est fixé qu'au lancement, src/main.py).
+    # parler finaliserait une session vide). Réglages relus au point d'échange
+    # d'un modèle (swap_point), car la langue peut changer en cours de session.
     interaction_mode = config.interaction_mode
     silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
     last_dictation_result_ts = 0.0
@@ -345,7 +347,43 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         except Exception:
             return False
 
+    # Un partiel non vide veut dire qu'un énoncé est en cours.
+    utterance_open = False
+
+    def swap_point():
+        """Prend le modèle que `switch` a fini de charger, à condition qu'aucun
+        énoncé ne soit en cours. Les réglages qui dépendent de la langue sont
+        relus, les recognizers refaits sur le nouveau modèle."""
+        nonlocal model, recognizer, current_mode, stop_rec, pending_wake, pending_stop
+        nonlocal _, in_progress_label, conf_threshold, wake_tokens, wake_discard_ms
+        nonlocal stop_tokens, restricted_stop_enabled, interaction_mode, silence_timeout_s
+        if switch is None or utterance_open or not switch.has_ready():
+            return
+        engine = switch.take_ready()
+        switch.commit(engine)
+        model = engine.model
+        _ = get_translation()
+        in_progress_label = _("[In progress]")
+        conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+        wake_tokens = phrase_tokens(config.WAKE_PHRASE)
+        wake_discard_ms = config.recognition_setting('wake_discard_ms', 300)
+        stop_tokens = phrase_tokens(config.STOP_PHRASE)
+        restricted_stop_enabled = bool(
+            config.recognition_setting('restricted_stop_in_dictation', True))
+        interaction_mode = config.interaction_mode
+        silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
+        clear_partial()
+        pending_wake = False
+        pending_stop = False
+        current_mode = None
+        stop_rec = None
+        if wake_event.is_set():
+            # En VEILLE, la sortie de veille reconstruit tout pour l'état courant.
+            rebuild_for(runtime_state.state)
+            rebuild_stop_rec(runtime_state.state)
+
     while not stop_event.is_set():
+        swap_point()
         if not wake_event.is_set():
             if wake_event.wait(timeout=1.0):
                 clear_partial()
@@ -438,6 +476,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     continue
 
             if is_final:
+                utterance_open = False
                 result_dict = json.loads(recognizer.Result())
                 consecutive_decode_errors = 0
                 text = result_dict.get("text", "")
@@ -477,6 +516,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 partial_dict = json.loads(recognizer.PartialResult())
                 consecutive_decode_errors = 0
                 partial_text = partial_dict.get("partial", "").strip()
+                utterance_open = bool(partial_text)
 
                 if state == STATE_DICTATING and partial_text:
                     last_dictation_result_ts = time.monotonic()
