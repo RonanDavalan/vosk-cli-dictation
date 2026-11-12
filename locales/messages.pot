@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-12 14:21+0100\n"
+"POT-Creation-Date: 2026-11-12 18:44+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,12 +94,12 @@ msgstr ""
 msgid "Selected values (value, origin)"
 msgstr ""
 
-#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:134
+#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:145
 msgid "Language"
 msgstr ""
 
 #: src/diagnose.py:60 src/diagnose.py:63
-#: tray/vosk_cli_dictation_tray/tray.py:144
+#: tray/vosk_cli_dictation_tray/tray.py:155
 msgid "Model"
 msgstr ""
 
@@ -107,7 +107,7 @@ msgstr ""
 msgid "Selection file"
 msgstr ""
 
-#: src/diagnose.py:68 tray/vosk_cli_dictation_tray/tray.py:210
+#: src/diagnose.py:68 tray/vosk_cli_dictation_tray/tray.py:223
 msgid "Refinement"
 msgstr ""
 
@@ -878,152 +878,162 @@ msgstr ""
 msgid "to download"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:136
+#: tray/vosk_cli_dictation_tray/tray.py:131
+#, python-brace-format
+msgid "Memory after loading: about {size}"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:135
+#, python-brace-format
+msgid "Memory after loading: more than {size}, not advised under 8 GB of memory"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:147
 #, python-brace-format
 msgid "Follow the system ({language})"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:146
+#: tray/vosk_cli_dictation_tray/tray.py:158
 msgid "Light model"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:146
+#: tray/vosk_cli_dictation_tray/tray.py:158
 msgid "Full model"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:151
+#: tray/vosk_cli_dictation_tray/tray.py:164
 msgid "Revert to the configuration"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:152
+#: tray/vosk_cli_dictation_tray/tray.py:165
 msgid "Launch the icon at login"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:153
+#: tray/vosk_cli_dictation_tray/tray.py:166
 msgid "Quit the icon"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:178
+#: tray/vosk_cli_dictation_tray/tray.py:191
 msgid "Loading model…"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:187
+#: tray/vosk_cli_dictation_tray/tray.py:200
 msgid "Turn dictation off"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:188
+#: tray/vosk_cli_dictation_tray/tray.py:201
 msgid "Turn dictation on"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:189
+#: tray/vosk_cli_dictation_tray/tray.py:202
 msgid "Leave deep sleep"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:189
+#: tray/vosk_cli_dictation_tray/tray.py:202
 msgid "Enter deep sleep"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:190
+#: tray/vosk_cli_dictation_tray/tray.py:203
 msgid "Finish and copy the text"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:191
+#: tray/vosk_cli_dictation_tray/tray.py:204
 msgid "Cancel the session"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:213
+#: tray/vosk_cli_dictation_tray/tray.py:226
 msgid "Correction"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:217
+#: tray/vosk_cli_dictation_tray/tray.py:230
 msgid "Quit dictation"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:217
+#: tray/vosk_cli_dictation_tray/tray.py:230
 msgid "Launch dictation"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:222
+#: tray/vosk_cli_dictation_tray/tray.py:235
 msgid "None"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:240
+#: tray/vosk_cli_dictation_tray/tray.py:253
 msgid "not available in this dictation"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:267
+#: tray/vosk_cli_dictation_tray/tray.py:280
 #, python-brace-format
 msgid "Dictation error: {error}"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:279
+#: tray/vosk_cli_dictation_tray/tray.py:292
 #, python-brace-format
 msgid ""
 "Downloading the Whisper {size} model (first use, this can take a few "
 "minutes)..."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:281
+#: tray/vosk_cli_dictation_tray/tray.py:294
 #, python-brace-format
 msgid "The Whisper {size} model is ready."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:326
+#: tray/vosk_cli_dictation_tray/tray.py:339
 msgid "The dictation does not answer."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:329
+#: tray/vosk_cli_dictation_tray/tray.py:342
 msgid "A model is loading, try again in a moment."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:330
+#: tray/vosk_cli_dictation_tray/tray.py:343
 msgid "No model is installed for this choice."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:331
+#: tray/vosk_cli_dictation_tray/tray.py:344
 msgid "This choice is not available in this dictation."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:332
+#: tray/vosk_cli_dictation_tray/tray.py:345
 #, python-brace-format
 msgid "The dictation refused the request ({reason})."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:341
-#: tray/vosk_cli_dictation_tray/tray.py:355
+#: tray/vosk_cli_dictation_tray/tray.py:354
+#: tray/vosk_cli_dictation_tray/tray.py:368
 msgid "The dictation program was not found."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:346
+#: tray/vosk_cli_dictation_tray/tray.py:359
 #, python-brace-format
 msgid "Could not launch the dictation: {error}"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:351
+#: tray/vosk_cli_dictation_tray/tray.py:364
 msgid "A model download is already running."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:373
+#: tray/vosk_cli_dictation_tray/tray.py:386
 #, python-brace-format
 msgid "Downloading the model ({size}, {language})…"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:374
-#: tray/vosk_cli_dictation_tray/tray.py:385
+#: tray/vosk_cli_dictation_tray/tray.py:387
+#: tray/vosk_cli_dictation_tray/tray.py:398
 msgid "full"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:374
-#: tray/vosk_cli_dictation_tray/tray.py:385
+#: tray/vosk_cli_dictation_tray/tray.py:387
+#: tray/vosk_cli_dictation_tray/tray.py:398
 msgid "light"
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:384
+#: tray/vosk_cli_dictation_tray/tray.py:397
 #, python-brace-format
 msgid "Model download finished ({size}, {language})."
 msgstr ""
 
-#: tray/vosk_cli_dictation_tray/tray.py:388
+#: tray/vosk_cli_dictation_tray/tray.py:401
 #, python-brace-format
 msgid "Model download failed (see {log})."
 msgstr ""

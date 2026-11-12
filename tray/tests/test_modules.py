@@ -8,7 +8,7 @@ from vosk_cli_dictation_tray import autostart, launcher
 from vosk_cli_dictation_tray.client import parse_info, request
 from vosk_cli_dictation_tray.i18n import Translator, system_language
 from vosk_cli_dictation_tray.icons import icon_dir, icon_files, icon_name
-from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, format_size
+from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, MEMORY_MB, MEMORY_OVER_MB, format_size
 
 
 def test_parse_info():
@@ -109,3 +109,7 @@ def test_autostart_with_a_system_entry(tmp_path, monkeypatch):
 def test_exec_argument_quotes_reserved_characters():
     assert autostart._exec_argument("/opt/a b/python") == '"/opt/a b/python"'
     assert autostart._exec_argument("50%") == "50%%"
+
+
+def test_every_model_has_a_memory_figure():
+    assert set(MEMORY_MB) | set(MEMORY_OVER_MB) == set(ARCHIVE_BYTES)

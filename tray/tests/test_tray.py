@@ -201,6 +201,15 @@ def test_missing_model_size_uses_the_language_units(make):
     assert tray.a_lang["es"].text() == "Espagnol (à télécharger, 40 Mo)"
 
 
+def test_model_entries_carry_the_measured_memory_in_their_tooltip(make):
+    tray, _client, _ = make()
+    tray.on_info(info(lang="fr", models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
+    assert tray.a_model["small"].toolTip() == "Mémoire après chargement : environ 171 Mo"
+    assert tray.a_model["big"].toolTip() == "Mémoire après chargement : environ 3,3 Go"
+    tray.on_info(info(lang="en", models=[{"folder": "vosk-model-small-en-us-0.15", "size": "small"}]))
+    assert "more than 5.0 GB" in tray.a_model["big"].toolTip()
+
+
 def test_model_entries_and_choice(make):
     tray, client, _ = make()
     tray.on_info(info(models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))

@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from vosk_cli_dictation_tray import autostart, launcher, notifier
 from vosk_cli_dictation_tray.icons import icon_name, load_icon
-from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, format_size
+from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, MEMORY_MB, MEMORY_OVER_MB, format_size
 
 APP_TITLE = "vosk-cli-dictation"
 LANGS = ("fr", "en", "de", "es")
@@ -125,6 +125,17 @@ class DictationTray(QSystemTrayIcon):
         return self._t("to download, {size}").format(size=format_size(n, self._t.lang)) if n \
             else self._t("to download")
 
+    def _memory_tip(self, lang: str, size: str) -> str:
+        mb = MEMORY_MB.get((lang, size))
+        if mb:
+            return self._t("Memory after loading: about {size}").format(
+                size=format_size(mb * 1_000_000, self._t.lang))
+        mb = MEMORY_OVER_MB.get((lang, size))
+        if mb:
+            return self._t("Memory after loading: more than {size}, not advised under 8 GB of memory").format(
+                size=format_size(mb * 1_000_000, self._t.lang))
+        return ""
+
     def _refresh_texts(self) -> None:
         t, info = self._t, self.info
         installed = set(info.get("langs", [])) if info else set()
@@ -143,7 +154,9 @@ class DictationTray(QSystemTrayIcon):
 
         self.m_model.setTitle(t("Model"))
         have = {m.get("size") for m in (info or {}).get("models", [])}
+        self.m_model.setToolTipsVisible(True)
         for size, label in (("small", t("Light model")), ("big", t("Full model"))):
+            self.a_model[size].setToolTip(self._memory_tip(lang, size))
             self.a_model[size].setText(
                 label if (size in have or info is None)
                 else "{} ({})".format(label, self._missing_suffix(lang, size)))
