@@ -29,6 +29,7 @@ sleep: [...]
 clipboard: [...]
 injection: [...]
 language_settings: [...]
+refine: [...]
 hotkeys: [...]
 sound_file: "..."
 theme: [...]
@@ -212,6 +213,27 @@ interaction:
 -   **`silence_timeout_ms`** (entero, valor predeterminado `700`): retraso de silencio para el modo `silence`. Se puede sobrescribir por idioma en `language_settings.<lang>.silence_timeout_ms`, con el mismo patrón que `recognition.confidence_threshold`.
 
 En los tres modos, la frase de parada hablada y `--finalize` / `--cancel` siguen funcionando como red de seguridad — ningún modo elimina una forma existente de detener la sesión.
+
+### `refine`
+
+Refinar cada enunciado terminado con `faster-whisper` antes de teclearlo (véase el README, «Refinar cada enunciado con Whisper»). Nada cambia mientras `engine` valga `none`.
+
+```yaml
+refine:
+  engine: none
+  model: auto
+  device: auto
+  compute_type: auto
+  timeout_ms: 2000
+```
+
+-   **`engine`** (`none` | `whisper`, por defecto `none`): `whisper` activa el refinado. `faster-whisper` debe estar instalado en el entorno Python del dictado (`pip install faster-whisper`); `vosk-cli-dictation --diagnose` dice si lo está.
+-   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, por defecto `auto`): el tamaño de Whisper. `auto` da `large-v3-turbo` cuando sirve una tarjeta gráfica, y ningún refinado en un procesador, donde ningún tamaño se queda por debajo de 500 ms por enunciado. Los pesos se descargan en el primer uso en `~/.local/share/vosk-cli-dictation/whisper-models`.
+-   **`device`** (`auto` | `cpu` | `cuda`, por defecto `auto`): `auto` toma la tarjeta cuando CTranslate2 ve una y `libcublas.so.12` se carga (Debian y Ubuntu: `sudo apt install libcublas12 libcublaslt12`), el procesador si no. `cuda` sin la biblioteca se rechaza con ese remedio.
+-   **`compute_type`** (por defecto `auto`): `float16` en `cuda`, `int8` en `cpu`; `int8_float16` ahorra memoria de vídeo.
+-   **`timeout_ms`** (entero, por defecto `2000`): pasado este plazo desde el final de un enunciado, se teclea el texto de Vosk tal cual y se cuenta el retroceso (`--status`, `--diagnose`, `--info`).
+
+Un tamaño elegido en el menú del icono o con `set-refine` se recuerda en `selection.yaml` y prevalece sobre esta sección; «Volver a la configuración» lo borra.
 
 ### `hotkeys`
 

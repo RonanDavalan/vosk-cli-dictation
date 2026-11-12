@@ -86,6 +86,12 @@ def probe_device(requested: str = "auto") -> str:
         return "cpu"
 
 
+def cpu_threads() -> int:
+    """Sur processeur, un cœur reste à Vosk : son décodage doit tenir le temps
+    réel pendant que la finition travaille."""
+    return max(1, (os.cpu_count() or 2) - 1)
+
+
 def resolve_compute_type(requested: str, device: str) -> str:
     if requested and requested != "auto":
         return requested
@@ -120,7 +126,8 @@ class WhisperEngine(RefineEngine):
         try:
             self._model = WhisperModel(
                 self.size, device=self._device, compute_type=self.compute_type,
-                download_root=self._directory)
+                download_root=self._directory,
+                cpu_threads=cpu_threads() if self._device == "cpu" else 0)
         except Exception as e:
             raise RefineUnavailable("load-failed", f"{self.size}: {e}") from e
 

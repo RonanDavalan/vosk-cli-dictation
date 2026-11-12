@@ -68,7 +68,8 @@ führt die Aktion aus, gibt den resultierenden Zustand aus (`OK DICTÉE`,
 an Tastenkombinationen auf dem Desktop gebunden werden.
 
 **\--status**
-:   Geben Sie den aktuellen Zustand aus, ohne ihn zu ändern.
+:   Geben Sie den aktuellen Zustand aus, ohne ihn zu ändern. Ist eine Verfeinerung
+    gewählt, nennt eine zweite Zeile ihre Zähler.
 
 **\--info**
 :   Gibt den vollständigen Zustand der laufenden Sitzung in einer Zeile aus: `OK`,
@@ -93,7 +94,7 @@ an Tastenkombinationen auf dem Desktop gebunden werden.
 **\--stop**
 :   Beenden Sie die laufende Sitzung sauber.
 
-Drei weitere Anfragen werden direkt in den Socket geschrieben (zum Beispiel
+Vier weitere Anfragen werden direkt in den Socket geschrieben (zum Beispiel
 `printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). Sie ändern eine
 laufende Sitzung ohne Neustart:
 
@@ -106,11 +107,19 @@ laufende Sitzung ohne Neustart:
 :   Wechselt zu einem installierten Modellordner aus dem Feld `models` von
     **\--info**.
 
-`reset-selection`
-:   Vergisst die gespeicherte Auswahl und kehrt zu dem zurück, was `config.yaml`
-    oder die Systemsprache ergibt. Sie nimmt kein Argument.
+`set-refine` *none*|*whisper:GRÖSSE*
+:   Ändert die Verfeinerung jeder Äußerung durch Whisper (GRÖSSE: *tiny*, *base*,
+    *small*, *medium*, *large-v3-turbo*). Die Größe wird im Hintergrund geladen,
+    während der Text von Vosk getippt wird; beim ersten Gebrauch werden ihre
+    Gewichte heruntergeladen. Antwortet `ERR unsupported`, wenn `faster-whisper`
+    nicht installiert ist.
 
-Alle drei antworten sofort `OK <Zustand>` oder `ERR bad-argument`, `ERR no-model`,
+`reset-selection`
+:   Vergisst die gespeicherte Auswahl, die Verfeinerung eingeschlossen, und kehrt
+    zu dem zurück, was `config.yaml` oder die Systemsprache ergibt. Sie nimmt
+    kein Argument.
+
+Alle vier antworten sofort `OK <Zustand>` oder `ERR bad-argument`, `ERR no-model`,
 `ERR busy`. Schlägt das Laden fehl, bleibt das aktuelle Modell, und `last_error`
 in **\--info** nennt den Grund. Die Auswahl wird in `selection.yaml` gespeichert.
 
@@ -231,6 +240,10 @@ Referenz aller Konfigurationsschlüssel.
 `~/.local/state/vosk-cli-dictation/selection.yaml`
 :   Aus einer laufenden Sitzung gemerkte Sprache und gemerktes Modell; wird beim
     nächsten Start gelesen. Löschen kehrt zur Konfigurationsdatei zurück.
+
+`~/.local/share/vosk-cli-dictation/whisper-models/`
+:   Beim ersten Gebrauch einer Größe geladene Whisper-Gewichte (Abschnitt **refine**
+    der Konfigurationsdatei).
 
 `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
 :   Kontroll-Socket der laufenden Sitzung (Modus `0600`). Wird bei einem sauberen

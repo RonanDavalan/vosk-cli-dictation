@@ -183,6 +183,27 @@ vosk-cli-dictation --info            # lang, model, models, loading, last_error�
 
 Fehler: `ERR bad-argument` (unbekanntes Argument), `ERR no-model` (für die Anfrage ist kein Modell installiert), `ERR busy` (ein Modell wird gerade geladen). Eine dritte Anfrage ohne Argument, `reset-selection`, vergisst die gespeicherte Auswahl und kehrt zu dem zurück, was `config.yaml` oder die Systemsprache ergibt.
 
+### Jede Äußerung mit Whisper verfeinern (optional)
+
+Vosk zerlegt und zeigt den Text weiter beim Sprechen. Bei eingeschalteter Verfeinerung geht jede beendete Äußerung zusätzlich als Audio an `faster-whisper`, dessen Text mit Groß- und Kleinschreibung und Zeichensetzung den von Vosk unmittelbar vor dem Tippen ersetzt. Ein Befehlssatz (Stopp, Aufwecken) wird nie verfeinert; die Äußerungen werden in der Reihenfolge getippt, in der sie gesprochen wurden; und braucht Whisper nach dem Ende der Äußerung länger als `refine.timeout_ms` (2000 ms) oder liefert nichts Brauchbares, wird stattdessen der Text von Vosk getippt. `vosk-cli-dictation --status` (eine zweite Zeile), `--diagnose` und `--info` zählen diese Rückfälle. Solange `refine.engine` auf `none` steht, dem Werkswert, ändert sich nichts.
+
+**Voraussetzung:** `faster-whisper` in der Python-Umgebung des Diktats (`pip install faster-whisper`). Ohne es graut das Menü des Symbols den Eintrag mit diesem Grund aus, und `--diagnose` sagt es ebenfalls. Die Gewichte werden beim ersten Gebrauch unter `~/.local/share/vosk-cli-dictation/whisper-models` geladen (etwa 75 MB für `tiny`, 1,6 GB für `large-v3-turbo`); das Symbol kündigt den ersten Download an, und währenddessen wird der Text von Vosk getippt.
+
+```yaml
+refine:
+  engine: whisper      # none (Werkswert) | whisper
+  model: auto          # auto | tiny | base | small | medium | large-v3-turbo
+  device: auto         # auto | cpu | cuda
+  compute_type: auto   # auto: float16 auf cuda, int8 auf cpu
+  timeout_ms: 2000
+```
+
+*   **Auf einer Grafikkarte (NVIDIA):** CTranslate2 braucht die CUDA-12-Bibliothek `libcublas.so.12` (Debian und Ubuntu: `sudo apt install libcublas12 libcublaslt12`). `device: auto` nutzt die Karte, wenn sie erkannt wird und die Bibliothek sich laden lässt; eine Karte ohne die Bibliothek fällt auf den Prozessor zurück, und das Diktat gibt dieses Rezept aus; `device: cuda` wird dann mit demselben Rezept abgelehnt. `--diagnose` zeigt die gewählte Hardware und den Zustand der Bibliothek. `model: auto` ergibt `large-v3-turbo`, die größte Größe, deren Latenz im 95. Perzentil pro Äußerung unter 500 ms bleibt (etwa 310 ms auf einer RTX 3060).
+*   **Auf einem Prozessor:** keine Größe bleibt unter 500 ms pro Äußerung (`tiny` braucht im 95. Perzentil 3,4 s auf einem Raspberry Pi 4 und 1,3 s auf einem x86 mit 8 Kernen), und `tiny` wie `base` verderben den französischen Text. `model: auto` ergibt dort daher keine Verfeinerung; wählen Sie eine Größe von Hand in `config.yaml` oder im Menü des Symbols und erhöhen Sie `timeout_ms` entsprechend. Ein Kern bleibt Vosk vorbehalten.
+*   **Was zu erwarten ist:** auf dem Benchmark des Projekts mit synthetischer Sprache (er vergleicht Engines, er verspricht keine echte Rate) sinken die Wortfehler im Französischen von 15,4 % auf 12,0 % mit dem leichten Vosk-Modell und `large-v3-turbo`; mit dem vollständigen Vosk-Modell werden die Wörter nicht besser (10,1 % gegenüber 12,2 %), und die Verfeinerung bringt vor allem Groß- und Kleinschreibung und Zeichensetzung.
+
+Eine laufende Sitzung ändert die Verfeinerung ohne Neustart, über das Menü des Symbols oder den Socket: `set-refine whisper:small` oder `set-refine none`. Die Größe wird im Hintergrund geladen, während der Text von Vosk getippt wird; die Auswahl wird in `selection.yaml` gespeichert (Schlüssel `refine`), und `reset-selection` kehrt zur Konfiguration zurück. Fehler: `ERR bad-argument` (unbekannte Größe), `ERR busy` (ein Ladevorgang läuft), `ERR unsupported` (`faster-whisper` fehlt). `--info` liefert `refine`, `refine_options`, `refine_reason`, `device`, `refine_download` und `refine_stats` (`done`, `timeout`, `error`, `rejected`, `skipped`, `mean_ms`).
+
 ### Manuelle Befehle
 
 Solange das Skript in einem Terminal läuft, können Sie auch diese Befehle eingeben und die Eingabetaste drücken:

@@ -91,8 +91,8 @@ sleep:
 refine:
   # Refinado de cada enunciado con una segunda red neuronal. Vosk sigue
   # cortando y mostrando el texto mientras hablas; cuando un enunciado termina,
-  # su audio va a faster-whisper (paquete vosk-cli-dictation-whisper, o
-  # «pip install faster-whisper» en el entorno del dictado), cuyo texto, con sus
+  # su audio va a faster-whisper («pip install faster-whisper» en el entorno
+  # del dictado), cuyo texto, con sus
   # mayúsculas y su puntuación, sustituye al de Vosk antes de teclear. Una frase
   # de orden (parada, despertar) nunca se refina.
   # none (por defecto): nada cambia; whisper: refinado activo.

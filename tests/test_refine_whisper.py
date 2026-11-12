@@ -69,6 +69,15 @@ def test_compute_type_defaults_follow_the_device():
     assert we.resolve_compute_type("int8_float16", "cuda") == "int8_float16"
 
 
+def test_cpu_leaves_a_core_to_vosk(monkeypatch):
+    monkeypatch.setattr(os, "cpu_count", lambda: 4)
+    assert we.cpu_threads() == 3
+    monkeypatch.setattr(os, "cpu_count", lambda: 1)
+    assert we.cpu_threads() == 1
+    monkeypatch.setattr(os, "cpu_count", lambda: None)
+    assert we.cpu_threads() == 1
+
+
 def test_unknown_size_is_refused():
     with pytest.raises(RefineUnavailable) as err:
         we.WhisperEngine("gigantic")

@@ -89,7 +89,8 @@ performs the action, prints the resulting state (`OK DICTÉE`,
 be bound to desktop keyboard shortcuts.
 
 **\--status**
-:   Print the current state without changing it.
+:   Print the current state without changing it. When a refinement engine is chosen, a
+    second line gives its counters.
 
 **\--info**
 :   Print the full state of the running session on one line: `OK` followed by a
@@ -115,7 +116,7 @@ be bound to desktop keyboard shortcuts.
 **\--stop**
 :   Shut the running session down cleanly.
 
-Three further requests are written to the socket directly (for example
+Four further requests are written to the socket directly (for example
 `printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). They change a
 running session without restarting it:
 
@@ -128,11 +129,17 @@ running session without restarting it:
 :   Change to an installed model folder listed in the `models` field of
     **\--info**.
 
-`reset-selection`
-:   Forget the remembered choice and go back to what `config.yaml` or the
-    system language gives. It takes no argument.
+`set-refine` *none*|*whisper:SIZE*
+:   Change the refinement of each utterance by Whisper (SIZE: *tiny*, *base*,
+    *small*, *medium*, *large-v3-turbo*). The size loads in the background while
+    the text of Vosk is typed; the first use downloads its weights. Answers
+    `ERR unsupported` when `faster-whisper` is not installed.
 
-All three answer `OK <state>` at once, or `ERR bad-argument`, `ERR no-model`,
+`reset-selection`
+:   Forget the remembered choice, refinement included, and go back to what
+    `config.yaml` or the system language gives. It takes no argument.
+
+All four answer `OK <state>` at once, or `ERR bad-argument`, `ERR no-model`,
 `ERR busy`. If loading fails the current model stays and `last_error` of
 **\--info** gives the reason. The choice is remembered in `selection.yaml`.
 
@@ -308,6 +315,10 @@ reference of every configuration key.
 `~/.local/state/vosk-cli-dictation/selection.yaml`
 :   Language and model remembered from a running session; read at the next
     start. Deleting it returns to the configuration file.
+
+`~/.local/share/vosk-cli-dictation/whisper-models/`
+:   Whisper weights downloaded at the first use of a size (**refine** section of
+    the configuration file).
 
 `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
 :   Control socket of the running session (mode `0600`). Removed on a clean

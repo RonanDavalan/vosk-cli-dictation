@@ -88,8 +88,8 @@ sleep:
 refine:
   # Refining every utterance with a second neural network. Vosk keeps cutting
   # and showing the text as you speak; when an utterance ends, its audio goes
-  # to faster-whisper (the vosk-cli-dictation-whisper package, or
-  # "pip install faster-whisper" in the dictation environment), and its text,
+  # to faster-whisper ("pip install faster-whisper" in the dictation
+  # environment), and its text,
   # with its capitals and punctuation, replaces Vosk's before typing. A command
   # phrase (stop, wake) is never refined.
   # none (default): nothing changes; whisper: refinement on.

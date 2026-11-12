@@ -95,8 +95,8 @@ sleep:
 refine:
   # Verfeinerung jeder Äußerung durch ein zweites neuronales Netz. Vosk
   # zerlegt und zeigt den Text weiter beim Sprechen; ist eine Äußerung zu Ende,
-  # geht ihr Audio an faster-whisper (Paket vosk-cli-dictation-whisper oder
-  # „pip install faster-whisper“ in der Umgebung des Diktats), dessen Text mit
+  # geht ihr Audio an faster-whisper („pip install faster-whisper“ in der
+  # Umgebung des Diktats), dessen Text mit
   # Groß- und Kleinschreibung und Zeichensetzung den von Vosk vor dem Tippen
   # ersetzt. Ein Befehlssatz (Stopp, Aufwecken) wird nie verfeinert.
   # none (Standard): nichts ändert sich; whisper: Verfeinerung aktiv.

@@ -29,6 +29,7 @@ sleep: [...]
 clipboard: [...]
 injection: [...]
 language_settings: [...]
+refine: [...]
 hotkeys: [...]
 sound_file: "..."
 theme: [...]
@@ -213,6 +214,27 @@ interaction:
 -   **`silence_timeout_ms`** (entier, par défaut `700`) : délai de silence pour le mode `silence`. Surchargeable par langue sous `language_settings.<lang>.silence_timeout_ms`, même motif que `recognition.confidence_threshold`.
 
 Dans les trois modes, la phrase d'arrêt vocale et `--finalize` / `--cancel` restent actifs comme filet de sécurité — aucun mode ne retire un moyen d'arrêt existant.
+
+### `refine`
+
+Affiner chaque énoncé fini avec `faster-whisper` avant de le taper (voir le README, « Affiner chaque énoncé avec Whisper »). Rien ne change tant que `engine` vaut `none`.
+
+```yaml
+refine:
+  engine: none
+  model: auto
+  device: auto
+  compute_type: auto
+  timeout_ms: 2000
+```
+
+-   **`engine`** (`none` | `whisper`, défaut `none`) : `whisper` active la finition. `faster-whisper` doit être installé dans l'environnement Python de la dictée (`pip install faster-whisper`) ; `vosk-cli-dictation --diagnose` dit s'il l'est.
+-   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, défaut `auto`) : la taille de Whisper. `auto` donne `large-v3-turbo` quand une carte graphique sert, et aucune finition sur un processeur, où aucune taille ne reste sous 500 ms par énoncé. Les poids se téléchargent au premier usage sous `~/.local/share/vosk-cli-dictation/whisper-models`.
+-   **`device`** (`auto` | `cpu` | `cuda`, défaut `auto`) : `auto` prend la carte quand CTranslate2 en voit une et que `libcublas.so.12` se charge (Debian et Ubuntu : `sudo apt install libcublas12 libcublaslt12`), le processeur sinon. `cuda` sans la bibliothèque est refusé avec ce remède.
+-   **`compute_type`** (défaut `auto`) : `float16` sur `cuda`, `int8` sur `cpu` ; `int8_float16` économise la mémoire vidéo.
+-   **`timeout_ms`** (entier, défaut `2000`) : au-delà de ce délai après la fin d'un énoncé, le texte de Vosk est tapé tel quel et le repli est compté (`--status`, `--diagnose`, `--info`).
+
+Une taille choisie au menu de l'icône ou avec `set-refine` est mémorisée dans `selection.yaml` et l'emporte sur cette section ; « Revenir à la configuration » l'efface.
 
 ### `hotkeys`
 

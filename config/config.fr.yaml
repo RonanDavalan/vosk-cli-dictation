@@ -87,8 +87,8 @@ sleep:
 refine:
   # Finition de chaque énoncé par un second réseau de neurones. Vosk continue de
   # découper et d'afficher au fil de la voix ; quand un énoncé est fini, son
-  # audio part à faster-whisper (paquet vosk-cli-dictation-whisper, ou
-  # « pip install faster-whisper » dans l'environnement de la dictée), dont le
+  # audio part à faster-whisper (« pip install faster-whisper » dans
+  # l'environnement de la dictée), dont le
   # texte, avec sa casse et sa ponctuation, remplace celui de Vosk avant la
   # frappe. Une phrase de commande (arrêt, réveil) n'est jamais affinée.
   # none (défaut) : rien ne change ; whisper : finition active.

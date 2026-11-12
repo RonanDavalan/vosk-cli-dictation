@@ -29,6 +29,7 @@ sleep: [...]
 clipboard: [...]
 injection: [...]
 language_settings: [...]
+refine: [...]
 hotkeys: [...]
 sound_file: "..."
 theme: [...]
@@ -270,6 +271,27 @@ interaction:
 -   **`silence_timeout_ms`** (integer, default `700`): silence delay for the `silence` mode. Overridable per language under `language_settings.<lang>.silence_timeout_ms`, the same pattern as `recognition.confidence_threshold`.
 
 In every mode, the spoken stop phrase and `--finalize` / `--cancel` keep working as a safety net — no mode removes an existing way to stop.
+
+### `refine`
+
+Refining every finished utterance with `faster-whisper` before it is typed (see the README, "Refining Each Utterance With Whisper"). Nothing changes while `engine` is `none`.
+
+```yaml
+refine:
+  engine: none
+  model: auto
+  device: auto
+  compute_type: auto
+  timeout_ms: 2000
+```
+
+-   **`engine`** (`none` | `whisper`, default `none`): `whisper` turns the refinement on. `faster-whisper` must be installed in the Python environment of the dictation (`pip install faster-whisper`); `vosk-cli-dictation --diagnose` says whether it is.
+-   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, default `auto`): the Whisper size. `auto` gives `large-v3-turbo` when a graphics card serves, and no refinement on a processor, where no size stays under 500 ms per utterance. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models`.
+-   **`device`** (`auto` | `cpu` | `cuda`, default `auto`): `auto` takes the card when CTranslate2 sees one and `libcublas.so.12` loads (Debian and Ubuntu: `sudo apt install libcublas12 libcublaslt12`), the processor otherwise. `cuda` without the library is refused with that remedy.
+-   **`compute_type`** (default `auto`): `float16` on `cuda`, `int8` on `cpu`; `int8_float16` saves video memory.
+-   **`timeout_ms`** (integer, default `2000`): past this delay after the end of an utterance, the text of Vosk is typed as it is and the fallback is counted (`--status`, `--diagnose`, `--info`).
+
+A size chosen from the icon menu or with `set-refine` is remembered in `selection.yaml` and wins over this section; "Revert to the configuration" clears it.
 
 ### `hotkeys`
 

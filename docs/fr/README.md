@@ -183,6 +183,27 @@ vosk-cli-dictation --info            # lang, model, models, loading, last_error�
 
 Erreurs : `ERR bad-argument` (argument inconnu), `ERR no-model` (aucun modèle installé pour la demande), `ERR busy` (un chargement est en cours). Une troisième requête, sans argument, `reset-selection`, oublie le choix mémorisé et revient à ce que donnent `config.yaml` ou la langue du système.
 
+### Affiner chaque énoncé avec Whisper (facultatif)
+
+Vosk continue de découper et d'afficher le texte au fil de la voix. Avec la finition active, chaque énoncé fini part aussi, en audio, à `faster-whisper`, dont le texte, avec ses majuscules et sa ponctuation, remplace celui de Vosk juste avant la frappe. Une phrase de commande (arrêt, réveil) n'est jamais affinée ; les énoncés sont tapés dans l'ordre où ils ont été dits ; et quand Whisper met plus de `refine.timeout_ms` (2000 ms) après la fin de l'énoncé, ou ne rend rien d'utilisable, le texte de Vosk est tapé à sa place. `vosk-cli-dictation --status` (une seconde ligne), `--diagnose` et `--info` comptent ces replis. Rien ne change tant que `refine.engine` vaut `none`, la valeur d'usine.
+
+**Prérequis :** `faster-whisper` dans l'environnement Python de la dictée (`pip install faster-whisper`). Sans lui, le menu de l'icône grise l'entrée avec cette raison et `--diagnose` le dit. Les poids se téléchargent au premier usage sous `~/.local/share/vosk-cli-dictation/whisper-models` (environ 75 Mo pour `tiny`, 1,6 Go pour `large-v3-turbo`) ; l'icône annonce le premier téléchargement, et le texte de Vosk est tapé en attendant.
+
+```yaml
+refine:
+  engine: whisper      # none (valeur d'usine) | whisper
+  model: auto          # auto | tiny | base | small | medium | large-v3-turbo
+  device: auto         # auto | cpu | cuda
+  compute_type: auto   # auto : float16 sur cuda, int8 sur cpu
+  timeout_ms: 2000
+```
+
+*   **Sur une carte graphique (NVIDIA) :** CTranslate2 a besoin de la bibliothèque CUDA 12 `libcublas.so.12` (Debian et Ubuntu : `sudo apt install libcublas12 libcublaslt12`). `device: auto` se sert de la carte quand elle est détectée et que la bibliothèque se charge ; une carte sans la bibliothèque replie sur le processeur et la dictée affiche ce remède ; `device: cuda` est alors refusé avec le même remède. `--diagnose` montre le matériel retenu et l'état de la bibliothèque. `model: auto` donne `large-v3-turbo`, la plus grande taille dont la latence au 95e centile par énoncé reste sous 500 ms (environ 310 ms sur une RTX 3060).
+*   **Sur un processeur :** aucune taille ne reste sous 500 ms par énoncé (`tiny` demande 3,4 s au 95e centile sur un Raspberry Pi 4 et 1,3 s sur un x86 à 8 cœurs), et `tiny` comme `base` abîment le texte français. `model: auto` ne donne donc aucune finition ; choisissez une taille à la main dans `config.yaml` ou au menu de l'icône, et relevez `timeout_ms` en conséquence. Un cœur reste à Vosk.
+*   **À quoi s'attendre :** sur le banc de parole synthétique du projet (il compare des moteurs, il ne promet pas un taux réel), les erreurs sur les mots français passent de 15,4 % à 12,0 % avec le modèle Vosk léger et `large-v3-turbo` ; avec le modèle Vosk complet les mots ne sont pas meilleurs (10,1 % contre 12,2 %) et la finition apporte surtout majuscules et ponctuation.
+
+Une session en cours change la finition sans redémarrer, depuis le menu de l'icône ou sur la socket : `set-refine whisper:small` ou `set-refine none`. La taille se charge en arrière-plan pendant que le texte de Vosk est tapé ; le choix est mémorisé dans `selection.yaml` (clé `refine`), et `reset-selection` revient à la configuration. Erreurs : `ERR bad-argument` (taille inconnue), `ERR busy` (un chargement est en cours), `ERR unsupported` (`faster-whisper` manque). `--info` donne `refine`, `refine_options`, `refine_reason`, `device`, `refine_download` et `refine_stats` (`done`, `timeout`, `error`, `rejected`, `skipped`, `mean_ms`).
+
 ### Commandes manuelles
 
 Pendant que le script s'exécute dans un terminal, vous pouvez aussi saisir ces commandes et appuyer sur Entrée :

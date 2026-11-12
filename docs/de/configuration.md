@@ -29,6 +29,7 @@ sleep: [...]
 clipboard: [...]
 injection: [...]
 language_settings: [...]
+refine: [...]
 hotkeys: [...]
 sound_file: "..."
 theme: [...]
@@ -212,6 +213,27 @@ interaction:
 -   **`silence_timeout_ms`** (Ganzzahl, Standard `700`): Stille-Verzögerung für den Modus `silence`. Pro Sprache überschreibbar unter `language_settings.<lang>.silence_timeout_ms`, gleiches Muster wie `recognition.confidence_threshold`.
 
 In allen drei Modi bleiben das gesprochene Stoppwort sowie `--finalize` / `--cancel` als Sicherheitsnetz aktiv — kein Modus entfernt einen bestehenden Weg zum Stoppen.
+
+### `refine`
+
+Jede beendete Äußerung wird vor dem Tippen mit `faster-whisper` verfeinert (siehe README, „Jede Äußerung mit Whisper verfeinern“). Solange `engine` auf `none` steht, ändert sich nichts.
+
+```yaml
+refine:
+  engine: none
+  model: auto
+  device: auto
+  compute_type: auto
+  timeout_ms: 2000
+```
+
+-   **`engine`** (`none` | `whisper`, Standard `none`): `whisper` schaltet die Verfeinerung ein. `faster-whisper` muss in der Python-Umgebung des Diktats installiert sein (`pip install faster-whisper`); `vosk-cli-dictation --diagnose` sagt, ob es das ist.
+-   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, Standard `auto`): die Whisper-Größe. `auto` ergibt `large-v3-turbo`, wenn eine Grafikkarte bedient, und keine Verfeinerung auf einem Prozessor, wo keine Größe unter 500 ms pro Äußerung bleibt. Die Gewichte werden beim ersten Gebrauch unter `~/.local/share/vosk-cli-dictation/whisper-models` geladen.
+-   **`device`** (`auto` | `cpu` | `cuda`, Standard `auto`): `auto` nimmt die Karte, wenn CTranslate2 eine sieht und `libcublas.so.12` sich laden lässt (Debian und Ubuntu: `sudo apt install libcublas12 libcublaslt12`), sonst den Prozessor. `cuda` ohne die Bibliothek wird mit diesem Rezept abgelehnt.
+-   **`compute_type`** (Standard `auto`): `float16` auf `cuda`, `int8` auf `cpu`; `int8_float16` spart Grafikspeicher.
+-   **`timeout_ms`** (Ganzzahl, Standard `2000`): nach dieser Frist ab dem Ende einer Äußerung wird der Text von Vosk unverändert getippt und der Rückfall gezählt (`--status`, `--diagnose`, `--info`).
+
+Eine im Menü des Symbols oder mit `set-refine` gewählte Größe wird in `selection.yaml` gespeichert und hat Vorrang vor diesem Abschnitt; „Zur Konfiguration zurückkehren“ löscht sie.
 
 ### `hotkeys`
 
