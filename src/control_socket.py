@@ -8,9 +8,12 @@
 # sort. L'utilisateur lie ces sous-commandes aux raccourcis globaux de son
 # bureau — ce qui fonctionne sous Wayland natif là où pynput est aveugle.
 #
-# Protocole : une requête = un jeton, terminé par \n. Réponse = "OK <ÉTAT>" ou
-# "ERR <raison>", terminée par \n. <ÉTAT> ∈ {DICTÉE, ÉCOUTE, VEILLE}.
+# Protocole : une requête = « jeton[ argument] » terminé par \n. Réponse =
+# "OK <ÉTAT>" ou "ERR <raison>", terminée par \n. <ÉTAT> ∈ {DICTÉE, ÉCOUTE,
+# VEILLE}. `info` répond « OK <JSON> » sur une seule ligne ; `set-*` répond tout
+# de suite « OK <ÉTAT> » et applique le réglage en arrière-plan.
 
+import json
 import os
 import queue
 import socket
@@ -24,7 +27,15 @@ SOCKET_NAME = "vosk-cli-dictation.sock"
 COMMANDS = {
     "toggle", "dictation-on", "dictation-off", "finalize", "cancel",
     "sleep", "wake", "sleep-toggle", "status", "quit",
+    "info", "set-lang", "set-model", "set-refine", "set-correction",
 }
+
+# Jetons qui prennent un argument ; les autres le refusent.
+ARG_COMMANDS = {"set-lang", "set-model", "set-refine", "set-correction"}
+
+# Un `info` dépasse 256 octets ; la requête et la réponse sont lues jusqu'au
+# saut de ligne, dans cette limite.
+MAX_LINE = 65536
 
 # Jeton -> message posé dans la control_queue (vocabulaire déjà géré par ui.py).
 _TO_QUEUE = {
@@ -52,6 +63,23 @@ def socket_path() -> str:
 # Client — utilisé par le binaire invoqué avec un drapeau de contrôle          #
 # --------------------------------------------------------------------------- #
 
+def _read_line(sock) -> bytes:
+    """Lit jusqu'au saut de ligne, à la fin du flux ou à MAX_LINE octets. Un
+    délai dépassé après un premier octet rend ce qui est arrivé."""
+    data = b""
+    while b"\n" not in data and len(data) < MAX_LINE:
+        try:
+            chunk = sock.recv(4096)
+        except socket.timeout:
+            if data:
+                break
+            raise
+        if not chunk:
+            break
+        data += chunk
+    return data
+
+
 def send_control_command(command: str):
     """Envoie `command` à l'instance en cours. Retourne la réponse (str) ou
     None si aucune instance n'écoute."""
@@ -61,7 +89,7 @@ def send_control_command(command: str):
     try:
         s.connect(path)
         s.sendall((command.strip() + "\n").encode("utf-8"))
-        return s.recv(256).decode("utf-8", "replace").strip()
+        return _read_line(s).decode("utf-8", "replace").strip()
     except (FileNotFoundError, ConnectionRefusedError, socket.timeout, OSError):
         return None
     finally:
@@ -80,15 +108,36 @@ def instance_running() -> bool:
 # Serveur — tourne dans un thread de l'instance principale                     #
 # --------------------------------------------------------------------------- #
 
-def _handle(raw: str, control_queue) -> str:
-    cmd = raw.strip().lower()
-    if cmd not in COMMANDS:
+def _info_fallback() -> dict:
+    snap = runtime_state.snapshot()
+    return {"state": snap["state"], "loading": False, "last_error": None}
+
+
+def _handle(raw: str, control_queue, controller=None) -> str:
+    """`controller` (src/engine_switch.py) répond à `info` et aux `set-*` ;
+    sans lui, `info` rend l'état seul et les `set-*` rendent ERR unsupported."""
+    token, _sep, arg = raw.strip().partition(" ")
+    token = token.lower()
+    arg = arg.strip()
+    if token not in COMMANDS or (arg and token not in ARG_COMMANDS):
         return "ERR unknown-command"
-    if cmd == "status":
+    if token == "status":
         return "OK " + runtime_state.snapshot()["state"]
-    if cmd == "quit":
+    if token == "quit":
         return "OK stopping"
-    msg = _TO_QUEUE.get(cmd)
+    if token == "info":
+        data = controller.info() if controller else _info_fallback()
+        return "OK " + json.dumps(data, ensure_ascii=False, separators=(",", ":"))
+    if token in ARG_COMMANDS:
+        if controller is None:
+            return "ERR unsupported"
+        if not arg:
+            return "ERR bad-argument"
+        refusal = controller.request(token, arg)
+        if refusal:
+            return "ERR " + refusal
+        return "OK " + runtime_state.snapshot()["state"]
+    msg = _TO_QUEUE.get(token)
     if msg is None:
         return "ERR unsupported"
     try:
@@ -98,7 +147,7 @@ def _handle(raw: str, control_queue) -> str:
     return "OK " + runtime_state.snapshot()["state"]
 
 
-def start_control_server(control_queue, stop_event):
+def start_control_server(control_queue, stop_event, controller=None):
     """Ouvre la socket et sert les commandes jusqu'à stop_event. Retourne le
     thread serveur (démon). Lève OSError si le bind échoue."""
     path = socket_path()
@@ -125,8 +174,8 @@ def start_control_server(control_queue, stop_event):
                 with conn:
                     try:
                         conn.settimeout(2.0)
-                        raw = conn.recv(256).decode("utf-8", "replace")
-                        reply = _handle(raw, control_queue)
+                        raw = _read_line(conn).decode("utf-8", "replace")
+                        reply = _handle(raw, control_queue, controller)
                         conn.sendall((reply + "\n").encode("utf-8"))
                         if reply == "OK stopping":
                             stop_event.set()

@@ -102,3 +102,91 @@ def test_busy_queue_reports_err_busy(runtime_dir):
     finally:
         stop.set()
         t.join(timeout=2.0)
+
+
+# --- Jetons à argument et `info` ---------------------------------------------
+
+import json
+
+
+class FakeController:
+    def __init__(self):
+        self.requests = []
+        self.refuse = None
+
+    def info(self):
+        return {"state": runtime_state.state, "lang": "fr", "loading": False,
+                "last_error": None, "accents": "éàü"}
+
+    def request(self, token, arg):
+        self.requests.append((token, arg))
+        return self.refuse
+
+
+@pytest.fixture
+def server_with_controller(runtime_dir):
+    ctrl_q = queue.Queue(maxsize=32)
+    stop = threading.Event()
+    controller = FakeController()
+    runtime_state.set_state(STATE_LISTENING)
+    t = cs.start_control_server(ctrl_q, stop, controller)
+    yield controller
+    stop.set()
+    t.join(timeout=2.0)
+
+
+def test_status_still_answers_ok_ecoute(server_with_controller):
+    assert cs.send_control_command("status") == "OK ÉCOUTE"
+
+
+def test_info_is_read_as_json(server_with_controller):
+    reply = cs.send_control_command("info")
+    assert reply.startswith("OK ")
+    data = json.loads(reply[3:])
+    assert data["lang"] == "fr" and data["accents"] == "éàü"
+
+
+def test_info_longer_than_256_bytes_is_read_whole(runtime_dir):
+    class Big(FakeController):
+        def info(self):
+            return {"models": ["vosk-model-%03d" % i for i in range(60)]}
+
+    stop = threading.Event()
+    t = cs.start_control_server(queue.Queue(), stop, Big())
+    try:
+        reply = cs.send_control_command("info")
+        assert len(reply) > 256
+        assert len(json.loads(reply[3:])["models"]) == 60
+    finally:
+        stop.set()
+        t.join(timeout=2.0)
+
+
+def test_info_without_controller_gives_state_only(server):
+    data = json.loads(cs.send_control_command("info")[3:])
+    assert data["state"] == STATE_LISTENING and data["loading"] is False
+
+
+def test_set_token_carries_its_argument_with_case_kept(server_with_controller):
+    reply = cs.send_control_command("set-model vosk-model-FR-0.22")
+    assert reply == "OK ÉCOUTE"
+    assert server_with_controller.requests == [("set-model", "vosk-model-FR-0.22")]
+
+
+def test_set_token_refusal_becomes_err(server_with_controller):
+    server_with_controller.refuse = "unsupported"
+    assert cs.send_control_command("set-refine none") == "ERR unsupported"
+
+
+def test_set_token_without_argument_is_rejected(server_with_controller):
+    assert cs.send_control_command("set-lang") == "ERR bad-argument"
+    assert server_with_controller.requests == []
+
+
+def test_set_token_without_controller_is_unsupported(server):
+    assert cs.send_control_command("set-lang en") == "ERR unsupported"
+
+
+def test_argument_on_a_plain_token_is_unknown(server):
+    assert cs.send_control_command("status now") == "ERR unknown-command"
+    assert cs.send_control_command("set-unknown x") == "ERR unknown-command"

@@ -32,6 +32,7 @@ CONTROL_FLAGS = [
     ("dictation_off", "dictation-off"), ("finalize", "finalize"),
     ("cancel", "cancel"), ("sleep", "sleep"), ("wake", "wake"),
     ("sleep_toggle", "sleep-toggle"), ("status", "status"), ("stop", "quit"),
+    ("info", "info"),
 ]
 
 def print_status(message, color):
@@ -214,6 +215,7 @@ def main():
     ctl.add_argument('--sleep-toggle', action='store_true', help=_("toggle deep sleep"))
     ctl.add_argument('--status', action='store_true', help=_("print the current state"))
     ctl.add_argument('--stop', action='store_true', help=_("stop the running session"))
+    ctl.add_argument('--info', action='store_true', help=_("print the full state of the running session as one JSON line"))
     ctl.add_argument('--diagnose', action='store_true', help=_("check the environment and exit"))
     parser.add_argument('--download-model', nargs='?', const='', default=None, metavar='LANG',
                         help=_("download the small model for LANG (or the current language) and exit"))
