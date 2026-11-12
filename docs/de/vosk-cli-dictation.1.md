@@ -63,8 +63,8 @@ funktioniert.
 # STEUERUNG EINER LAUFENDEN SITZUNG
 
 Jede der folgenden Flags verbindet sich mit dem Socket der laufenden Sitzung,
-führt die Aktion aus, gibt den resultierenden Zustand aus (`OK DICTÉE`,
-`OK ÉCOUTE`, `OK VEILLE`) oder `ERR <reason>`), und beendet sich. Sie sollen
+führt die Aktion aus, gibt den Zustand aus, den die Sitzung beim Empfang des Befehls meldet (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE`; die Aktion wirkt unmittelbar danach, und **\--status** liefert dann den neuen Zustand) oder `ERR <reason>`, und beendet sich. Sie sollen
 an Tastenkombinationen auf dem Desktop gebunden werden.
 
 **\--status**

@@ -187,7 +187,7 @@ Errors: `ERR bad-argument` (unknown argument), `ERR no-model` (no model installe
 
 Vosk keeps cutting and showing the text as you speak. With the refinement on, each finished utterance is also sent, as audio, to `faster-whisper`, and its text, with capitals and punctuation, replaces Vosk's just before it is typed. A command phrase (stop, wake) is never refined; utterances are typed in the order they were said; and when Whisper takes longer than `refine.timeout_ms` (2000 ms) after the end of the utterance, or returns nothing usable, the text of Vosk is typed instead. `vosk-cli-dictation --status` (a second line), `--diagnose` and `--info` count those fallbacks. Nothing changes while `refine.engine` is `none`, the factory value.
 
-**Prerequisite:** `faster-whisper` in the Python environment of the dictation (`pip install faster-whisper`). Without it the icon menu greys the entry with that reason and `--diagnose` says so. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models` (about 75 MB for `tiny`, 1.6 GB for `large-v3-turbo`); the icon announces the first download, and the text of Vosk is typed meanwhile.
+**Prerequisite:** `faster-whisper` in the Python environment of the dictation: the optional package `vosk-cli-dictation-whisper` of the same version as the main one adds it (`sudo apt install ./vosk-cli-dictation-whisper_0.5.4~beta_all.deb`; the same file names with `-whisper` on Fedora, openSUSE and Arch), or `pip install faster-whisper` from a Git checkout. Without it the icon menu greys the entry with that reason and `--diagnose` says so. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models` (about 75 MB for `tiny`, 1.6 GB for `large-v3-turbo`); the icon announces the first download, and the text of Vosk is typed meanwhile.
 
 ```yaml
 refine:
@@ -223,7 +223,20 @@ While the script is running in a terminal, you can also type these commands and 
 
 A left click launches the dictation when it is off and toggles it otherwise. The right-click menu starts or stops dictation, sleeps or wakes it, finishes and copies the text, cancels the session, and chooses the language (follow the system or one of the four; a language without a model is marked "to download"), the model (light or full, with its size when it is missing; the download starts from the menu and a notification tells when it ends), the refinement by Whisper (offered when `faster-whisper` is installed, greyed with its reason otherwise; the first use of a size downloads its weights and a notification tells when it starts and ends) and the correction (greyed, with its reason, until the running dictation announces it), then "Revert to the configuration", launching or quitting the dictation, "Launch the icon at login" (an XDG Autostart entry) and quitting the icon. The dictation launched from the icon runs detached from any terminal; its output goes to `~/.local/state/vosk-cli-dictation/instance.log`. On a desktop with no notification area (GNOME without an extension), the icon says once, as a desktop notification, how to enable "AppIndicator and KStatusNotifierItem Support"; the control subcommands above keep working.
 
-From a Git checkout (the native package comes with a later release):
+With the native packages, the icon is a second package of the same version as the main one:
+
+```bash
+# Debian 12+, Ubuntu 24.04+, Mint 22+...
+sudo apt install ./vosk-cli-dictation-tray_0.5.4~beta_all.deb
+# Fedora
+sudo dnf install ./vosk-cli-dictation-tray-0.5.4~beta-1.fc42.noarch.rpm
+# openSUSE Leap
+sudo zypper install ./vosk-cli-dictation-tray-0.5.4~beta-1.leap156.noarch.rpm
+# Arch Linux
+sudo pacman -U ./vosk-cli-dictation-tray-0.5.4_beta-1-any.pkg.tar.zst
+```
+
+Its graphics library, PySide6, is installed with `pip` into a private virtual environment on first configuration (network access needed at that point only); the package also adds a menu entry and a system login entry (uncheck "Launch the icon at login" in the menu to remove it for your account). From a Git checkout:
 
 ```bash
 cd ~/git/vosk-cli-dictation/vosk-cli-dictation/tray

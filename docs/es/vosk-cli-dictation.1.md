@@ -64,8 +64,8 @@ funcione en todas partes.
 # CONTROLANDO UNA SESIÓN EN CURSO
 
 Cada una de las siguientes opciones de configuración se conecta al socket de la sesión en ejecución,
-realiza la acción, imprime el estado resultante (`OK DICTÉE`,
-`OK ÉCOUTE`, `OK VEILLE`) o `ERR <reason>`, y finaliza. Están diseñadas para
+realiza la acción, imprime el estado que la sesión anuncia al recibir el comando (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE`; la acción se aplica justo después y **\--status** da entonces el estado nuevo) o `ERR <reason>`, y finaliza. Están diseñadas para
 ser asignadas a atajos de teclado del escritorio.
 
 **\--status**

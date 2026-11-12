@@ -187,7 +187,7 @@ Erreurs : `ERR bad-argument` (argument inconnu), `ERR no-model` (aucun modèle i
 
 Vosk continue de découper et d'afficher le texte au fil de la voix. Avec la finition active, chaque énoncé fini part aussi, en audio, à `faster-whisper`, dont le texte, avec ses majuscules et sa ponctuation, remplace celui de Vosk juste avant la frappe. Une phrase de commande (arrêt, réveil) n'est jamais affinée ; les énoncés sont tapés dans l'ordre où ils ont été dits ; et quand Whisper met plus de `refine.timeout_ms` (2000 ms) après la fin de l'énoncé, ou ne rend rien d'utilisable, le texte de Vosk est tapé à sa place. `vosk-cli-dictation --status` (une seconde ligne), `--diagnose` et `--info` comptent ces replis. Rien ne change tant que `refine.engine` vaut `none`, la valeur d'usine.
 
-**Prérequis :** `faster-whisper` dans l'environnement Python de la dictée (`pip install faster-whisper`). Sans lui, le menu de l'icône grise l'entrée avec cette raison et `--diagnose` le dit. Les poids se téléchargent au premier usage sous `~/.local/share/vosk-cli-dictation/whisper-models` (environ 75 Mo pour `tiny`, 1,6 Go pour `large-v3-turbo`) ; l'icône annonce le premier téléchargement, et le texte de Vosk est tapé en attendant.
+**Prérequis :** `faster-whisper` dans l'environnement Python de la dictée : le paquet optionnel `vosk-cli-dictation-whisper`, de la même version que le paquet principal, l'y ajoute (`sudo apt install ./vosk-cli-dictation-whisper_0.5.4~beta_all.deb` ; les mêmes noms de fichier avec `-whisper` sous Fedora, openSUSE et Arch), ou `pip install faster-whisper` depuis une copie du dépôt Git. Sans lui, le menu de l'icône grise l'entrée avec cette raison et `--diagnose` le dit. Les poids se téléchargent au premier usage sous `~/.local/share/vosk-cli-dictation/whisper-models` (environ 75 Mo pour `tiny`, 1,6 Go pour `large-v3-turbo`) ; l'icône annonce le premier téléchargement, et le texte de Vosk est tapé en attendant.
 
 ```yaml
 refine:
@@ -223,7 +223,20 @@ Pendant que le script s'exécute dans un terminal, vous pouvez aussi saisir ces 
 
 Un clic gauche lance la dictée si elle est éteinte et la bascule sinon. Le menu du clic droit démarre ou arrête la dictée, la met en veille ou la réveille, termine et copie le texte, annule la session, et choisit la langue (suivre le système ou l'une des quatre ; une langue sans modèle est marquée « à télécharger »), le modèle (léger ou complet, avec sa taille s'il manque ; le téléchargement part du menu et une notification dit quand il finit), la finition par Whisper (proposée quand `faster-whisper` est installé, grisée avec sa raison sinon ; le premier usage d'une taille télécharge ses poids et une notification dit quand cela commence et finit) et la correction (grisée, avec sa raison, tant que la dictée en cours ne l'annonce pas), puis « Revenir à la configuration », lancer ou quitter la dictée, « Lancer l'icône à l'ouverture de session » (une entrée XDG Autostart) et quitter l'icône. La dictée lancée par l'icône tourne détachée de tout terminal ; sa sortie va dans `~/.local/state/vosk-cli-dictation/instance.log`. Sur un bureau sans zone de notification (GNOME sans extension), l'icône dit une fois, par une notification de bureau, comment activer « AppIndicator and KStatusNotifierItem Support » ; les sous-commandes de contrôle ci-dessus continuent de fonctionner.
 
-Depuis une copie du dépôt Git (le paquet natif viendra avec une version ultérieure) :
+Avec les paquets natifs, l'icône est un second paquet de la même version que le paquet principal :
+
+```bash
+# Debian 12+, Ubuntu 24.04+, Mint 22+...
+sudo apt install ./vosk-cli-dictation-tray_0.5.4~beta_all.deb
+# Fedora
+sudo dnf install ./vosk-cli-dictation-tray-0.5.4~beta-1.fc42.noarch.rpm
+# openSUSE Leap
+sudo zypper install ./vosk-cli-dictation-tray-0.5.4~beta-1.leap156.noarch.rpm
+# Arch Linux
+sudo pacman -U ./vosk-cli-dictation-tray-0.5.4_beta-1-any.pkg.tar.zst
+```
+
+Sa bibliothèque graphique, PySide6, s'installe avec `pip` dans un environnement virtuel privé à la première configuration (accès réseau nécessaire à ce moment-là seulement) ; le paquet ajoute aussi une entrée de menu et une entrée système d'ouverture de session (décocher « Lancer l'icône à l'ouverture de session » dans le menu la retire pour votre compte). Depuis une copie du dépôt Git :
 
 ```bash
 cd ~/git/vosk-cli-dictation/vosk-cli-dictation/tray

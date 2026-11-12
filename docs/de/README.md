@@ -187,7 +187,7 @@ Fehler: `ERR bad-argument` (unbekanntes Argument), `ERR no-model` (für die Anfr
 
 Vosk zerlegt und zeigt den Text weiter beim Sprechen. Bei eingeschalteter Verfeinerung geht jede beendete Äußerung zusätzlich als Audio an `faster-whisper`, dessen Text mit Groß- und Kleinschreibung und Zeichensetzung den von Vosk unmittelbar vor dem Tippen ersetzt. Ein Befehlssatz (Stopp, Aufwecken) wird nie verfeinert; die Äußerungen werden in der Reihenfolge getippt, in der sie gesprochen wurden; und braucht Whisper nach dem Ende der Äußerung länger als `refine.timeout_ms` (2000 ms) oder liefert nichts Brauchbares, wird stattdessen der Text von Vosk getippt. `vosk-cli-dictation --status` (eine zweite Zeile), `--diagnose` und `--info` zählen diese Rückfälle. Solange `refine.engine` auf `none` steht, dem Werkswert, ändert sich nichts.
 
-**Voraussetzung:** `faster-whisper` in der Python-Umgebung des Diktats (`pip install faster-whisper`). Ohne es graut das Menü des Symbols den Eintrag mit diesem Grund aus, und `--diagnose` sagt es ebenfalls. Die Gewichte werden beim ersten Gebrauch unter `~/.local/share/vosk-cli-dictation/whisper-models` geladen (etwa 75 MB für `tiny`, 1,6 GB für `large-v3-turbo`); das Symbol kündigt den ersten Download an, und währenddessen wird der Text von Vosk getippt.
+**Voraussetzung:** `faster-whisper` in der Python-Umgebung des Diktats: Das optionale Paket `vosk-cli-dictation-whisper` in derselben Version wie das Hauptpaket fügt es hinzu (`sudo apt install ./vosk-cli-dictation-whisper_0.5.4~beta_all.deb`; dieselben Dateinamen mit `-whisper` unter Fedora, openSUSE und Arch), oder `pip install faster-whisper` aus einer Git-Kopie. Ohne es graut das Menü des Symbols den Eintrag mit diesem Grund aus, und `--diagnose` sagt es ebenfalls. Die Gewichte werden beim ersten Gebrauch unter `~/.local/share/vosk-cli-dictation/whisper-models` geladen (etwa 75 MB für `tiny`, 1,6 GB für `large-v3-turbo`); das Symbol kündigt den ersten Download an, und währenddessen wird der Text von Vosk getippt.
 
 ```yaml
 refine:
@@ -223,7 +223,20 @@ Solange das Skript in einem Terminal läuft, können Sie auch diese Befehle eing
 
 Ein Linksklick startet das Diktat, wenn es aus ist, und schaltet es sonst um. Das Menü des Rechtsklicks startet oder beendet das Diktat, versetzt es in den Tiefschlaf oder weckt es, beendet und kopiert den Text, bricht die Sitzung ab und wählt die Sprache (dem System folgen oder eine der vier; eine Sprache ohne Modell ist als „zum Herunterladen“ markiert), das Modell (leicht oder vollständig, mit seiner Größe, wenn es fehlt; der Download startet im Menü und eine Benachrichtigung meldet sein Ende), die Verfeinerung durch Whisper (angeboten, wenn `faster-whisper` installiert ist, sonst mit ihrem Grund ausgegraut; beim ersten Gebrauch einer Größe werden ihre Gewichte geladen, und eine Benachrichtigung meldet Anfang und Ende) und die Korrektur (ausgegraut, mit ihrem Grund, solange das laufende Diktat sie nicht ankündigt), dann „Zur Konfiguration zurückkehren“, das Diktat starten oder beenden, „Symbol beim Anmelden starten“ (ein XDG-Autostart-Eintrag) und das Symbol beenden. Das vom Symbol gestartete Diktat läuft ohne Terminal; seine Ausgabe geht nach `~/.local/state/vosk-cli-dictation/instance.log`. Auf einem Desktop ohne Benachrichtigungsbereich (GNOME ohne Erweiterung) sagt das Symbol einmal per Desktop-Benachrichtigung, wie „AppIndicator and KStatusNotifierItem Support“ aktiviert wird; die obigen Steuer-Unterbefehle funktionieren weiter.
 
-Aus einer Git-Kopie (das native Paket folgt mit einer späteren Version):
+Mit den nativen Paketen ist das Symbol ein zweites Paket in derselben Version wie das Hauptpaket:
+
+```bash
+# Debian 12+, Ubuntu 24.04+, Mint 22+...
+sudo apt install ./vosk-cli-dictation-tray_0.5.4~beta_all.deb
+# Fedora
+sudo dnf install ./vosk-cli-dictation-tray-0.5.4~beta-1.fc42.noarch.rpm
+# openSUSE Leap
+sudo zypper install ./vosk-cli-dictation-tray-0.5.4~beta-1.leap156.noarch.rpm
+# Arch Linux
+sudo pacman -U ./vosk-cli-dictation-tray-0.5.4_beta-1-any.pkg.tar.zst
+```
+
+Ihre Grafikbibliothek PySide6 wird bei der ersten Konfiguration mit `pip` in eine private virtuelle Umgebung installiert (nur dann ist Netzzugriff nötig); das Paket fügt außerdem einen Menüeintrag und einen Systemeintrag für die Anmeldung hinzu („Symbol beim Anmelden starten“ im Menü abzuwählen entfernt ihn für das eigene Konto). Aus einer Git-Kopie:
 
 ```bash
 cd ~/git/vosk-cli-dictation/vosk-cli-dictation/tray

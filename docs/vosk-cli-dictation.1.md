@@ -84,8 +84,8 @@ settings for control that works everywhere.
 # CONTROLLING A RUNNING SESSION
 
 Each of the following flags connects to the socket of the running session,
-performs the action, prints the resulting state (`OK DICTÉE`,
-`OK ÉCOUTE`, `OK VEILLE`) or `ERR <reason>`, and exits. They are meant to
+performs the action, prints the state the session reports as it receives the command (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE`; the action takes effect right after, and **\--status** then gives the new state) or `ERR <reason>`, and exits. They are meant to
 be bound to desktop keyboard shortcuts.
 
 **\--status**

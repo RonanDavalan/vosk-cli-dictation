@@ -63,8 +63,8 @@ raccourcis de votre environnement de bureau pour un contrôle qui marche partout
 # GESTION D'UNE SESSION EN COURS
 
 Chacun des drapeaux suivants se connecte à la socket de la session en cours,
-effectue l'action, affiche l'état résultant (`OK DICTÉE`,
-`OK ÉCOUTE`, `OK VEILLE`) ou `ERR <reason>`, puis se termine. Ils sont destinés à être
+effectue l'action, affiche l'état que la session annonce en recevant la commande (`OK DICTÉE`,
+`OK ÉCOUTE`, `OK VEILLE` ; l'action s'applique aussitôt après et **\--status** donne alors le nouvel état) ou `ERR <reason>`, puis se termine. Ils sont destinés à être
 associés à des raccourcis clavier de bureau.
 
 **\--status**
