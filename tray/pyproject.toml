@@ -1,0 +1,28 @@
+[project]
+name = "vosk-cli-dictation-tray"
+version = "0.1.0"
+description = "Notification-area microphone icon for vosk-cli-dictation: shows the dictation state and drives it through its control socket"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+    "PySide6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[project.scripts]
+vosk-cli-dictation-tray = "vosk_cli_dictation_tray.app:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["vosk_cli_dictation_tray*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
