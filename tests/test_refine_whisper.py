@@ -9,7 +9,7 @@ import pytest
 from src.refine import RefineUnavailable
 from src.refine import whisper_engine as we
 
-CORPUS = os.path.expanduser("~/git/vosk-cli-dictation/scripts/bench/moteurs")
+CORPUS = os.environ.get("VOSK_REFINE_TEST_CORPUS", "")
 WAV = os.path.join(CORPUS, "audio", "fr", "fr_FR-siwis-medium", "propre", "01.wav")
 REFERENCE = os.path.join(CORPUS, "corpus", "fr.tape.txt")
 
@@ -113,11 +113,11 @@ def _word_errors(reference, hypothesis):
 
 
 @pytest.mark.skipif(we.missing_module() is not None, reason="faster-whisper absent")
-@pytest.mark.skipif(not os.path.exists(WAV), reason="corpus du banc absent")
+@pytest.mark.skipif(not os.path.exists(WAV), reason="VOSK_REFINE_TEST_CORPUS ne désigne pas le corpus du banc")
 def test_transcribes_a_corpus_wav():
     """Sur fichier, aucune instance : le WAV de la première phrase du corpus
-    français. La taille et le dossier de poids se règlent par
-    VOSK_REFINE_TEST_SIZE et VOSK_REFINE_TEST_MODELS."""
+    français. Le dossier du corpus, la taille et le dossier de poids se règlent par
+    VOSK_REFINE_TEST_CORPUS, VOSK_REFINE_TEST_SIZE et VOSK_REFINE_TEST_MODELS."""
     size = os.environ.get("VOSK_REFINE_TEST_SIZE", "tiny")
     directory = os.environ.get("VOSK_REFINE_TEST_MODELS") or None
     with wave.open(WAV, "rb") as w:
