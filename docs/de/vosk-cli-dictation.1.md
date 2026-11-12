@@ -93,7 +93,7 @@ an Tastenkombinationen auf dem Desktop gebunden werden.
 **\--stop**
 :   Beenden Sie die laufende Sitzung sauber.
 
-Zwei weitere Anfragen werden direkt in den Socket geschrieben (zum Beispiel
+Drei weitere Anfragen werden direkt in den Socket geschrieben (zum Beispiel
 `printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). Sie ändern eine
 laufende Sitzung ohne Neustart:
 
@@ -106,7 +106,11 @@ laufende Sitzung ohne Neustart:
 :   Wechselt zu einem installierten Modellordner aus dem Feld `models` von
     **\--info**.
 
-Beide antworten sofort `OK <Zustand>` oder `ERR bad-argument`, `ERR no-model`,
+`reset-selection`
+:   Vergisst die gespeicherte Auswahl und kehrt zu dem zurück, was `config.yaml`
+    oder die Systemsprache ergibt. Sie nimmt kein Argument.
+
+Alle drei antworten sofort `OK <Zustand>` oder `ERR bad-argument`, `ERR no-model`,
 `ERR busy`. Schlägt das Laden fehl, bleibt das aktuelle Modell, und `last_error`
 in **\--info** nennt den Grund. Die Auswahl wird in `selection.yaml` gespeichert.
 
@@ -262,6 +266,8 @@ vosk-cli-dictation --lang en
 ```
 
 # SIEHE AUCH
+
+**vosk-cli-dictation-tray**(1), das Symbol im Benachrichtigungsbereich.
 
 Vosk-Modelle und Downloads: *https://alphacephei.com/vosk/models*
 

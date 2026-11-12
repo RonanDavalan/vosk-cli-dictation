@@ -95,7 +95,7 @@ ser asignadas a atajos de teclado del escritorio.
 **\--stop**
 :   Cerrar la sesión en ejecución de forma limpia.
 
-Dos peticiones más se escriben directamente en el socket (por ejemplo
+Tres peticiones más se escriben directamente en el socket (por ejemplo
 `printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). Cambian una
 sesión en curso sin reiniciarla:
 
@@ -108,7 +108,11 @@ sesión en curso sin reiniciarla:
 :   Pasa a una carpeta de modelo instalada, de la lista del campo `models` de
     **\--info**.
 
-Ambas responden enseguida `OK <estado>`, o `ERR bad-argument`, `ERR no-model`,
+`reset-selection`
+:   Olvida la elección recordada y vuelve a lo que dan `config.yaml` o el idioma
+    del sistema. No lleva argumento.
+
+Las tres responden enseguida `OK <estado>`, o `ERR bad-argument`, `ERR no-model`,
 `ERR busy`. Si la carga falla, se mantiene el modelo actual y `last_error` de
 **\--info** da el motivo. La elección se recuerda en `selection.yaml`.
 
@@ -265,6 +269,8 @@ vosk-cli-dictation --lang en
 ```
 
 # VEA TAMBIÉN
+
+**vosk-cli-dictation-tray**(1), el icono del área de notificación.
 
 Modelos de Vosk y descargas: *https://alphacephei.com/vosk/models*
 

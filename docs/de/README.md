@@ -181,7 +181,7 @@ printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictatio
 vosk-cli-dictation --info            # lang, model, models, loading, last_error…
 ```
 
-Fehler: `ERR bad-argument` (unbekanntes Argument), `ERR no-model` (für die Anfrage ist kein Modell installiert), `ERR busy` (ein Modell wird gerade geladen).
+Fehler: `ERR bad-argument` (unbekanntes Argument), `ERR no-model` (für die Anfrage ist kein Modell installiert), `ERR busy` (ein Modell wird gerade geladen). Eine dritte Anfrage ohne Argument, `reset-selection`, vergisst die gespeicherte Auswahl und kehrt zu dem zurück, was `config.yaml` oder die Systemsprache ergibt.
 
 ### Manuelle Befehle
 
@@ -190,6 +190,27 @@ Solange das Skript in einem Terminal läuft, können Sie auch diese Befehle eing
 *   `/cancel`: Beendet die laufende Aufnahmesitzung, ohne Text auszugeben.
 *   `/delete-word`: Löscht das zuletzt getippte Wort.
 *   `/nl`: Fügt einen Zeilenumbruch ein (simuliert die Eingabetaste).
+
+### Symbol im Benachrichtigungsbereich (optional)
+
+`vosk-cli-dictation-tray` ist ein eigenständiges Programm (Python und PySide6), das ein Mikrofon im Benachrichtigungsbereich zeigt und die laufende Sitzung über ihren Steuer-Socket bedient. Das Diktat braucht es nie und läuft ohne es genauso. Farbe und Form geben den Zustand an, sodass das Symbol auch für Farbfehlsichtige lesbar bleibt:
+
+*   **rotes Mikrofon mit Schallwellen**: `DICTÉE`, die Stimme wird getippt;
+*   **orangefarbenes Mikrofon**: `ÉCOUTE`, das Mikrofon ist offen, das Diktat ist aus, die Weckphrase wird erwartet;
+*   **blaues Mikrofon unter einer Mondsichel**: `VEILLE`, das Mikrofon ist freigegeben;
+*   **grünes Mikrofon als Umriss**: kein Diktat läuft; ein Klick startet es.
+
+Ein Linksklick startet das Diktat, wenn es aus ist, und schaltet es sonst um. Das Menü des Rechtsklicks startet oder beendet das Diktat, versetzt es in den Tiefschlaf oder weckt es, beendet und kopiert den Text, bricht die Sitzung ab und wählt die Sprache (dem System folgen oder eine der vier; eine Sprache ohne Modell ist als „zum Herunterladen“ markiert), das Modell (leicht oder vollständig, mit seiner Größe, wenn es fehlt; der Download startet im Menü und eine Benachrichtigung meldet sein Ende), die Verfeinerung und die Korrektur (ausgegraut, mit ihrem Grund, solange das laufende Diktat sie nicht ankündigt), dann „Zur Konfiguration zurückkehren“, das Diktat starten oder beenden, „Symbol beim Anmelden starten“ (ein XDG-Autostart-Eintrag) und das Symbol beenden. Das vom Symbol gestartete Diktat läuft ohne Terminal; seine Ausgabe geht nach `~/.local/state/vosk-cli-dictation/instance.log`. Auf einem Desktop ohne Benachrichtigungsbereich (GNOME ohne Erweiterung) sagt das Symbol einmal per Desktop-Benachrichtigung, wie „AppIndicator and KStatusNotifierItem Support“ aktiviert wird; die obigen Steuer-Unterbefehle funktionieren weiter.
+
+Aus einer Git-Kopie (das native Paket folgt mit einer späteren Version):
+
+```bash
+cd ~/git/vosk-cli-dictation/vosk-cli-dictation/tray
+python3 -m venv venv && venv/bin/pip install -e .
+venv/bin/vosk-cli-dictation-tray
+```
+
+Optionen: `--socket PFAD` (den Socket eines anderen Diktats bedienen), `--dictation-command BEFEHL` (wie das Symbol das Diktat startet), `--version`. Siehe `man vosk-cli-dictation-tray` (`docs/de/vosk-cli-dictation-tray.1.md`).
 
 ### Anpassung
 

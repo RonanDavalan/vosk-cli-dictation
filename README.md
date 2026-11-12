@@ -181,7 +181,7 @@ printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictatio
 vosk-cli-dictation --info            # lang, model, models, loading, last_error…
 ```
 
-Errors: `ERR bad-argument` (unknown argument), `ERR no-model` (no model installed for the request), `ERR busy` (a model is still loading).
+Errors: `ERR bad-argument` (unknown argument), `ERR no-model` (no model installed for the request), `ERR busy` (a model is still loading). A third request without argument, `reset-selection`, forgets the remembered choice and goes back to what `config.yaml` or the system language gives.
 
 ### Manual Commands
 
@@ -190,6 +190,27 @@ While the script is running in a terminal, you can also type these commands and 
 *   `/cancel`: Stops the current recording session without outputting text.
 *   `/delete-word`: Deletes the last typed word.
 *   `/nl`: Inserts a new line (simulates pressing the Enter key).
+
+### Notification-Area Icon (optional)
+
+`vosk-cli-dictation-tray` is a separate program (Python and PySide6) that shows a microphone in the notification area and drives the running session through its control socket. The dictation never needs it and runs the same without it. Colour and shape give the state, so the icon stays readable for colour-blind users:
+
+*   **red microphone with sound waves**: `DICTÉE`, the voice is typed;
+*   **orange microphone**: `ÉCOUTE`, the microphone is open, dictation is off, the wake phrase is awaited;
+*   **blue microphone under a crescent moon**: `VEILLE`, the microphone is released;
+*   **green outlined microphone**: no dictation is running; a click launches it.
+
+A left click launches the dictation when it is off and toggles it otherwise. The right-click menu starts or stops dictation, sleeps or wakes it, finishes and copies the text, cancels the session, and chooses the language (follow the system or one of the four; a language without a model is marked "to download"), the model (light or full, with its size when it is missing; the download starts from the menu and a notification tells when it ends), the refinement and the correction (greyed, with their reason, until the running dictation announces them), then "Revert to the configuration", launching or quitting the dictation, "Launch the icon at login" (an XDG Autostart entry) and quitting the icon. The dictation launched from the icon runs detached from any terminal; its output goes to `~/.local/state/vosk-cli-dictation/instance.log`. On a desktop with no notification area (GNOME without an extension), the icon says once, as a desktop notification, how to enable "AppIndicator and KStatusNotifierItem Support"; the control subcommands above keep working.
+
+From a Git checkout (the native package comes with a later release):
+
+```bash
+cd ~/git/vosk-cli-dictation/vosk-cli-dictation/tray
+python3 -m venv venv && venv/bin/pip install -e .
+venv/bin/vosk-cli-dictation-tray
+```
+
+Options: `--socket PATH` (drive another dictation's socket), `--dictation-command COMMAND` (how the icon launches the dictation), `--version`. See `man vosk-cli-dictation-tray` (`docs/vosk-cli-dictation-tray.1.md`).
 
 ### Customization
 

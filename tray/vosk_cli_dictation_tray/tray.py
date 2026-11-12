@@ -99,7 +99,7 @@ class DictationTray(QSystemTrayIcon):
     def _state_label(self, state) -> str:
         t = self._t
         return {"DICTÉE": t("Dictating"), "ÉCOUTE": t("Listening"),
-                "VEILLE": t("Standby")}.get(state, state or "")
+                "VEILLE": t("Deep sleep")}.get(state, state or "")
 
     def _engine_label(self, info: dict) -> str:
         t = self._t
@@ -184,7 +184,7 @@ class DictationTray(QSystemTrayIcon):
 
         self.a_dictation.setText(t("Turn dictation off") if state == "DICTÉE"
                                  else t("Turn dictation on"))
-        self.a_sleep.setText(t("Wake up") if state == "VEILLE" else t("Put to sleep"))
+        self.a_sleep.setText(t("Leave deep sleep") if state == "VEILLE" else t("Enter deep sleep"))
         self.a_finalize.setText(t("Finish and copy the text"))
         self.a_cancel.setText(t("Cancel the session"))
         self.a_dictation.setEnabled(running)
@@ -353,7 +353,7 @@ class DictationTray(QSystemTrayIcon):
             if process.state() == QProcess.ProcessState.NotRunning else None)
         self._download = process
         process.start()
-        self._notify(t("Downloading the {size} model for {language}…").format(
+        self._notify(t("Downloading the model ({size}, {language})…").format(
             size=t("full") if size == "big" else t("light"),
             language=self._language_name(lang)))
 
@@ -364,7 +364,7 @@ class DictationTray(QSystemTrayIcon):
         self._download.deleteLater()
         self._download = None
         if code == 0 and status == QProcess.ExitStatus.NormalExit:
-            self._notify(t("Model download finished: {size} model, {language}.").format(
+            self._notify(t("Model download finished ({size}, {language}).").format(
                 size=t("full") if size == "big" else t("light"),
                 language=self._language_name(lang)))
         else:
