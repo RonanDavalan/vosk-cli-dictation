@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 11:47+0100\n"
+"POT-Creation-Date: 2026-11-12 13:51+0100\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: de\n"
@@ -25,8 +25,8 @@ msgstr "Kritischer Fehler bei der Audio-Initialisierung:"
 #: src/audio_capture.py:63
 msgid "TIP: This can happen if no microphone is connected or selected."
 msgstr ""
-"TIPP: Das kann passieren, wenn kein Mikrofon angeschlossen oder ausgewählt "
-"ist."
+"TIPP: Das kann passieren, wenn kein Mikrofon angeschlossen oder "
+"ausgewählt ist."
 
 #: src/audio_capture.py:64
 msgid "Check your system audio settings (e.g., with pavucontrol)."
@@ -99,11 +99,12 @@ msgstr "nicht gefunden"
 msgid "Selected values (value, origin)"
 msgstr "Gewählte Werte (Wert, Herkunft)"
 
-#: src/diagnose.py:57
+#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:133
 msgid "Language"
 msgstr "Sprache"
 
 #: src/diagnose.py:60 src/diagnose.py:63
+#: tray/vosk_cli_dictation_tray/tray.py:143
 msgid "Model"
 msgstr "Modell"
 
@@ -188,16 +189,16 @@ msgstr "Alle Prüfungen bestanden."
 msgid "Some checks failed (see !! above)."
 msgstr "Einige Prüfungen sind fehlgeschlagen (siehe !! oben)."
 
-#: src/engine_switch.py:134 src/recognition.py:139
+#: src/engine_switch.py:149 src/recognition.py:139
 msgid "Attempting to load model:"
 msgstr "Versuch, das Modell zu laden:"
 
-#: src/engine_switch.py:142
+#: src/engine_switch.py:157
 #, python-brace-format
 msgid "Model change failed, keeping the current model: {error}"
 msgstr "Modellwechsel fehlgeschlagen, das aktuelle Modell bleibt: {error}"
 
-#: src/engine_switch.py:171
+#: src/engine_switch.py:187
 #, python-brace-format
 msgid "Model switched: {model_name}"
 msgstr "Modell gewechselt: {model_name}"
@@ -215,9 +216,9 @@ msgid ""
 "Global hotkeys via pynput are disabled on this session; use the CLI "
 "subcommands bound to your desktop shortcuts."
 msgstr ""
-"Globale Tastenkombinationen über pynput sind in dieser Sitzung deaktiviert;"
-" verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-Verknüpfungen "
-"gebunden sind."
+"Globale Tastenkombinationen über pynput sind in dieser Sitzung "
+"deaktiviert; verwenden Sie die CLI-Unterbefehle, die an Ihre Desktop-"
+"Verknüpfungen gebunden sind."
 
 #: src/keyboard_listener.py:43 src/keyboard_listener.py:50
 #: src/keyboard_listener.py:126
@@ -231,8 +232,9 @@ msgstr ""
 
 #: src/keyboard_listener.py:56
 msgid ""
-"Global hotkeys via pynput only reach windows running through XWayland; bind"
-" the CLI subcommands to your desktop shortcuts for native Wayland windows."
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
 msgstr ""
 "Globale Tastenkombinationen über pynput erreichen nur Fenster, die über "
 "XWayland laufen; binden Sie die CLI-Unterbefehle an Ihre Desktop-"
@@ -247,8 +249,8 @@ msgid ""
 "interaction.mode is \"maintenue\" but hotkeys.push_to_talk is missing or "
 "invalid; push-to-talk disabled."
 msgstr ""
-"interaction.mode ist „maintenue“, aber hotkeys.push_to_talk fehlt oder ist "
-"ungültig; Push-to-Talk deaktiviert."
+"interaction.mode ist „maintenue“, aber hotkeys.push_to_talk fehlt oder "
+"ist ungültig; Push-to-Talk deaktiviert."
 
 #: src/keyboard_listener.py:161
 msgid "Push-to-talk listener could not start:"
@@ -258,8 +260,8 @@ msgstr "Push-to-Talk-Listener konnte nicht gestartet werden:"
 #, python-brace-format
 msgid "  - Hold [{key}] to dictate; release to stop and copy."
 msgstr ""
-"  - Halten Sie [{key}] gedrückt, um zu diktieren; loslassen, um zu stoppen "
-"und zu kopieren."
+"  - Halten Sie [{key}] gedrückt, um zu diktieren; loslassen, um zu "
+"stoppen und zu kopieren."
 
 #: src/main.py:89
 #, python-brace-format
@@ -272,8 +274,8 @@ msgstr ""
 
 #: src/main.py:90 src/main.py:97 src/main.py:103
 msgid ""
-"  - Hotkeys reach the focused window and miss native-Wayland windows; use "
-"--finalize."
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
 msgstr ""
 "  - Tastenkombinationen erreichen das fokussierte Fenster und verfehlen "
 "native Wayland-Fenster; verwenden Sie --finalize."
@@ -287,8 +289,8 @@ msgstr "  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu star
 #, python-brace-format
 msgid ""
 "  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
-"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to "
-"stop early."
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
 msgstr ""
 "  - Stoppt und kopiert sich nach {timeout_ms} ms Stille von selbst, oder "
 "sagen Sie „{stop_phrase}“ / drücken Sie {hotkey} / führen Sie „vosk-cli-"
@@ -307,8 +309,8 @@ msgid ""
 "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
 "--finalize' to stop and copy."
 msgstr ""
-"  - Sagen Sie „{stop_phrase}“, drücken Sie {hotkey}, oder führen Sie „vosk-"
-"cli-dictation --finalize“ aus, um zu stoppen und zu kopieren."
+"  - Sagen Sie „{stop_phrase}“, drücken Sie {hotkey}, oder führen Sie "
+"„vosk-cli-dictation --finalize“ aus, um zu stoppen und zu kopieren."
 
 #: src/main.py:108
 #, python-brace-format
@@ -398,7 +400,9 @@ msgstr "die laufende Sitzung beenden"
 
 #: src/main.py:220
 msgid "print the full state of the running session as one JSON line"
-msgstr "gibt den vollständigen Zustand der laufenden Sitzung als eine JSON-Zeile aus"
+msgstr ""
+"gibt den vollständigen Zustand der laufenden Sitzung als eine JSON-Zeile "
+"aus"
 
 #: src/main.py:221
 msgid "check the environment and exit"
@@ -410,7 +414,9 @@ msgstr "lädt das Modell für LANG (oder die aktuelle Sprache) herunter und been
 
 #: src/main.py:225
 msgid "with --download-model: small (default) or big (full) model"
-msgstr "mit --download-model: kleines (Standard) oder großes (vollständiges) Modell"
+msgstr ""
+"mit --download-model: kleines (Standard) oder großes (vollständiges) "
+"Modell"
 
 #: src/main.py:241
 msgid "No running vosk-cli-dictation session."
@@ -433,8 +439,8 @@ msgid ""
 "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
 "also works."
 msgstr ""
-"Installieren Sie 'wtype' + 'wl-clipboard' (Wayland) oder 'xdotool' (X11); "
-"'ydotool' funktioniert auch."
+"Installieren Sie 'wtype' + 'wl-clipboard' (Wayland) oder 'xdotool' (X11);"
+" 'ydotool' funktioniert auch."
 
 #: src/main.py:268
 msgid "'paplay' not found. Sound notifications will be disabled."
@@ -457,8 +463,8 @@ msgstr "Fehlgeschlagen. Versuch, das Standardmodell zu laden: {model_name}"
 #: src/main.py:282
 #, python-brace-format
 msgid ""
-"No speech recognition model could be loaded. Download the small model for "
-"'{lang}' now? [y/N] "
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
 msgstr ""
 "Es konnte kein Spracherkennungsmodell geladen werden. Jetzt das kleine "
 "Modell für '{lang}' herunterladen? [j/N] "
@@ -500,8 +506,8 @@ msgstr "Modellverzeichnis: {path}"
 #: src/main.py:383
 #, python-brace-format
 msgid ""
-"Your config.yaml predates newer options (schema {current}); see the manual "
-"for what changed. File: {path}"
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
 msgstr ""
 "Ihre config.yaml stammt von vor neueren Optionen (Schema {current}); im "
 "Handbuch steht, was sich geändert hat. Datei: {path}"
@@ -550,7 +556,9 @@ msgstr "{url} wird heruntergeladen ({size:.0f} MB)..."
 
 #: src/model_download.py:132
 #, python-brace-format
-msgid "Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed."
+msgid ""
+"Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB "
+"needed."
 msgstr ""
 "Nicht genug Speicherplatz in {path}: {free:.0f} MB frei, {needed:.0f} MB "
 "nötig."
@@ -727,8 +735,8 @@ msgid ""
 "Heard the stop phrase but confidence was low. Repeat it, or use the stop "
 "hotkey / --finalize."
 msgstr ""
-"Stoppwort gehört, aber die Konfidenz war niedrig. Wiederholen Sie es, oder "
-"verwenden Sie die Stopp-Taste / --finalize."
+"Stoppwort gehört, aber die Konfidenz war niedrig. Wiederholen Sie es, "
+"oder verwenden Sie die Stopp-Taste / --finalize."
 
 #: src/ui.py:236
 msgid "Warning: xdotool failed. Switching to log-only mode."
@@ -746,11 +754,213 @@ msgstr "[Eingeschränkter Modus] Hinzugefügt:"
 msgid "Stopping user interface..."
 msgstr "Benutzeroberfläche wird beendet..."
 
+#: tray/vosk_cli_dictation_tray/app.py:43
+msgid "The icon is already running."
+msgstr "Das Symbol läuft bereits."
+
+#: tray/vosk_cli_dictation_tray/app.py:48
+msgid ""
+"No notification area found. On GNOME, enable the 'AppIndicator and "
+"KStatusNotifierItem Support' extension; desktop shortcuts on the control "
+"socket keep working."
+msgstr ""
+"Kein Benachrichtigungsbereich gefunden. Aktivieren Sie unter GNOME die "
+"Erweiterung „AppIndicator and KStatusNotifierItem Support“; die "
+"Tastenkürzel des Desktops über den Steuer-Socket funktionieren weiterhin."
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "French"
+msgstr "Französisch"
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "English"
+msgstr "Englisch"
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "German"
+msgstr "Deutsch"
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "Spanish"
+msgstr "Spanisch"
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Dictating"
+msgstr "Diktat"
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Listening"
+msgstr "Zuhören"
+
+#: tray/vosk_cli_dictation_tray/tray.py:102
+msgid "Deep sleep"
+msgstr "Tiefschlaf"
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk full"
+msgstr "Vosk vollständig"
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk light"
+msgstr "Vosk leicht"
+
+#: tray/vosk_cli_dictation_tray/tray.py:117
+msgid "Dictation not running"
+msgstr "Diktat nicht gestartet"
+
+#: tray/vosk_cli_dictation_tray/tray.py:124
+#, python-brace-format
+msgid "to download, {size}"
+msgstr "zum Herunterladen, {size}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:125
+msgid "to download"
+msgstr "zum Herunterladen"
+
+#: tray/vosk_cli_dictation_tray/tray.py:135
+#, python-brace-format
+msgid "Follow the system ({language})"
+msgstr "Dem System folgen ({language})"
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Light model"
+msgstr "Leichtes Modell"
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Full model"
+msgstr "Vollständiges Modell"
+
+#: tray/vosk_cli_dictation_tray/tray.py:150
+msgid "Revert to the configuration"
+msgstr "Zur Konfiguration zurückkehren"
+
+#: tray/vosk_cli_dictation_tray/tray.py:151
+msgid "Launch the icon at login"
+msgstr "Symbol beim Anmelden starten"
+
+#: tray/vosk_cli_dictation_tray/tray.py:152
+msgid "Quit the icon"
+msgstr "Symbol beenden"
+
+#: tray/vosk_cli_dictation_tray/tray.py:176
+msgid "Loading model…"
+msgstr "Modell wird geladen…"
+
+#: tray/vosk_cli_dictation_tray/tray.py:185
+msgid "Turn dictation off"
+msgstr "Diktat ausschalten"
+
+#: tray/vosk_cli_dictation_tray/tray.py:186
+msgid "Turn dictation on"
+msgstr "Diktat einschalten"
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Leave deep sleep"
+msgstr "Tiefschlaf verlassen"
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Enter deep sleep"
+msgstr "In den Tiefschlaf wechseln"
+
+#: tray/vosk_cli_dictation_tray/tray.py:188
+msgid "Finish and copy the text"
+msgstr "Beenden und Text kopieren"
+
+#: tray/vosk_cli_dictation_tray/tray.py:189
+msgid "Cancel the session"
+msgstr "Sitzung abbrechen"
+
+#: tray/vosk_cli_dictation_tray/tray.py:208
+msgid "Refinement"
+msgstr "Verfeinerung"
+
+#: tray/vosk_cli_dictation_tray/tray.py:211
+msgid "Correction"
+msgstr "Korrektur"
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Quit dictation"
+msgstr "Diktat beenden"
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Launch dictation"
+msgstr "Diktat starten"
+
+#: tray/vosk_cli_dictation_tray/tray.py:220
+msgid "None"
+msgstr "Keine"
+
+#: tray/vosk_cli_dictation_tray/tray.py:238
+msgid "not available in this dictation"
+msgstr "in diesem Diktat nicht verfügbar"
+
+#: tray/vosk_cli_dictation_tray/tray.py:265
+#, python-brace-format
+msgid "Dictation error: {error}"
+msgstr "Diktatfehler: {error}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:310
+msgid "The dictation does not answer."
+msgstr "Das Diktat antwortet nicht."
+
+#: tray/vosk_cli_dictation_tray/tray.py:313
+msgid "A model is loading, try again in a moment."
+msgstr "Ein Modell wird geladen, versuchen Sie es gleich noch einmal."
+
+#: tray/vosk_cli_dictation_tray/tray.py:314
+msgid "No model is installed for this choice."
+msgstr "Für diese Auswahl ist kein Modell installiert."
+
+#: tray/vosk_cli_dictation_tray/tray.py:315
+#, python-brace-format
+msgid "The dictation refused the request ({reason})."
+msgstr "Das Diktat hat die Anfrage abgelehnt ({reason})."
+
+#: tray/vosk_cli_dictation_tray/tray.py:324
+#: tray/vosk_cli_dictation_tray/tray.py:338
+msgid "The dictation program was not found."
+msgstr "Das Diktatprogramm wurde nicht gefunden."
+
+#: tray/vosk_cli_dictation_tray/tray.py:329
+#, python-brace-format
+msgid "Could not launch the dictation: {error}"
+msgstr "Das Diktat konnte nicht gestartet werden: {error}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:334
+msgid "A model download is already running."
+msgstr "Ein Modelldownload läuft bereits."
+
+#: tray/vosk_cli_dictation_tray/tray.py:356
+#, python-brace-format
+msgid "Downloading the model ({size}, {language})…"
+msgstr "Das Modell ({size}, {language}) wird heruntergeladen…"
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "full"
+msgstr "vollständig"
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "light"
+msgstr "leicht"
+
+#: tray/vosk_cli_dictation_tray/tray.py:367
+#, python-brace-format
+msgid "Model download finished ({size}, {language})."
+msgstr "Modelldownload abgeschlossen ({size}, {language})."
+
+#: tray/vosk_cli_dictation_tray/tray.py:371
+#, python-brace-format
+msgid "Model download failed (see {log})."
+msgstr "Modelldownload fehlgeschlagen (siehe {log})."
+
 #~ msgid "Error in recognition thread:"
 #~ msgstr "Fehler im Erkennungs-Thread:"
 
 #~ msgid "download the small model for LANG (or the current language) and exit"
 #~ msgstr ""
-#~ "das kleine Modell für LANG (oder die"
-#~ " aktuelle Sprache) herunterladen und beenden"
+#~ "das kleine Modell für LANG (oder "
+#~ "die aktuelle Sprache) herunterladen und "
+#~ "beenden"
 

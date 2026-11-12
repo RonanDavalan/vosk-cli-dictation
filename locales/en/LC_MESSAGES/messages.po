@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 11:47+0100\n"
+"POT-Creation-Date: 2026-11-12 13:51+0100\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: en\n"
@@ -95,11 +95,12 @@ msgstr "not found"
 msgid "Selected values (value, origin)"
 msgstr "Selected values (value, origin)"
 
-#: src/diagnose.py:57
+#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:133
 msgid "Language"
 msgstr "Language"
 
 #: src/diagnose.py:60 src/diagnose.py:63
+#: tray/vosk_cli_dictation_tray/tray.py:143
 msgid "Model"
 msgstr "Model"
 
@@ -184,16 +185,16 @@ msgstr "All checks passed."
 msgid "Some checks failed (see !! above)."
 msgstr "Some checks failed (see !! above)."
 
-#: src/engine_switch.py:134 src/recognition.py:139
+#: src/engine_switch.py:149 src/recognition.py:139
 msgid "Attempting to load model:"
 msgstr "Attempting to load model:"
 
-#: src/engine_switch.py:142
+#: src/engine_switch.py:157
 #, python-brace-format
 msgid "Model change failed, keeping the current model: {error}"
 msgstr "Model change failed, keeping the current model: {error}"
 
-#: src/engine_switch.py:171
+#: src/engine_switch.py:187
 #, python-brace-format
 msgid "Model switched: {model_name}"
 msgstr "Model switched: {model_name}"
@@ -225,11 +226,13 @@ msgstr ""
 
 #: src/keyboard_listener.py:56
 msgid ""
-"Global hotkeys via pynput only reach windows running through XWayland; bind"
-" the CLI subcommands to your desktop shortcuts for native Wayland windows."
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
 msgstr ""
-"Global hotkeys via pynput only reach windows running through XWayland; bind"
-" the CLI subcommands to your desktop shortcuts for native Wayland windows."
+"Global hotkeys via pynput only reach windows running through XWayland; "
+"bind the CLI subcommands to your desktop shortcuts for native Wayland "
+"windows."
 
 #: src/keyboard_listener.py:69 src/recognition.py:289 src/recognition.py:314
 msgid "Control queue full; the UI thread is not responding."
@@ -263,11 +266,11 @@ msgstr ""
 
 #: src/main.py:90 src/main.py:97 src/main.py:103
 msgid ""
-"  - Hotkeys reach the focused window and miss native-Wayland windows; use "
-"--finalize."
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
 msgstr ""
-"  - Hotkeys reach the focused window and miss native-Wayland windows; use "
-"--finalize."
+"  - Hotkeys reach the focused window and miss native-Wayland windows; use"
+" --finalize."
 
 #: src/main.py:95
 #, python-brace-format
@@ -278,12 +281,12 @@ msgstr "  - Say '{wake_phrase}' or press {hotkey} to start."
 #, python-brace-format
 msgid ""
 "  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
-"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to "
-"stop early."
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
 msgstr ""
 "  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
-"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to "
-"stop early."
+"'{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to"
+" stop early."
 
 #: src/main.py:101
 #, python-brace-format
@@ -446,11 +449,11 @@ msgstr "Failed. Attempting to load default model: {model_name}"
 #: src/main.py:282
 #, python-brace-format
 msgid ""
-"No speech recognition model could be loaded. Download the small model for "
-"'{lang}' now? [y/N] "
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
 msgstr ""
-"No speech recognition model could be loaded. Download the small model for "
-"'{lang}' now? [y/N] "
+"No speech recognition model could be loaded. Download the small model for"
+" '{lang}' now? [y/N] "
 
 #: src/main.py:289
 msgid "No speech recognition model could be loaded."
@@ -483,11 +486,11 @@ msgstr "Model directory: {path}"
 #: src/main.py:383
 #, python-brace-format
 msgid ""
-"Your config.yaml predates newer options (schema {current}); see the manual "
-"for what changed. File: {path}"
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
 msgstr ""
-"Your config.yaml predates newer options (schema {current}); see the manual "
-"for what changed. File: {path}"
+"Your config.yaml predates newer options (schema {current}); see the "
+"manual for what changed. File: {path}"
 
 #: src/main.py:388
 #, python-brace-format
@@ -533,8 +536,12 @@ msgstr "Downloading {url} ({size:.0f} MB)..."
 
 #: src/model_download.py:132
 #, python-brace-format
-msgid "Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed."
-msgstr "Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed."
+msgid ""
+"Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB "
+"needed."
+msgstr ""
+"Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB "
+"needed."
 
 #: src/model_download.py:141
 #, python-brace-format
@@ -716,6 +723,207 @@ msgstr "[Degraded Mode] Added:"
 #: src/ui.py:321
 msgid "Stopping user interface..."
 msgstr "Stopping user interface..."
+
+#: tray/vosk_cli_dictation_tray/app.py:43
+msgid "The icon is already running."
+msgstr "The icon is already running."
+
+#: tray/vosk_cli_dictation_tray/app.py:48
+msgid ""
+"No notification area found. On GNOME, enable the 'AppIndicator and "
+"KStatusNotifierItem Support' extension; desktop shortcuts on the control "
+"socket keep working."
+msgstr ""
+"No notification area found. On GNOME, enable the 'AppIndicator and "
+"KStatusNotifierItem Support' extension; desktop shortcuts on the control "
+"socket keep working."
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "French"
+msgstr "French"
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "English"
+msgstr "English"
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "German"
+msgstr "German"
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "Spanish"
+msgstr "Spanish"
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Dictating"
+msgstr "Dictating"
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Listening"
+msgstr "Listening"
+
+#: tray/vosk_cli_dictation_tray/tray.py:102
+msgid "Deep sleep"
+msgstr "Deep sleep"
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk full"
+msgstr "Vosk full"
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk light"
+msgstr "Vosk light"
+
+#: tray/vosk_cli_dictation_tray/tray.py:117
+msgid "Dictation not running"
+msgstr "Dictation not running"
+
+#: tray/vosk_cli_dictation_tray/tray.py:124
+#, python-brace-format
+msgid "to download, {size}"
+msgstr "to download, {size}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:125
+msgid "to download"
+msgstr "to download"
+
+#: tray/vosk_cli_dictation_tray/tray.py:135
+#, python-brace-format
+msgid "Follow the system ({language})"
+msgstr "Follow the system ({language})"
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Light model"
+msgstr "Light model"
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Full model"
+msgstr "Full model"
+
+#: tray/vosk_cli_dictation_tray/tray.py:150
+msgid "Revert to the configuration"
+msgstr "Revert to the configuration"
+
+#: tray/vosk_cli_dictation_tray/tray.py:151
+msgid "Launch the icon at login"
+msgstr "Launch the icon at login"
+
+#: tray/vosk_cli_dictation_tray/tray.py:152
+msgid "Quit the icon"
+msgstr "Quit the icon"
+
+#: tray/vosk_cli_dictation_tray/tray.py:176
+msgid "Loading model…"
+msgstr "Loading model…"
+
+#: tray/vosk_cli_dictation_tray/tray.py:185
+msgid "Turn dictation off"
+msgstr "Turn dictation off"
+
+#: tray/vosk_cli_dictation_tray/tray.py:186
+msgid "Turn dictation on"
+msgstr "Turn dictation on"
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Leave deep sleep"
+msgstr "Leave deep sleep"
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Enter deep sleep"
+msgstr "Enter deep sleep"
+
+#: tray/vosk_cli_dictation_tray/tray.py:188
+msgid "Finish and copy the text"
+msgstr "Finish and copy the text"
+
+#: tray/vosk_cli_dictation_tray/tray.py:189
+msgid "Cancel the session"
+msgstr "Cancel the session"
+
+#: tray/vosk_cli_dictation_tray/tray.py:208
+msgid "Refinement"
+msgstr "Refinement"
+
+#: tray/vosk_cli_dictation_tray/tray.py:211
+msgid "Correction"
+msgstr "Correction"
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Quit dictation"
+msgstr "Quit dictation"
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Launch dictation"
+msgstr "Launch dictation"
+
+#: tray/vosk_cli_dictation_tray/tray.py:220
+msgid "None"
+msgstr "None"
+
+#: tray/vosk_cli_dictation_tray/tray.py:238
+msgid "not available in this dictation"
+msgstr "not available in this dictation"
+
+#: tray/vosk_cli_dictation_tray/tray.py:265
+#, python-brace-format
+msgid "Dictation error: {error}"
+msgstr "Dictation error: {error}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:310
+msgid "The dictation does not answer."
+msgstr "The dictation does not answer."
+
+#: tray/vosk_cli_dictation_tray/tray.py:313
+msgid "A model is loading, try again in a moment."
+msgstr "A model is loading, try again in a moment."
+
+#: tray/vosk_cli_dictation_tray/tray.py:314
+msgid "No model is installed for this choice."
+msgstr "No model is installed for this choice."
+
+#: tray/vosk_cli_dictation_tray/tray.py:315
+#, python-brace-format
+msgid "The dictation refused the request ({reason})."
+msgstr "The dictation refused the request ({reason})."
+
+#: tray/vosk_cli_dictation_tray/tray.py:324
+#: tray/vosk_cli_dictation_tray/tray.py:338
+msgid "The dictation program was not found."
+msgstr "The dictation program was not found."
+
+#: tray/vosk_cli_dictation_tray/tray.py:329
+#, python-brace-format
+msgid "Could not launch the dictation: {error}"
+msgstr "Could not launch the dictation: {error}"
+
+#: tray/vosk_cli_dictation_tray/tray.py:334
+msgid "A model download is already running."
+msgstr "A model download is already running."
+
+#: tray/vosk_cli_dictation_tray/tray.py:356
+#, python-brace-format
+msgid "Downloading the model ({size}, {language})…"
+msgstr "Downloading the model ({size}, {language})…"
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "full"
+msgstr "full"
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "light"
+msgstr "light"
+
+#: tray/vosk_cli_dictation_tray/tray.py:367
+#, python-brace-format
+msgid "Model download finished ({size}, {language})."
+msgstr "Model download finished ({size}, {language})."
+
+#: tray/vosk_cli_dictation_tray/tray.py:371
+#, python-brace-format
+msgid "Model download failed (see {log})."
+msgstr "Model download failed (see {log})."
 
 #~ msgid "Error in recognition thread:"
 #~ msgstr "Error in recognition thread:"

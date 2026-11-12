@@ -5,6 +5,9 @@
 #
 # Ce script compile les fichiers de traduction .po en fichiers .mo binaires
 # que Python peut utiliser. Il doit être exécuté depuis la racine du projet.
+# Avec l'argument « update », il extrait d'abord les chaînes de src/ et de
+# tray/ dans locales/messages.pot et fusionne le modèle dans chaque .po (les
+# chaînes nouvelles y arrivent vides, à traduire), puis compile.
 #
 # Il automatise :
 #   - La vérification des chemins nécessaires (locales, venv).
@@ -56,6 +59,13 @@ if ! command -v pybabel &> /dev/null; then
     echo -e "${RED}ERREUR : La commande 'pybabel' n'a pas été trouvée après activation du venv.${NC}"
     echo "Assurez-vous que Babel est bien installé dans votre venv ('pip install Babel')."
     exit 1
+fi
+
+# --- Étape facultative : extraire et fusionner (argument « update ») ---
+if [ "$1" = "update" ]; then
+    echo "Extraction des chaînes (src/ et tray/) puis fusion dans chaque .po..."
+    pybabel extract -F babel.cfg -k t -k _t -k translator -o "$LOCALES_DIR/messages.pot" . || exit 1
+    pybabel update --no-fuzzy-matching -i "$LOCALES_DIR/messages.pot" -d "$LOCALES_DIR" || exit 1
 fi
 
 # --- Étape 4 : Lancer la compilation ---

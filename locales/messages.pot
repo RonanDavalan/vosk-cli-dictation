@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2026-11-12 11:47+0100\n"
+"POT-Creation-Date: 2026-11-12 13:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,11 +94,12 @@ msgstr ""
 msgid "Selected values (value, origin)"
 msgstr ""
 
-#: src/diagnose.py:57
+#: src/diagnose.py:57 tray/vosk_cli_dictation_tray/tray.py:133
 msgid "Language"
 msgstr ""
 
 #: src/diagnose.py:60 src/diagnose.py:63
+#: tray/vosk_cli_dictation_tray/tray.py:143
 msgid "Model"
 msgstr ""
 
@@ -183,16 +184,16 @@ msgstr ""
 msgid "Some checks failed (see !! above)."
 msgstr ""
 
-#: src/engine_switch.py:134 src/recognition.py:139
+#: src/engine_switch.py:149 src/recognition.py:139
 msgid "Attempting to load model:"
 msgstr ""
 
-#: src/engine_switch.py:142
+#: src/engine_switch.py:157
 #, python-brace-format
 msgid "Model change failed, keeping the current model: {error}"
 msgstr ""
 
-#: src/engine_switch.py:171
+#: src/engine_switch.py:187
 #, python-brace-format
 msgid "Model switched: {model_name}"
 msgstr ""
@@ -682,5 +683,203 @@ msgstr ""
 
 #: src/ui.py:321
 msgid "Stopping user interface..."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/app.py:43
+msgid "The icon is already running."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/app.py:48
+msgid ""
+"No notification area found. On GNOME, enable the 'AppIndicator and "
+"KStatusNotifierItem Support' extension; desktop shortcuts on the control "
+"socket keep working."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "French"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:96
+msgid "English"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "German"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:97
+msgid "Spanish"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Dictating"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:101
+msgid "Listening"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:102
+msgid "Deep sleep"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk full"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:108
+msgid "Vosk light"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:117
+msgid "Dictation not running"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:124
+#, python-brace-format
+msgid "to download, {size}"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:125
+msgid "to download"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:135
+#, python-brace-format
+msgid "Follow the system ({language})"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Light model"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:145
+msgid "Full model"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:150
+msgid "Revert to the configuration"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:151
+msgid "Launch the icon at login"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:152
+msgid "Quit the icon"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:176
+msgid "Loading model…"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:185
+msgid "Turn dictation off"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:186
+msgid "Turn dictation on"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Leave deep sleep"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:187
+msgid "Enter deep sleep"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:188
+msgid "Finish and copy the text"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:189
+msgid "Cancel the session"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:208
+msgid "Refinement"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:211
+msgid "Correction"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Quit dictation"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:215
+msgid "Launch dictation"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:220
+msgid "None"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:238
+msgid "not available in this dictation"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:265
+#, python-brace-format
+msgid "Dictation error: {error}"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:310
+msgid "The dictation does not answer."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:313
+msgid "A model is loading, try again in a moment."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:314
+msgid "No model is installed for this choice."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:315
+#, python-brace-format
+msgid "The dictation refused the request ({reason})."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:324
+#: tray/vosk_cli_dictation_tray/tray.py:338
+msgid "The dictation program was not found."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:329
+#, python-brace-format
+msgid "Could not launch the dictation: {error}"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:334
+msgid "A model download is already running."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:356
+#, python-brace-format
+msgid "Downloading the model ({size}, {language})…"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "full"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:357
+#: tray/vosk_cli_dictation_tray/tray.py:368
+msgid "light"
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:367
+#, python-brace-format
+msgid "Model download finished ({size}, {language})."
+msgstr ""
+
+#: tray/vosk_cli_dictation_tray/tray.py:371
+#, python-brace-format
+msgid "Model download failed (see {log})."
 msgstr ""
 
