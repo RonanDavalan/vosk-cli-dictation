@@ -51,6 +51,11 @@ def test_system_language(monkeypatch):
 def test_size_format():
     assert format_size(41205931) == "41 MB"
     assert format_size(1523026348) == "1.5 GB"
+    assert format_size(41205931, "fr") == "41 Mo"
+    assert format_size(1523026348, "fr") == "1,5 Go"
+    assert format_size(1523026348, "de") == "1,5 GB"
+    assert format_size(1484681703, "es") == "1,5 GB"
+    assert format_size(1523026348, "en") == "1.5 GB"
     assert len(ARCHIVE_BYTES) == 8
 
 

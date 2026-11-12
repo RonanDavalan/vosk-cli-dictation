@@ -14,8 +14,16 @@ ARCHIVE_BYTES = {
 }
 
 
-def format_size(size_bytes: int) -> str:
-    """« 41 MB » sous le gigaoctet, « 1.5 GB » au-delà (unités décimales)."""
+_DECIMAL_COMMA = ("fr", "de", "es")
+_UNITS = {"fr": ("Mo", "Go")}
+
+
+def format_size(size_bytes: int, lang: str = "en") -> str:
+    """« 41 MB » sous le gigaoctet, « 1.5 GB » au-delà (unités décimales) ; en français
+    « 41 Mo » et « 1,5 Go », en allemand et en espagnol la virgule décimale."""
+    mega, giga = _UNITS.get(lang, ("MB", "GB"))
     if size_bytes >= 1_000_000_000:
-        return "{:.1f} GB".format(size_bytes / 1_000_000_000)
-    return "{:.0f} MB".format(size_bytes / 1_000_000)
+        text = "{:.1f} {}".format(size_bytes / 1_000_000_000, giga)
+    else:
+        text = "{:.0f} {}".format(size_bytes / 1_000_000, mega)
+    return text.replace(".", ",") if lang in _DECIMAL_COMMA else text

@@ -122,7 +122,7 @@ class DictationTray(QSystemTrayIcon):
 
     def _missing_suffix(self, lang: str, size: str) -> str:
         n = ARCHIVE_BYTES.get((lang, size))
-        return self._t("to download, {size}").format(size=format_size(n)) if n \
+        return self._t("to download, {size}").format(size=format_size(n, self._t.lang)) if n \
             else self._t("to download")
 
     def _refresh_texts(self) -> None:

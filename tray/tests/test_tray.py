@@ -194,6 +194,13 @@ def test_language_entries_and_choice(make):
     assert tray.a_lang["system"].isChecked()
 
 
+def test_missing_model_size_uses_the_language_units(make):
+    tray, _client, _ = make()
+    tray.on_info(info(lang="fr", langs=["fr"], models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
+    assert tray.a_model["big"].text() == "Modèle complet (à télécharger, 1,5 Go)"
+    assert tray.a_lang["es"].text() == "Espagnol (à télécharger, 40 Mo)"
+
+
 def test_model_entries_and_choice(make):
     tray, client, _ = make()
     tray.on_info(info(models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
