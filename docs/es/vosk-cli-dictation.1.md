@@ -12,9 +12,9 @@ vosk-cli-dictation: dictado de voz sin conexión para la línea de comandos, dis
 
 **vosk-cli-dictation** **\--diagnose**
 
-**vosk-cli-dictation** **\--download-model** [*LANG*]
+**vosk-cli-dictation** **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
-**vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
+**vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
 
 # DESCRIPCIÓN
 
@@ -41,8 +41,8 @@ funcione en todas partes.
 
 **-l** *LANG*, **--lang** *LANG*
 :   Fuerza el idioma de la interfaz y el reconocimiento de voz para esta sesión
-    (`en`, `fr`, `de` o `es`), sobrescribiendo el valor de `default_model`
-    del archivo de configuración. *LANG* debe coincidir con el nombre de uno de los
+    (`en`, `fr`, `de` o `es`), sobrescribiendo la elección recordada y el valor de
+    `default_model` del archivo de configuración. *LANG* debe coincidir con el nombre de uno de los
     modelos declarados en `vosk_models` en el archivo de configuración.
 
 **\--diagnose**
@@ -51,10 +51,15 @@ funcione en todas partes.
     cuando todas las verificaciones se aprueban.
 
 **\--download-model** [*LANG*]
-:   Descarga el modelo pequeño de Vosk para *LANG* (o el idioma actual si se
+:   Descarga el modelo de Vosk para *LANG* (o el idioma actual si se
     omite) en `~/.local/share/vosk-models/`, verificando su suma de
     comprobación, y luego sale. También se ofrece un modelo de forma
     interactiva en el primer inicio cuando no hay ninguno instalado.
+
+**\--model-size** *small*|*big*
+:   Con **\--download-model**: el modelo pequeño (por defecto) o el modelo
+    completo (de 1,4 a 1,9 GB según el idioma, unas tres veces ese tamaño de
+    espacio libre en disco mientras se descomprime).
 
 # CONTROLANDO UNA SESIÓN EN CURSO
 
@@ -65,6 +70,11 @@ ser asignadas a atajos de teclado del escritorio.
 
 **\--status**
 :   Imprimir el estado actual sin modificarlo.
+
+**\--info**
+:   Imprime el estado completo de la sesión en curso en una línea: `OK` seguido
+    de un objeto JSON (`state`, `lang`, `lang_source`, `langs`, `model`,
+    `models`, `loading`, `last_error`…).
 
 **\--toggle**
 :   Alterna entre el modo de dictado (DICTÉE) y el modo de escucha (ÉCOUTE).
@@ -84,6 +94,23 @@ ser asignadas a atajos de teclado del escritorio.
 
 **\--stop**
 :   Cerrar la sesión en ejecución de forma limpia.
+
+Dos peticiones más se escriben directamente en el socket (por ejemplo
+`printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). Cambian una
+sesión en curso sin reiniciarla:
+
+`set-lang` *fr*|*en*|*de*|*es*|*system*
+:   Cambia el idioma. El modelo de ese idioma, del tamaño actual si está
+    instalado, se carga en segundo plano y reemplaza al actual entre dos
+    enunciados.
+
+`set-model` *carpeta*
+:   Pasa a una carpeta de modelo instalada, de la lista del campo `models` de
+    **\--info**.
+
+Ambas responden enseguida `OK <estado>`, o `ERR bad-argument`, `ERR no-model`,
+`ERR busy`. Si la carga falla, se mantiene el modelo actual y `last_error` de
+**\--info** da el motivo. La elección se recuerda en `selection.yaml`.
 
 # COMANDOS DE VOZ
 
@@ -175,7 +202,12 @@ El archivo de configuración se encuentra mediante la primera regla que coincida
    `~/.config/vosk-cli-dictation/config.yaml`). Se crea automáticamente en la primera ejecución, a partir de la plantilla predeterminada, cuando se instala desde un paquete nativo.
 4. La plantilla predeterminada incluida en el paquete, de solo lectura.
 
-El idioma activo se elige, en el siguiente orden: la opción **--lang**, si se proporciona; de lo contrario, el idioma detectado por el sistema operativo; de lo contrario, el valor **`default_model`** del archivo de configuración.
+El idioma activo se elige, en el siguiente orden: la opción **\--lang**, si se
+indica; si no, la elección recordada (`selection.yaml`); si no, el valor
+`default_model` del archivo de configuración, donde `system` (valor de fábrica)
+significa el idioma de la sesión (`LC_ALL`, `LC_MESSAGES` y luego `LANG`) si hay
+un modelo instalado para él, y el inglés en caso contrario. **\--diagnose**
+muestra cada valor con su origen.
 
 Consulte **configuration.md** en la documentación del proyecto para obtener la
 referencia completa de cada clave de configuración.
@@ -196,6 +228,10 @@ referencia completa de cada clave de configuración.
 
 `vosk-model/`
 :   Ubicación predeterminada donde se buscan los modelos acústicos de Vosk cuando se ejecuta desde un repositorio Git.
+
+`~/.local/state/vosk-cli-dictation/selection.yaml`
+:   Idioma y modelo recordados de una sesión en curso; se lee en el siguiente
+    arranque. Borrarlo devuelve al archivo de configuración.
 
 `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
 :   Socket de control de la sesión en ejecución (modo `0600`). Se elimina al

@@ -12,9 +12,9 @@ vosk-cli-dictation - dictée vocale hors ligne, disponible pour tout le système
 
 vosk-cli-dictation **\--diagnose**
 
-vosk-cli-dictation **\--download-model** [*LANG*]
+vosk-cli-dictation **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
-vosk-cli-dictation {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop**}
+vosk-cli-dictation {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
 
 # DESCRIPTION
 
@@ -40,8 +40,8 @@ raccourcis de votre environnement de bureau pour un contrôle qui marche partout
 
 **-l** *LANG*, **\--lang** *LANG*
 :   Force la langue de l'interface et de la reconnaissance vocale pour cette session
-    (`en`, `fr`, `de` ou `es`), en remplaçant la valeur de `default_model`
-    depuis le fichier de configuration. *LANG* doit correspondre au nom d'un des
+    (`en`, `fr`, `de` ou `es`), en remplaçant le choix mémorisé et la valeur de
+    `default_model` du fichier de configuration. *LANG* doit correspondre au nom d'un des
     modèles déclarés sous `vosk_models` dans le fichier de configuration.
 
 **\--diagnose**
@@ -50,10 +50,15 @@ raccourcis de votre environnement de bureau pour un contrôle qui marche partout
     lorsque toutes les vérifications sont réussies.
 
 **\--download-model** [*LANG*]
-:   Télécharge le petit modèle Vosk pour *LANG* (ou la langue courante si
+:   Télécharge le modèle Vosk pour *LANG* (ou la langue courante si
     l'argument est omis) dans `~/.local/share/vosk-models/`, en vérifiant sa
     somme de contrôle, puis se termine. Un modèle est également proposé de
     façon interactive au premier lancement si aucun n'est installé.
+
+**\--model-size** *small*|*big*
+:   Avec **\--download-model** : le petit modèle (par défaut) ou le modèle
+    complet (de 1,4 à 1,9 Go selon la langue, environ trois fois plus d'espace
+    disque libre pendant la décompression).
 
 # GESTION D'UNE SESSION EN COURS
 
@@ -64,6 +69,11 @@ associés à des raccourcis clavier de bureau.
 
 **\--status**
 :   Afficher l'état actuel sans le modifier.
+
+**\--info**
+:   Afficher tout l'état de la session en cours sur une ligne : `OK` suivi d'un
+    objet JSON (`state`, `lang`, `lang_source`, `langs`, `model`, `models`,
+    `loading`, `last_error`…).
 
 **--toggle**
 :   Alterner entre la dictée (DICTÉE) et l'écoute (ÉCOUTE).
@@ -82,6 +92,23 @@ associés à des raccourcis clavier de bureau.
 
 **\--stop**
 :   Fermez proprement la session en cours.
+
+Deux requêtes de plus s'écrivent directement dans la socket (par exemple
+`printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`). Elles changent une
+session en cours sans la relancer :
+
+`set-lang` *fr*|*en*|*de*|*es*|*system*
+:   Change la langue. Le modèle de cette langue, à la taille actuelle s'il est
+    installé, se charge en arrière-plan et remplace l'actuel entre deux énoncés.
+
+`set-model` *dossier*
+:   Passe à un dossier de modèle installé, listé dans le champ `models` de
+    **\--info**.
+
+Les deux répondent tout de suite `OK <état>`, ou `ERR bad-argument`,
+`ERR no-model`, `ERR busy`. Si le chargement échoue, le modèle actuel reste et
+`last_error` de **\--info** donne la raison. Le choix est mémorisé dans
+`selection.yaml`.
 
 # COMMANDES VOCALES
 
@@ -162,9 +189,12 @@ Le fichier de configuration est trouvé selon la première règle correspondante
    `~/.config/vosk-cli-dictation/config.yaml`). Créé automatiquement lors de la première exécution, à partir du modèle par défaut, lorsque installé à partir d'un paquet natif.
 4. Le modèle par défaut fourni par le paquet, en lecture seule.
 
-La langue active est choisie, dans l'ordre suivant : l'**\--lang** option, si elle est spécifiée ;
-sinon, la langue détectée par le système d'exploitation ; sinon, la
-valeur **`default_model`** provenant du fichier de configuration.
+La langue active est choisie, dans l'ordre suivant : l'option **\--lang**, si elle est
+indiquée ; sinon le choix mémorisé (`selection.yaml`) ; sinon la valeur
+`default_model` du fichier de configuration, où `system` (valeur d'usine)
+désigne la langue de la session (`LC_ALL`, `LC_MESSAGES`, puis `LANG`) si un
+modèle de cette langue est installé, l'anglais sinon. **\--diagnose** affiche
+chaque valeur avec son origine.
 
 Consultez **configuration.md** dans la documentation du projet pour obtenir la
 référence complète de chaque clé de configuration.
@@ -186,6 +216,10 @@ référence complète de chaque clé de configuration.
 `vosk-model/`
 :   Emplacement par défaut recherché pour les modèles acoustiques Vosk lorsqu'ils sont utilisés
     à partir d'une branche Git.
+
+`~/.local/state/vosk-cli-dictation/selection.yaml`
+:   Langue et modèle mémorisés depuis une session en cours ; lu au lancement
+    suivant. Le supprimer revient au fichier de configuration.
 
 `$XDG_RUNTIME_DIR/vosk-cli-dictation.sock`
 :   Socket de contrôle de la session en cours (mode `0600`). Supprimé lors d'une

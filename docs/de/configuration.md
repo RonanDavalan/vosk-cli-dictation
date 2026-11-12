@@ -8,9 +8,11 @@ Die Anwendung wählt die zu verwendende Sprache anhand folgender Prioritätsreih
 
 1.  **Befehlszeilenargument (höchste Priorität):** Die Verwendung des Flags `-l` oder `--lang` (z. B. `python src/main.py -l en`) überschreibt immer alle anderen Einstellungen.
 
-2. **Systemsprache (Automatische Erkennung):** Wenn kein Sprachparameter angegeben wird, erkennt die Anwendung automatisch die Sprache Ihres Betriebssystems.
+2. **Gemerkte Auswahl:** Die Sprache oder das Modell, das aus einer laufenden Sitzung gewählt wurde (`set-lang`, `set-model`), gespeichert in `~/.local/state/vosk-cli-dictation/selection.yaml`. Das Programm schreibt `config.yaml` nie um.
 
-3.  **`default_model` Einstellung (Fallback):** Wenn die Sprache des Systems nicht ermittelt werden kann, verwendet die Anwendung das in der `default_model` Einstellung angegebene Modell als letzte Ausweichoption.
+3.  **Einstellung `default_model`:** ein Sprachcode aus `config.yaml`. Mit `system` (Werkswert, gilt auch, wenn der Schlüssel fehlt) folgt die Anwendung der Sprache der Sitzung (`LC_ALL`, `LC_MESSAGES`, dann `LANG`), wenn ein Modell dafür installiert ist, andernfalls verwendet sie Englisch.
+
+`vosk-cli-dictation --diagnose` gibt Sprache und Modell mit der Herkunft jedes Werts aus (`cli`, `selection`, `config` oder `system`).
 
 ## Allgemeine Struktur von `config.yaml`
 
@@ -58,10 +60,10 @@ Ein Modell, das deklariert, aber nicht auf der Festplatte vorhanden ist, wird be
 
 ### `default_model`
 
-The name of the Vosk model to load at startup. Must match a `name` in the `vosk_models` list.
+Die Sprache des beim Start geladenen Sprachmodells: ein Sprachcode, der zu einem `name` in der Liste `vosk_models` passt, oder `system` — der Werkswert, der auch gilt, wenn der Schlüssel fehlt —, um der Sprache der Sitzung zu folgen (`LC_ALL`, `LC_MESSAGES`, dann `LANG`), wenn ein Modell dafür installiert ist, andernfalls Englisch. Eine mit `-l` angegebene oder aus einer laufenden Sitzung gemerkte Sprache hat Vorrang.
 
 ```yaml
-default_model: "en"
+default_model: system
 ```
 
 ### `control_socket`

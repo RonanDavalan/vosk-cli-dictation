@@ -8,9 +8,11 @@ The application chooses which language to use based on this priority order:
 
 1.  **Command-Line Argument (Highest Priority):** Using the `-l` or `--lang` flag (e.g., `python src/main.py -l en`) will always override all other settings.
 
-2.  **System Language (Automatic Detection):** If no flag is provided, the application automatically detects your operating system's language.
+2.  **Remembered Choice:** the language or model chosen from a running session (`set-lang`, `set-model`), stored in `~/.local/state/vosk-cli-dictation/selection.yaml`. `config.yaml` is never rewritten by the program.
 
-3.  **`default_model` Setting (Fallback):** If your system's language cannot be determined, the application will use the model specified in the `default_model` setting as a final fallback.
+3.  **`default_model` Setting:** a language code from `config.yaml`. With `system` (the factory value, also used when the key is missing), the application follows the language of the session (`LC_ALL`, `LC_MESSAGES`, then `LANG`) if a model for it is installed, and uses English otherwise.
+
+`vosk-cli-dictation --diagnose` prints the language and the model together with the origin of each (`cli`, `selection`, `config` or `system`).
 
 ## General Structure of `config.yaml`
 
@@ -90,10 +92,10 @@ A model that is declared but not present on disk is reported at startup and skip
 
 ### `default_model`
 
-The name of the Vosk model to load at startup. Must match a `name` in the `vosk_models` list.
+The language of the speech model to load at startup: a language code that matches a `name` in the `vosk_models` list, or `system` — the factory value, also used when the key is missing — to follow the session language (`LC_ALL`, `LC_MESSAGES`, then `LANG`) when a model for that language is installed, and English otherwise. A language given with `-l`, or remembered from a running session, takes precedence.
 
 ```yaml
-default_model: "en"
+default_model: system
 ```
 
 ### `control_socket`

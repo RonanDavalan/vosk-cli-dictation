@@ -8,9 +8,11 @@ L'application choisit la langue à utiliser en fonction de l'ordre de priorité 
 
 1.  **Argument de ligne de commande (priorité la plus élevée) :** L'utilisation du paramètre `-l` ou `--lang` (par exemple, `python src/main.py -l en`) annulera toujours tous les autres paramètres.
 
-2. **Langue du système (détection automatique) :** Si aucun paramètre n'est spécifié, l'application détecte automatiquement la langue de votre système d'exploitation.
+2. **Choix mémorisé :** la langue ou le modèle choisi depuis une session en cours (`set-lang`, `set-model`), conservé dans `~/.local/state/vosk-cli-dictation/selection.yaml`. Le programme ne réécrit jamais `config.yaml`.
 
-3. **`default_model` Paramétrage (solution de secours) :** Si la langue de votre système ne peut pas être déterminée, l'application utilisera le modèle spécifié dans le paramètre `default_model` comme solution de secours.
+3. **Réglage `default_model` :** un code de langue de `config.yaml`. Avec `system` (valeur d'usine, aussi utilisée quand la clé manque), l'application suit la langue de la session (`LC_ALL`, `LC_MESSAGES`, puis `LANG`) si un modèle de cette langue est installé, et prend l'anglais sinon.
+
+`vosk-cli-dictation --diagnose` affiche la langue et le modèle avec l'origine de chacun (`cli`, `selection`, `config` ou `system`).
 
 ## Structure générale de `config.yaml`
 
@@ -59,10 +61,10 @@ Un modèle qui est déclaré mais qui n'est pas présent sur le disque est signa
 
 ### `default_model`
 
-The name of the Vosk model to load at startup. Must match a `name` in the `vosk_models` list.
+La langue du modèle vocal chargé au démarrage : un code de langue qui correspond à un `name` de la liste `vosk_models`, ou `system` — valeur d'usine, aussi utilisée quand la clé manque — pour suivre la langue de la session (`LC_ALL`, `LC_MESSAGES`, puis `LANG`) si un modèle de cette langue est installé, l'anglais sinon. Une langue donnée avec `-l`, ou mémorisée depuis une session en cours, l'emporte.
 
 ```yaml
-default_model: "en"
+default_model: system
 ```
 
 ### `control_socket`

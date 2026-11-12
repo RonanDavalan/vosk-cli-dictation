@@ -8,9 +8,11 @@ La aplicación elige qué idioma usar según el siguiente orden de prioridad:
 
 1.  **Argumento de línea de comandos (mayor prioridad):** El uso de la opción `-l` o `--lang` (por ejemplo, `python src/main.py -l en`) siempre anulará todas las demás configuraciones.
 
-2. **Idioma del sistema (Detección automática):** Si no se proporciona ninguna configuración, la aplicación detecta automáticamente el idioma de tu sistema operativo.
+2. **Elección recordada:** el idioma o el modelo elegido desde una sesión en curso (`set-lang`, `set-model`), guardado en `~/.local/state/vosk-cli-dictation/selection.yaml`. El programa nunca reescribe `config.yaml`.
 
-3.  **`default_model` Configuración (Respaldo):** Si el idioma de su sistema no puede determinarse, la aplicación utilizará el modelo especificado en la configuración `default_model` como último recurso.
+3.  **Configuración `default_model`:** un código de idioma de `config.yaml`. Con `system` (valor de fábrica, que también se usa si falta la clave), la aplicación sigue el idioma de la sesión (`LC_ALL`, `LC_MESSAGES` y luego `LANG`) si hay un modelo instalado para él, y usa el inglés en caso contrario.
+
+`vosk-cli-dictation --diagnose` muestra el idioma y el modelo con el origen de cada uno (`cli`, `selection`, `config` o `system`).
 
 ## Estructura general de `config.yaml`
 
@@ -58,10 +60,10 @@ Un modelo que se declara pero no está presente en el disco se informa al inicio
 
 ### `default_model`
 
-El nombre del modelo de Vosk que se cargará al inicio. Debe coincidir con un `name` en la lista de `vosk_models`.
+El idioma del modelo de voz que se carga al inicio: un código de idioma que coincide con un `name` de la lista `vosk_models`, o `system` —el valor de fábrica, que también se usa si falta la clave— para seguir el idioma de la sesión (`LC_ALL`, `LC_MESSAGES` y luego `LANG`) si hay un modelo instalado para él, y el inglés en caso contrario. Un idioma indicado con `-l`, o recordado de una sesión en curso, tiene prioridad.
 
 ```yaml
-default_model: "en"
+default_model: system
 ```
 
 ### `control_socket`

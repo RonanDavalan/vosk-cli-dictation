@@ -141,5 +141,5 @@ def test_diagnose_gives_the_origin_of_each_value(state, monkeypatch, capsys):
     except Exception:
         pass
     out = capsys.readouterr().out
-    assert "Language" in out and "es  (cli)" in out
-    assert "Selection file" in out
+    assert "es  (cli)" in out
+    assert str(sel.selection_path()) in out

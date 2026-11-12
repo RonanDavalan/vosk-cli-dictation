@@ -72,6 +72,8 @@ vosk-cli-dictation --download-model fr   # también: en, de, es
 vosk-cli-dictation -l fr
 ```
 
+Añade `--model-size big` para el modelo completo (`vosk-cli-dictation --download-model fr --model-size big`): de 1,4 a 1,9 GB según el idioma, y unas tres veces ese tamaño de espacio libre en disco mientras se descomprime.
+
 Si inicias la herramienta sin ningún modelo instalado, ofrece la descarga de forma interactiva. Un modelo ausente se señala sin ser fatal, mientras se cargue un idioma. Los modelos descargados se verifican con SHA256 y se guardan en `~/.local/share/vosk-models/`.
 
 El paquete trae `xdotool` (X11) o `ydotool` (alternativa de Wayland) para la inyección del texto. Para Wayland nativo, instala además el motor preferido con el gestor de paquetes de tu distribución (ejemplo de Debian):
@@ -144,7 +146,8 @@ Para acceder con más facilidad, puedes añadir una función al archivo de confi
 El modelo de idioma se elige según el orden de prioridad siguiente:
 
 1.  **Opción de línea de comandos (prioridad más alta):** usa `-l en`, `-l fr`, `-l de` o `-l es` para imponer un idioma en la sesión.
-2.  **Valor por defecto de `config.yaml` (alternativa):** sin opción, se carga el `default_model` de `config/config.yaml`.
+2.  **Elección recordada:** un idioma o modelo elegido mientras una sesión está en marcha (`set-lang`, `set-model`, véase más abajo) se guarda en `~/.local/state/vosk-cli-dictation/selection.yaml` y se reutiliza en el siguiente arranque.
+3.  **`default_model` de `config.yaml`:** un código de idioma, o `system` —el valor de fábrica, que también se usa si falta la clave—, que sigue el idioma de la sesión (`LC_ALL`, `LC_MESSAGES` y luego `LANG`) si hay un modelo instalado para él, y el inglés en caso contrario.
 
 ### Frases de activación por voz
 
@@ -160,6 +163,7 @@ La sesión abre un socket Unix privado en `$XDG_RUNTIME_DIR/vosk-cli-dictation.s
 
 ```bash
 vosk-cli-dictation --status          # -> OK ÉCOUTE
+vosk-cli-dictation --info            # -> OK {"state":"ÉCOUTE","lang":"fr",…}  (estado completo, una línea JSON)
 vosk-cli-dictation --toggle          # empezar/parar el dictado
 vosk-cli-dictation --sleep-toggle    # entrar en el modo reposo o salir de él (libera el micrófono)
 vosk-cli-dictation --finalize        # parar y copiar el texto acumulado
@@ -167,6 +171,17 @@ vosk-cli-dictation --stop            # cerrar la sesión
 ```
 
 Vincula estos comandos a los ajustes de atajos de teclado de tu escritorio (KDE, GNOME, Sway, labwc…) para obtener un control global que funcione en todas partes, incluidas las ventanas nativas de Wayland que `pynput` no puede ver. Los atajos de `pynput` de la sección `hotkeys` también funcionan como comodidad de mejor esfuerzo — bajo Wayland, solo sobre ventanas de XWayland.
+
+### Cambiar de idioma y de modelo sin reiniciar
+
+Una sesión en curso cambia de idioma o de modelo sin reiniciar, y el texto ya escrito se conserva. Dos peticiones lo hacen: `set-lang fr|en|de|es|system` y `set-model <carpeta del modelo>` (un nombre de carpeta de la lista `models` que muestra `--info`). El modelo nuevo se carga en segundo plano mientras el actual sigue sirviendo, y lo reemplaza entre dos enunciados; si la carga falla, se mantiene el modelo actual y `last_error` en `--info` dice por qué. La elección se recuerda en `selection.yaml` (véase la selección del idioma). Las peticiones van directamente al socket; sirve cualquier herramienta que escriba una línea en un socket Unix, aquí `socat`:
+
+```bash
+printf 'set-lang en\n' | socat - UNIX-CONNECT:$XDG_RUNTIME_DIR/vosk-cli-dictation.sock   # -> OK ÉCOUTE
+vosk-cli-dictation --info            # lang, model, models, loading, last_error…
+```
+
+Errores: `ERR bad-argument` (argumento desconocido), `ERR no-model` (no hay modelo instalado para la petición), `ERR busy` (hay una carga en curso).
 
 ### Comandos manuales
 
