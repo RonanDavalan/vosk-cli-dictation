@@ -227,7 +227,7 @@ refine:
   timeout_ms: 2000
 ```
 
--   **`engine`** (`none` | `whisper`, por defecto `none`): `whisper` activa el refinado. `faster-whisper` debe estar instalado en el entorno Python del dictado (`pip install faster-whisper`); `vosk-cli-dictation --diagnose` dice si lo está.
+-   **`engine`** (`none` | `whisper`, por defecto `none`): `whisper` activa el refinado. `faster-whisper` debe estar instalado en el entorno Python del dictado (el paquete opcional `vosk-cli-dictation-whisper` lo añade, o `pip install faster-whisper` desde una copia del repositorio Git); `vosk-cli-dictation --diagnose` dice si lo está.
 -   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, por defecto `auto`): el tamaño de Whisper. `auto` da `large-v3-turbo` cuando sirve una tarjeta gráfica, y ningún refinado en un procesador, donde ningún tamaño se queda por debajo de 500 ms por enunciado. Los pesos se descargan en el primer uso en `~/.local/share/vosk-cli-dictation/whisper-models`.
 -   **`device`** (`auto` | `cpu` | `cuda`, por defecto `auto`): `auto` toma la tarjeta cuando CTranslate2 ve una y `libcublas.so.12` se carga (Debian y Ubuntu: `sudo apt install libcublas12 libcublaslt12`), el procesador si no. `cuda` sin la biblioteca se rechaza con ese remedio.
 -   **`compute_type`** (por defecto `auto`): `float16` en `cuda`, `int8` en `cpu`; `int8_float16` ahorra memoria de vídeo.

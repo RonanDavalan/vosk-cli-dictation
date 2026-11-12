@@ -285,7 +285,7 @@ refine:
   timeout_ms: 2000
 ```
 
--   **`engine`** (`none` | `whisper`, default `none`): `whisper` turns the refinement on. `faster-whisper` must be installed in the Python environment of the dictation (`pip install faster-whisper`); `vosk-cli-dictation --diagnose` says whether it is.
+-   **`engine`** (`none` | `whisper`, default `none`): `whisper` turns the refinement on. `faster-whisper` must be installed in the Python environment of the dictation (the optional package `vosk-cli-dictation-whisper` adds it, or `pip install faster-whisper` from a Git checkout); `vosk-cli-dictation --diagnose` says whether it is.
 -   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, default `auto`): the Whisper size. `auto` gives `large-v3-turbo` when a graphics card serves, and no refinement on a processor, where no size stays under 500 ms per utterance. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models`.
 -   **`device`** (`auto` | `cpu` | `cuda`, default `auto`): `auto` takes the card when CTranslate2 sees one and `libcublas.so.12` loads (Debian and Ubuntu: `sudo apt install libcublas12 libcublaslt12`), the processor otherwise. `cuda` without the library is refused with that remedy.
 -   **`compute_type`** (default `auto`): `float16` on `cuda`, `int8` on `cpu`; `int8_float16` saves video memory.

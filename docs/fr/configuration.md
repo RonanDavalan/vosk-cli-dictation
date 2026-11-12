@@ -228,7 +228,7 @@ refine:
   timeout_ms: 2000
 ```
 
--   **`engine`** (`none` | `whisper`, défaut `none`) : `whisper` active la finition. `faster-whisper` doit être installé dans l'environnement Python de la dictée (`pip install faster-whisper`) ; `vosk-cli-dictation --diagnose` dit s'il l'est.
+-   **`engine`** (`none` | `whisper`, défaut `none`) : `whisper` active la finition. `faster-whisper` doit être installé dans l'environnement Python de la dictée (le paquet optionnel `vosk-cli-dictation-whisper` l'y ajoute, ou `pip install faster-whisper` depuis une copie du dépôt Git) ; `vosk-cli-dictation --diagnose` dit s'il l'est.
 -   **`model`** (`auto` | `tiny` | `base` | `small` | `medium` | `large-v3-turbo`, défaut `auto`) : la taille de Whisper. `auto` donne `large-v3-turbo` quand une carte graphique sert, et aucune finition sur un processeur, où aucune taille ne reste sous 500 ms par énoncé. Les poids se téléchargent au premier usage sous `~/.local/share/vosk-cli-dictation/whisper-models`.
 -   **`device`** (`auto` | `cpu` | `cuda`, défaut `auto`) : `auto` prend la carte quand CTranslate2 en voit une et que `libcublas.so.12` se charge (Debian et Ubuntu : `sudo apt install libcublas12 libcublaslt12`), le processeur sinon. `cuda` sans la bibliothèque est refusé avec ce remède.
 -   **`compute_type`** (défaut `auto`) : `float16` sur `cuda`, `int8` sur `cpu` ; `int8_float16` économise la mémoire vidéo.
