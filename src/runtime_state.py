@@ -16,6 +16,8 @@ STATE_DICTATING = "DICTÉE"
 STATE_LISTENING = "ÉCOUTE"
 STATE_SLEEPING = "VEILLE"
 
+REFINE_OUTCOMES = ("done", "timeout", "error", "rejected", "skipped")
+
 _RTF_WINDOW = 30  # taille de fenêtre de la moyenne glissante du RTF
 _DEBOUNCE_S = 0.5  # anti-rebond après une transition d'état (un déclenchement vocal immédiat serait un faux positif)
 
@@ -35,6 +37,11 @@ class RuntimeState:
         # Horodatage de la dernière transition d'état, pour l'anti-rebond des
         # déclenchements vocaux.
         self._last_transition = 0.0
+        # Finition des énoncés (src/refine) : énoncés affinés, repli sur le
+        # texte de Vosk (délai dépassé, erreur du moteur, texte rejeté) et
+        # énoncés-commandes laissés tels quels ; latence moyenne de la finition.
+        self.refine_counts = dict.fromkeys(REFINE_OUTCOMES, 0)
+        self.refine_mean_ms = 0.0
 
     def set_state(self, state):
         with self._lock:
@@ -70,6 +77,15 @@ class RuntimeState:
         with self._lock:
             return self._rtf_samples > 0 and self.rtf_mean > threshold
 
+    def note_refine(self, outcome, ms=None):
+        """Compte l'issue de la finition d'un énoncé (REFINE_OUTCOMES) ; `ms` est
+        la latence d'une finition réussie."""
+        with self._lock:
+            self.refine_counts[outcome] += 1
+            if outcome == "done" and ms is not None:
+                n = self.refine_counts["done"]
+                self.refine_mean_ms += (ms - self.refine_mean_ms) / n
+
     def snapshot(self):
         with self._lock:
             return {
@@ -77,6 +93,7 @@ class RuntimeState:
                 "audio_overflow_count": self.audio_overflow_count,
                 "input_overflow_count": self.input_overflow_count,
                 "rtf_mean": round(self.rtf_mean, 3),
+                "refine": {**self.refine_counts, "mean_ms": round(self.refine_mean_ms)},
             }
 
 

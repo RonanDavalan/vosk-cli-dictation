@@ -1,5 +1,6 @@
 # src/recognition.py
 
+import collections
 import json
 import locale
 import queue
@@ -27,6 +28,11 @@ MODE_LISTENING = "listening"
 # stop_event et termine la session proprement. Tout décodage réussi remet le
 # compteur à zéro.
 DECODE_ERROR_MAX_CONSECUTIVE = 5
+
+# Finition : audio gardé pour un énoncé (la fenêtre de Whisper est de 30 s) et
+# marge reprise avant le premier partiel.
+REFINE_MAX_AUDIO_S = 30.0
+REFINE_PREROLL_S = 0.8
 
 
 def force_c_numeric_locale():
@@ -89,6 +95,18 @@ def _capture_malformed_result(raw: str) -> str:
 # d'arrêt. Détection d'arrêt de haute confiance, indépendante du garde de
 # confiance sur le recognizer complet.
 MODE_STOP = "stop"
+
+
+def put_text(text_queue, text, words, refined=False):
+    """Rend un énoncé au thread UI. Un texte affiné porte un troisième élément
+    pour que l'UI garde sa casse."""
+    _ = get_translation()
+    try:
+        text_queue.put_nowait((text, words, True) if refined else (text, words))
+    except queue.Full:
+        print(f"\n{config.color_error}"
+              f"{_('Text queue full; the UI thread is not consuming. Dropping a result.')}"
+              f"{config.RESET}")
 
 
 def load_model(model_name: str, folder: str = None):
@@ -188,7 +206,7 @@ def _target_mode(state: str) -> str:
 
 def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: queue.Queue,
                        control_queue: queue.Queue, stop_event, display_partials_event, wake_event,
-                       switch=None):
+                       switch=None, refiner=None):
     """
     Décode l'audio et pilote la sémantique des commandes vocales.
 
@@ -204,6 +222,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
       le recognizer pour l'état courant.
     - `switch` (src/engine_switch.py) : un modèle chargé en arrière-plan est
       pris entre deux énoncés, jamais au milieu d'un énoncé.
+    - `refiner` (src/refine/pipeline.py) : en DICTÉE, l'audio de chaque énoncé
+      est gardé depuis la fin du précédent (30 s au plus) ; quand Vosk le
+      termine, le texte part à la file de finition, qui le rend dans l'ordre,
+      affiné ou repris tel quel. Sans moteur actif, rien n'est gardé.
     """
     _ = get_translation()
     last_partial_length = 0
@@ -350,6 +372,59 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # Un partiel non vide veut dire qu'un énoncé est en cours.
     utterance_open = False
 
+    # Audio de l'énoncé en cours pour la finition. Le premier partiel non vide
+    # (voice_mark) arrive après le début de la voix : on remonte de
+    # REFINE_PREROLL_S pour ne pas la couper, et on laisse de côté le silence
+    # qui précède, sur lequel un moteur de finition invente du texte.
+    refine_max_chunks = max(1, int(REFINE_MAX_AUDIO_S / chunk_audio_s)) if chunk_audio_s > 0 else 1
+    refine_preroll_chunks = int(REFINE_PREROLL_S / chunk_audio_s) + 1 if chunk_audio_s > 0 else 0
+    utterance_audio = collections.deque()
+    voice_mark = None
+
+    def refine_wanted():
+        return refiner is not None and (refiner.active() or refiner.pending() > 0)
+
+    def forget_utterance_audio():
+        nonlocal voice_mark
+        utterance_audio.clear()
+        voice_mark = None
+
+    def keep_audio(data):
+        nonlocal voice_mark
+        utterance_audio.append(data)
+        if len(utterance_audio) > refine_max_chunks:
+            utterance_audio.popleft()
+            if voice_mark is not None:
+                voice_mark = max(0, voice_mark - 1)
+
+    def take_utterance_audio():
+        nonlocal voice_mark
+        start = 0 if voice_mark is None else max(0, voice_mark - refine_preroll_chunks)
+        pcm = b"".join(list(utterance_audio)[start:])
+        forget_utterance_audio()
+        return pcm
+
+    def is_command_utterance(text):
+        tokens = normalize_tokens(text)
+        return (find_phrase(tokens, stop_tokens) != -1
+                or find_phrase(tokens, wake_tokens) != -1)
+
+    def hand_over_text(text, words):
+        """Donne le texte final d'un énoncé de DICTÉE à l'UI, par la file de
+        finition quand un moteur est actif ou qu'un énoncé précédent y attend
+        encore (l'ordre de frappe est celui des énoncés)."""
+        pcm = take_utterance_audio()
+        if not refine_wanted():
+            put_text(text_queue, text, words)
+            return
+        command = is_command_utterance(text)
+        if command and refiner.active():
+            runtime_state.note_refine("skipped")
+        refiner.submit(
+            text, words, pcm, config.current_lang,
+            refine=refiner.active() and not command,
+            guard=lambda refined: not is_command_utterance(refined))
+
     def swap_point():
         """Prend le modèle que `switch` a fini de charger, à condition qu'aucun
         énoncé ne soit en cours. Les réglages qui dépendent de la langue sont
@@ -373,6 +448,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         interaction_mode = config.interaction_mode
         silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
         clear_partial()
+        forget_utterance_audio()
         pending_wake = False
         pending_stop = False
         current_mode = None
@@ -408,6 +484,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 pending_wake = False
             if state != STATE_DICTATING:
                 pending_stop = False
+            forget_utterance_audio()
             # Entrée en DICTÉE -> jeter l'audio d'avant la transition et ouvrir
             # une fenêtre d'ignorance des résultats.
             if state == STATE_DICTATING and last_state == STATE_LISTENING:
@@ -444,6 +521,9 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             # boucle : coût d'un setlocale par trame (~microsecondes), plus
             # aucune trame perdue.
             force_c_numeric_locale()
+
+            if state == STATE_DICTATING and refine_wanted():
+                keep_audio(data)
 
             t0 = time.perf_counter()
             is_final = recognizer.AcceptWaveform(data)
@@ -505,12 +585,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 if state == STATE_DICTATING and text and not pending_stop:
                     last_dictation_result_ts = time.monotonic()
                     word_captured_in_session = True
-                    try:
-                        text_queue.put_nowait((text, words))
-                    except queue.Full:
-                        print(f"\n{config.color_error}"
-                              f"{_('Text queue full; the UI thread is not consuming. Dropping a result.')}"
-                              f"{config.RESET}")
+                    hand_over_text(text, words)
                     clear_partial()
             else:
                 partial_dict = json.loads(recognizer.PartialResult())
@@ -521,6 +596,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 if state == STATE_DICTATING and partial_text:
                     last_dictation_result_ts = time.monotonic()
                     word_captured_in_session = True
+                    if voice_mark is None and utterance_audio:
+                        voice_mark = len(utterance_audio) - 1
 
                 # Plus de réveil sur les partiels. La grammaire restreinte force
                 # la phrase de réveil sur de l'audio ambigu (« active » seul

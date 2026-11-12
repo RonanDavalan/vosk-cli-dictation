@@ -23,7 +23,14 @@ from src.voice_commands import (
 # le vide s'en aperçoive vite.
 SLEEP_REMINDER_INTERVAL_S = 30.0
 
-def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event, wake_event):
+# Commandes qui ferment la dictée ou la session : avec une finition en cours,
+# elles attendent que les énoncés déjà dits soient tapés, sinon leur texte
+# arriverait hors dictée et serait perdu.
+DRAIN_FIRST = ("FINALIZE_SESSION", "TOGGLE_RECORDING", "DICTATION_OFF",
+               "TOGGLE_SLEEP", "SLEEP_ON")
+
+
+def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event, wake_event, refiner=None):
     recording = False
     full_text_log = ""
     xdotool_failed_once = False
@@ -217,11 +224,11 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             msg = _("Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize.")
             print(f"\n{config.color_warning}{msg}{config.RESET}")
 
-    def process_and_type(raw_text: str):
+    def process_and_type(raw_text: str, keep_case: bool = False):
         nonlocal full_text_log, xdotool_failed_once
         _ = get_translation()
 
-        processed_text = processor.process(raw_text)
+        processed_text = processor.process(raw_text, keep_case)
         if not processed_text: return
 
         string_to_type = ""
@@ -245,37 +252,58 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             msg = _('[Degraded Mode] Added:')
             print(f"\r{config.color_success}{msg} {display_repr}{config.RESET}{' ' * 20}")
 
+    def handle_command(command: str):
+        if command == 'TOGGLE_RECORDING':
+            if recording: stop_recording()
+            else: start_recording()
+        elif command == 'DICTATION_ON':
+            # Plus de garde `not sleep_event` ici — start_recording()
+            # sort de veille de lui-même.
+            if not recording: start_recording()
+        elif command == 'DICTATION_OFF':
+            if recording: stop_recording()
+        elif command == 'FINALIZE_SESSION':
+            finalize_session()
+        elif command == 'TOGGLE_SLEEP':
+            toggle_sleep()
+        elif command == 'SLEEP_ON':
+            if not sleep_event.is_set(): toggle_sleep()
+        elif command == 'SLEEP_OFF':
+            if sleep_event.is_set(): toggle_sleep()
+        elif command.startswith('/'):
+            execute_manual_command(command)
+
+    # Commandes retenues le temps que la finition rende les énoncés déjà dits,
+    # dans l'ordre où elles sont arrivées.
+    held = []
+    held_until = 0.0
+
+    def refinement_in_flight() -> bool:
+        return refiner is not None and (refiner.pending() > 0 or not text_queue.empty())
+
     try:
         while not stop_event.is_set():
             if config.current_lang != ui_lang:
                 refresh_language()
             _ = get_translation()
             maybe_sleep_reminder()
+            if held and (not refinement_in_flight() or time.monotonic() > held_until):
+                for command in held:
+                    handle_command(command)
+                held.clear()
             try:
                 command = control_queue.get_nowait()
-                if command == 'TOGGLE_RECORDING':
-                    if recording: stop_recording()
-                    else: start_recording()
-                elif command == 'DICTATION_ON':
-                    # Plus de garde `not sleep_event` ici — start_recording()
-                    # sort de veille de lui-même.
-                    if not recording: start_recording()
-                elif command == 'DICTATION_OFF':
-                    if recording: stop_recording()
-                elif command == 'FINALIZE_SESSION':
-                    finalize_session()
-                elif command == 'TOGGLE_SLEEP':
-                    toggle_sleep()
-                elif command == 'SLEEP_ON':
-                    if not sleep_event.is_set(): toggle_sleep()
-                elif command == 'SLEEP_OFF':
-                    if sleep_event.is_set(): toggle_sleep()
-                elif command.startswith('/'):
-                    execute_manual_command(command)
+                if held or (command in DRAIN_FIRST and refinement_in_flight()):
+                    if not held:
+                        held_until = time.monotonic() + refiner.timeout_s + 0.5
+                    held.append(command)
+                else:
+                    handle_command(command)
             except queue.Empty: pass
             try:
                 item = text_queue.get_nowait()
-                raw_text, words = item if isinstance(item, tuple) else (item, [])
+                raw_text, words, *flags = item if isinstance(item, tuple) else (item, [])
+                keep_case = bool(flags and flags[0])
                 if not recording:
                     # En ÉCOUTE, le réveil est traité par le thread de
                     # reconnaissance ; tout texte parvenant ici est ignoré.
@@ -288,7 +316,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                 if is_doubled(tokens, stop_tokens):
                     literal = strip_one_repetition(raw_text, stop_tokens)
                     if literal:
-                        process_and_type(literal)
+                        process_and_type(literal, keep_case)
                     continue
 
                 idx = find_phrase(tokens, stop_tokens)
@@ -296,7 +324,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     conf = mean_confidence(words, idx, len(stop_tokens))
                     before = remove_phrase_and_after(raw_text, stop_tokens)
                     if before:
-                        process_and_type(before)
+                        process_and_type(before, keep_case)
                     if conf >= conf_threshold:
                         finalize_session()
                     else:
@@ -310,7 +338,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     continue
 
                 if raw_text:
-                    process_and_type(raw_text)
+                    process_and_type(raw_text, keep_case)
             except queue.Empty:
                 time.sleep(0.01)
                 continue

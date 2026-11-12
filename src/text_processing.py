@@ -62,16 +62,18 @@ class TextProcessor:
         """Réinitialise l'état du processeur, p. ex. pour une nouvelle session."""
         self.capitalize_next_word = True
 
-    def process(self, raw_text: str) -> str:
+    def process(self, raw_text: str, keep_case: bool = False) -> str:
         """
         Met en forme une chaîne brute reconnue.
         Le drapeau `is_first_word_of_sentence` est désormais géré en interne.
+        `keep_case` : texte d'un moteur de finition, dont la casse et la
+        ponctuation sont gardées (Vosk rend tout en minuscules).
         """
         # ÉTAPE 0 : prétraitement des erreurs d'espacement courantes de Vosk.
         text = re.sub(r'\s+([,.?)!\];»…])', r'\1', raw_text)
 
         # ÉTAPE 1 : appliquer les alias de reconnaissance
-        text = self._apply_aliases(text.lower())
+        text = self._apply_aliases(text if keep_case else text.lower(), keep_case)
 
         # ÉTAPE 2 : découper le texte en mots et commandes de ponctuation
         parts = self._tokenize(text)
@@ -82,11 +84,25 @@ class TextProcessor:
         # ÉTAPE 4 : appliquer le vocabulaire personnalisé pour la casse
         final_string = self._apply_custom_vocabulary(final_string)
 
+        if keep_case:
+            final_string = self._restore_space_before(final_string)
         return final_string
 
-    def _apply_aliases(self, text: str) -> str:
+    def _restore_space_before(self, text: str) -> str:
+        """L'étape 0 colle la ponctuation au mot qui précède ; les langues dont
+        la typographie veut une espace avant `?`, `!`, `:`, `;`, `»` (bloc
+        `typography.space_before`) la retrouvent ici, sauf devant un chiffre
+        (« 12:30 »)."""
+        sep = self._lead_separator()
+        for symbol in self.space_before:
+            text = re.sub(
+                r'(?<=[^\s' + re.escape(sep) + r'])' + re.escape(symbol) + r'(?!\d)', sep + symbol, text)
+        return text
+
+    def _apply_aliases(self, text: str, keep_case: bool = False) -> str:
+        flags = re.IGNORECASE if keep_case else 0
         for alias, correction in self.sorted_aliases:
-            text = re.sub(r'\b' + re.escape(alias) + r'\b', correction, text)
+            text = re.sub(r'\b' + re.escape(alias) + r'\b', correction, text, flags=flags)
         return text
 
     def _apply_custom_vocabulary(self, text: str) -> str:

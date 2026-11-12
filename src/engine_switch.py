@@ -74,6 +74,7 @@ class EngineSwitch:
                 "models": [{"folder": m["folder"], "size": m["size"]}
                            for m in installed if m["lang"] == self.lang],
                 "refine": "none",
+                "refine_stats": runtime_state.snapshot()["refine"],
                 "device": None,
                 "correction": "none",
                 "loading": self.loading,

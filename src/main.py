@@ -2,6 +2,7 @@
 
 import sys
 import os
+import json
 import threading
 import queue
 import atexit
@@ -36,6 +37,26 @@ CONTROL_FLAGS = [
     ("sleep_toggle", "sleep-toggle"), ("status", "status"), ("stop", "quit"),
     ("info", "info"),
 ]
+
+def print_refine_summary():
+    """Sous la ligne d'état : la finition en cours et ses compteurs. Rien n'est
+    affiché tant qu'aucun moteur de finition n'est choisi."""
+    reply = send_control_command("info") or ""
+    try:
+        info = json.loads(reply[3:]) if reply.startswith("OK ") else {}
+    except ValueError:
+        return
+    if info.get("refine", "none") == "none":
+        return
+    _ = get_translation()
+    stats = info.get("refine_stats", {})
+    fallbacks = stats.get("timeout", 0) + stats.get("error", 0) + stats.get("rejected", 0)
+    print(_("Refinement: {engine} ({device}), {done} refined, {fallbacks} fell back to Vosk "
+            "({timeout} too slow), {skipped} commands left as heard, {ms} ms on average").format(
+        engine=info["refine"], device=info.get("device") or "?", done=stats.get("done", 0),
+        fallbacks=fallbacks, timeout=stats.get("timeout", 0), skipped=stats.get("skipped", 0),
+        ms=stats.get("mean_ms", 0)))
+
 
 def print_status(message, color):
     """Affiche un message de statut en couleur, puis restaure le défaut du terminal."""
@@ -241,6 +262,8 @@ def main():
                 print_status(_("No running vosk-cli-dictation session."), config.color_error)
                 sys.exit(1)
             print(reply)
+            if wire == "status" and reply.startswith("OK"):
+                print_refine_summary()
             sys.exit(0 if reply.startswith("OK") else 2)
 
     ui_lang, lang_source = config.startup_language(args.lang)
