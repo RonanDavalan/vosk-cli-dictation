@@ -6,6 +6,9 @@ seulement mises à jour, sauf les sous-menus de finition et de correction, que
 la dictée annonce : refaire le menu toutes les 250 ms fermerait un menu ouvert.
 """
 
+import os
+import signal
+
 from PySide6.QtCore import QProcess, QProcessEnvironment, Qt
 from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
@@ -28,6 +31,8 @@ class DictationTray(QSystemTrayIcon):
         self._dictation_command = dictation_command
         self._notify = notify or self._default_notify
         self.info = None
+        self.alive_pid = None
+        self._tip = None
         self.icon_name = None
         self._icons = {}
         self._download = None
@@ -115,6 +120,8 @@ class DictationTray(QSystemTrayIcon):
     def status_text(self) -> str:
         info = self.info
         if info is None:
+            if self.alive_pid is not None:
+                return self._t("The dictation is not answering yet")
             return self._t("Dictation not running")
         return " — ".join([self._state_label(info.get("state")),
                            self._language_name(info.get("lang") or self._system_lang),
@@ -169,6 +176,7 @@ class DictationTray(QSystemTrayIcon):
 
     def on_info(self, info) -> None:
         self.info = info
+        self.alive_pid = launcher.running_pid() if info is None else None
         if info is not None and info.get("lang") and info["lang"] != self._t.lang:
             self._t.set_language(info["lang"])
         elif info is None and self._t.lang != self._system_lang:
@@ -189,7 +197,9 @@ class DictationTray(QSystemTrayIcon):
         tip = self.status_text()
         if self.info and self.info.get("loading"):
             tip += " — " + self._t("Loading model…")
-        self.setToolTip(tip)
+        if tip != self._tip:
+            self._tip = tip
+            self.setToolTip(tip)
 
     def _refresh_actions(self) -> None:
         t, info = self._t, self.info
@@ -227,7 +237,8 @@ class DictationTray(QSystemTrayIcon):
                               (info or {}).get("correction_options"), (info or {}).get("correction"),
                               (info or {}).get("correction_reason"), running and not loading)
 
-        self.a_launch.setText(t("Quit dictation") if running else t("Launch dictation"))
+        self.a_launch.setText(t("Quit dictation") if (running or self.alive_pid is not None)
+                              else t("Launch dictation"))
 
     def _option_label(self, value: str, device) -> str:
         t = self._t
@@ -313,10 +324,15 @@ class DictationTray(QSystemTrayIcon):
         self._client.send("wake" if asleep else "sleep")
 
     def _toggle_process(self) -> None:
-        if self.info is None:
-            self.launch_dictation()
-        else:
+        if self.info is not None:
             self._client.send("quit")
+        elif self.alive_pid is not None:
+            try:
+                os.kill(self.alive_pid, signal.SIGTERM)
+            except OSError:
+                pass
+        else:
+            self.launch_dictation()
 
     def _choose_lang(self, code: str) -> None:
         installed = set((self.info or {}).get("langs", []))
@@ -349,6 +365,9 @@ class DictationTray(QSystemTrayIcon):
 
     def launch_dictation(self) -> None:
         t = self._t
+        if launcher.running_pid() is not None:
+            self._notify(t("The dictation is already running; wait for it to answer, or quit it from the menu."))
+            return
         command = launcher.dictation_command(self._dictation_command)
         if command is None:
             self._notify(t("The dictation program was not found."))

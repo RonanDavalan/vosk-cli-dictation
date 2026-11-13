@@ -18,7 +18,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from config.config import config
 from config.selection import load_selection
 from src.i18n import set_ui_language, get_translation
-from src.system_control import check_command_exists, injection_backend_available
+from src.system_control import check_command_exists, injection_backend_available, injection_limited_to_xwayland
 from src.audio_capture import initialize_audio, audio_capture_thread
 from src.recognition import load_model, recognition_thread, force_c_numeric_locale, put_text
 from src.refine.control import RefineController, settings as refine_settings
@@ -26,8 +26,9 @@ from src.ui import ui_thread
 from src.keyboard_listener import keyboard_listener_thread
 from src.text_processing import TextProcessor
 from src.engine_switch import EngineSwitch
+from src import instance_lock
 from src.control_socket import (
-    start_control_server, send_control_command, instance_running, socket_path,
+    start_control_server, send_control_command, socket_path,
 )
 
 # Sous-commandes de contrôle : drapeau -> jeton socket.
@@ -259,6 +260,9 @@ def main():
     for attr, wire in CONTROL_FLAGS:
         if getattr(args, attr, False):
             reply = send_control_command(wire)
+            if reply is None and instance_lock.owner_pid() is not None:
+                print_status(_("The dictation is starting; try again once the model is loaded."), config.color_warning)
+                sys.exit(1)
             if reply is None:
                 print_status(_("No running vosk-cli-dictation session."), config.color_error)
                 sys.exit(1)
@@ -276,10 +280,9 @@ def main():
     config.set_language(ui_lang)
     atexit.register(exit_cleanup)
 
-    # Instance unique. Une socket qui répond -> une session tourne déjà. Une
-    # socket qui refuse la connexion est un résidu : on continue,
-    # start_control_server la remplacera.
-    if config.data.get('control_socket', True) and instance_running():
+    # Instance unique : le verrou se prend avant le chargement du modèle, qui
+    # dure jusqu'à 12 s, pendant lesquelles la socket n'existe pas encore.
+    if not instance_lock.acquire():
         print_status(_("A vosk-cli-dictation session is already running (see --status)."), config.color_error)
         return
 
@@ -288,6 +291,8 @@ def main():
         print_status(_("No text-injection backend available for this session."), config.color_error)
         print_status(_("Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."), config.color_error)
         return
+    if injection_limited_to_xwayland():
+        print_status(_("On a Wayland session, 'xdotool' only types into XWayland windows; install 'ydotool' or 'wtype' for native Wayland windows."), config.color_warning)
     if not check_command_exists("paplay"):
         print_status(_("'paplay' not found. Sound notifications will be disabled."), config.color_warning)
     print_status(_("Dependencies checked."), config.color_info)

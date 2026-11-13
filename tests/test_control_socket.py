@@ -195,3 +195,30 @@ def test_argument_on_a_plain_token_is_unknown(server):
 def test_reset_selection_needs_a_controller_and_takes_no_argument(server):
     assert cs.send_control_command("reset-selection") == "ERR unsupported"
     assert cs.send_control_command("reset-selection now") == "ERR unknown-command"
+
+
+# --- écho d'un raccourci pynput et d'une commande de bureau ------------------ #
+
+def test_socket_command_right_after_hotkey_is_ignored(monkeypatch):
+    monkeypatch.setattr(cs, "_echo_notice_shown", True)
+    q = queue.Queue()
+    runtime_state.note_hotkey("TOGGLE_RECORDING")
+    reply = cs._handle("toggle", q)
+    assert reply.startswith("OK") and q.empty()
+
+
+def test_socket_command_after_window_is_queued(monkeypatch):
+    q = queue.Queue()
+    clock = [100.0]
+    monkeypatch.setattr("src.runtime_state.time.monotonic", lambda: clock[0])
+    runtime_state.note_hotkey("TOGGLE_RECORDING")
+    clock[0] += 1.1
+    cs._handle("toggle", q)
+    assert q.get_nowait() == "TOGGLE_RECORDING"
+
+
+def test_dictation_on_is_never_ignored():
+    q = queue.Queue()
+    runtime_state.note_hotkey("DICTATION_ON")
+    cs._handle("dictation-on", q)
+    assert q.get_nowait() == "DICTATION_ON"

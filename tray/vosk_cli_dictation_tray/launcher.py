@@ -4,6 +4,7 @@ import os
 import shlex
 import shutil
 import subprocess
+import time
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -52,10 +53,38 @@ def launch_detached(command: Command) -> int:
     log = log_path()
     log.parent.mkdir(parents=True, exist_ok=True)
     with open(log, "ab") as out:
+        out.write(time.strftime("\n=== %Y-%m-%d %H:%M:%S ===\n").encode())
         process = subprocess.Popen(
             command.argv, cwd=command.cwd, stdin=subprocess.DEVNULL,
             stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+        out.write(("pid %d\n" % process.pid).encode())
     return process.pid
+
+
+LOCK_NAME = "vosk-cli-dictation.lock"
+
+
+def lock_path() -> Path:
+    base = os.environ.get("XDG_RUNTIME_DIR")
+    if not base or not os.path.isdir(base):
+        base = "/run/user/{}".format(os.getuid())
+    if not os.path.isdir(base):
+        base = os.environ.get("TMPDIR", "/tmp")
+    return Path(base) / LOCK_NAME
+
+
+def _birth_ticks(pid: int) -> int:
+    with open("/proc/%d/stat" % pid) as f:
+        return int(f.read().rsplit(")", 1)[1].split()[19])
+
+
+def running_pid():
+    """Pid du démon vivant qui tient le verrou d'instance, ou None. Ne prend jamais le verrou."""
+    try:
+        pid, born = (int(x) for x in lock_path().read_text().split())
+        return pid if _birth_ticks(pid) == born else None
+    except (OSError, ValueError):
+        return None
 
 
 def download_arguments(lang: str, size: str) -> list:

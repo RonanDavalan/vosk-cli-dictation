@@ -100,7 +100,7 @@ def test_socket_absent_gives_green_and_launch_entry(make):
     tray, _, _ = make()
     tray.on_info(None)
     assert tray.icon_name == "off"
-    assert tray.a_launch.text() == "Launch dictation"
+    assert tray.a_launch.text() == "Activate voice dictation"
     assert tray.a_launch.isEnabled()
     for action in (tray.a_dictation, tray.a_sleep, tray.a_finalize, tray.a_cancel):
         assert not action.isEnabled()
@@ -356,3 +356,69 @@ def test_request_times_out_quickly_on_a_silent_socket(tmp_path):
     assert request(path, "info", INFO_TIMEOUT_S) is None
     assert time.monotonic() - start < 0.6
     silent.close()
+
+
+def test_alive_daemon_without_socket_offers_quit_not_launch(make, monkeypatch):
+    tray, client, notes = make()
+    monkeypatch.setattr("vosk_cli_dictation_tray.launcher.running_pid", lambda: 4242)
+    launched = []
+    monkeypatch.setattr("vosk_cli_dictation_tray.launcher.launch_detached",
+                        lambda command: launched.append(command))
+    tray.on_info(None)
+    assert tray.icon_name == "off"
+    assert tray.a_launch.text() == "Quit dictation"
+    assert tray.status_text() == "The dictation is not answering yet"
+    tray.activated.emit(QSystemTrayIcon.ActivationReason.Trigger)
+    assert launched == []
+    assert notes and "already running" in notes[-1]
+
+
+def test_quit_on_alive_daemon_sends_sigterm(make, monkeypatch):
+    import signal
+    tray, client, _ = make()
+    monkeypatch.setattr("vosk_cli_dictation_tray.launcher.running_pid", lambda: 4242)
+    killed = []
+    monkeypatch.setattr("os.kill", lambda pid, sig: killed.append((pid, sig)))
+    tray.on_info(None)
+    tray.a_launch.trigger()
+    assert killed == [(4242, signal.SIGTERM)] and client.sent == []
+
+
+def test_tooltip_written_only_when_it_changes(make, monkeypatch):
+    tray, _, _ = make()
+    writes = []
+    monkeypatch.setattr(tray, "setToolTip", lambda text: writes.append(text))
+    tray._tip = None
+    tray.on_info(info())
+    tray.on_info(info())
+    tray.on_info(info())
+    assert len(writes) == 1
+    tray.on_info(info(state="VEILLE"))
+    assert len(writes) == 2
+
+
+def test_running_pid_cases(monkeypatch, tmp_path):
+    import os
+    import subprocess
+    from vosk_cli_dictation_tray import launcher
+    monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
+    path = launcher.lock_path()
+    assert launcher.running_pid() is None
+    path.write_text("")
+    assert launcher.running_pid() is None
+    dead = subprocess.Popen(["true"])
+    dead.wait()
+    path.write_text("%d %d\n" % (dead.pid, 1))
+    assert launcher.running_pid() is None
+    me = os.getpid()
+    path.write_text("%d %d\n" % (me, launcher._birth_ticks(me) + 1))
+    assert launcher.running_pid() is None
+    path.write_text("%d %d\n" % (me, launcher._birth_ticks(me)))
+    assert launcher.running_pid() == me
+
+
+def test_launch_detached_writes_header_in_log(monkeypatch, tmp_path):
+    from vosk_cli_dictation_tray import launcher
+    pid = launcher.launch_detached(launcher.Command(["true"]))
+    text = launcher.log_path().read_text()
+    assert "=== " in text and "pid %d" % pid in text

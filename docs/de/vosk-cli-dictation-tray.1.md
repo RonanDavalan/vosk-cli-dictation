@@ -64,7 +64,7 @@ Das Menü des Rechtsklicks, in dieser Reihenfolge:
 4.  **Modell**: leicht oder vollständig; ein fehlendes Modell zeigt seine Größe, und seine Wahl startet den Download, mit einer Benachrichtigung am Ende;
 5.  **Verfeinerung**: *Keine* und die Whisper-Größen, jede mit `GPU` oder `CPU` gekennzeichnet; mit ihrem Grund ausgegraut, wenn `faster-whisper` fehlt; beim ersten Gebrauch einer Größe werden ihre Gewichte geladen, mit einer Benachrichtigung am Anfang und am Ende. **Korrektur**: ausgegraut mit ihrem Grund, solange das laufende Diktat keine Optionen ankündigt;
 6.  zur Konfiguration zurückkehren (die gespeicherte Auswahl vergessen);
-7.  das Diktat starten oder beenden (ohne Terminal gestartet); das Symbol beim Anmelden starten; das Symbol beenden.
+7.  das Sprachdiktat aktivieren oder beenden (ohne Terminal gestartet); das Symbol beim Anmelden starten; das Symbol beenden.
 
 Während ein Modell lädt, sind die Auswahlen, die es ändern, ausgegraut.
 

@@ -5,6 +5,7 @@ import queue
 import textwrap
 from config.config import config
 from src.i18n import get_translation
+from src.runtime_state import runtime_state
 
 
 def _notice(text: str, color=None) -> None:
@@ -62,6 +63,8 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
         thread UI est bloqué. Le signaler bruyamment plutôt que geler
         l'écoute ou jeter la commande en silence.
         """
+        if command in ('TOGGLE_RECORDING', 'FINALIZE_SESSION', 'TOGGLE_SLEEP'):
+            runtime_state.note_hotkey(command)
         try:
             control_queue.put_nowait(command)
         except queue.Full:

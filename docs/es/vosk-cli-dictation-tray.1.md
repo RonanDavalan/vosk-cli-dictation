@@ -59,12 +59,12 @@ estado y dice «cargando el modelo…» mientras se carga un modelo.
 El menú del clic derecho, en este orden:
 
 1.  una línea de estado: estado, idioma, motor;
-2.  activar o desactivar el dictado; entrar en reposo profundo o salir de él; terminar y copiar el texto; cancelar la sesión;
+2.  iniciar o detener el dictado; entrar en reposo profundo o salir de él; terminar y copiar el texto; cancelar la sesión;
 3.  **Idioma**: seguir el sistema, o francés, inglés, alemán, español; un idioma sin modelo instalado dice «por descargar»;
 4.  **Modelo**: ligero o completo; un modelo ausente muestra su tamaño, y elegirlo inicia su descarga, con una notificación al terminar;
 5.  **Refinado**: *Ninguno* y los tamaños de Whisper, cada uno marcado `GPU` o `CPU`; en gris con su motivo cuando falta `faster-whisper`; el primer uso de un tamaño descarga sus pesos, con una notificación al principio y al final. **Corrección**: en gris con su motivo mientras el dictado en curso no anuncie opciones;
 6.  volver a la configuración (olvidar la elección recordada);
-7.  iniciar o salir del dictado (iniciado separado de cualquier terminal); iniciar el icono al abrir la sesión; salir del icono.
+7.  activar el dictado por voz o salir de él (iniciado separado de cualquier terminal); iniciar el icono al abrir la sesión; salir del icono.
 
 Mientras se carga un modelo, las elecciones que lo cambian están en gris.
 

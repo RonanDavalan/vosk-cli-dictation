@@ -52,6 +52,23 @@ _TO_QUEUE = {
 }
 
 
+_ECHOABLE = {"TOGGLE_RECORDING", "FINALIZE_SESSION", "TOGGLE_SLEEP"}
+_echo_notice_shown = False
+
+
+def _echo_notice():
+    global _echo_notice_shown
+    if _echo_notice_shown:
+        return
+    _echo_notice_shown = True
+    from config.config import config
+    from src.i18n import get_translation
+    _ = get_translation()
+    print(f"\n{config.color_warning}"
+          f"{_('A desktop shortcut and the program’s own hotkey fired together; the second one was ignored. Set hotkeys.pynput_enabled to false if the desktop owns this key.')}"
+          f"{config.RESET}")
+
+
 def socket_path() -> str:
     base = os.environ.get("XDG_RUNTIME_DIR")
     if not base or not os.path.isdir(base):
@@ -145,6 +162,9 @@ def _handle(raw: str, control_queue, controller=None) -> str:
     msg = _TO_QUEUE.get(token)
     if msg is None:
         return "ERR unsupported"
+    if msg in _ECHOABLE and runtime_state.is_hotkey_echo(msg):
+        _echo_notice()
+        return "OK " + runtime_state.snapshot()["state"]
     try:
         control_queue.put_nowait(msg)
     except queue.Full:

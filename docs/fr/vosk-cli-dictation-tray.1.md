@@ -64,7 +64,7 @@ Le menu du clic droit, dans cet ordre :
 4.  **Modèle** : léger ou complet ; un modèle absent montre sa taille, et le choisir lance son téléchargement, avec une notification à la fin ;
 5.  **Finition** : *Aucune* et les tailles de Whisper, chacune marquée `GPU` ou `CPU` ; grisée avec sa raison quand `faster-whisper` manque ; le premier usage d'une taille télécharge ses poids, avec une notification au début et à la fin. **Correction** : grisée avec sa raison tant que la dictée en cours n'annonce pas d'options ;
 6.  revenir à la configuration (oublier le choix mémorisé) ;
-7.  lancer ou quitter la dictée (lancée détachée de tout terminal) ; lancer l'icône à l'ouverture de session ; quitter l'icône.
+7.  activer la dictée vocale ou la quitter (lancée détachée de tout terminal) ; lancer l'icône à l'ouverture de session ; quitter l'icône.
 
 Pendant un chargement de modèle, les choix qui le changent sont grisés.
 

@@ -14,7 +14,9 @@
 
 import atexit
 import os
+import re
 import subprocess
+import threading
 import time
 import shutil
 
@@ -29,7 +31,6 @@ KEYCODE = {'ctrl': 29, 'shift': 42, 'v': 47, 'BackSpace': 14}
 
 _KEY_TIMEOUT = 2.0
 _CLIP_TIMEOUT = 2.0
-_SOUND_TIMEOUT = 5.0
 
 _caps = None          # capacités détectées (session + outils), calculées une fois
 _last_warn = 0.0
@@ -214,10 +215,30 @@ def _wl_copy(text: str) -> bool:
         return False
 
 
+_x11_clipboard_tool_chosen = False
+
+
+def _choose_x11_clipboard_tool(caps: dict):
+    """Sous X11, pyperclip prend GTK dès que `gi` s'importe ; GTK ne sert pas la
+    sélection sans fenêtre d'application, et le collage reste vide."""
+    global _x11_clipboard_tool_chosen
+    if _x11_clipboard_tool_chosen or caps["session"] != "x11":
+        return
+    _x11_clipboard_tool_chosen = True
+    for name in ("xclip", "xsel"):
+        if check_command_exists(name):
+            try:
+                pyperclip.set_clipboard(name)
+            except pyperclip.PyperclipException:
+                continue
+            return
+
+
 def _clipboard_set(text: str) -> bool:
     caps = _detect_caps()
     if caps["session"] == "wayland" and caps["wl_copy"]:
         return _wl_copy(text)
+    _choose_x11_clipboard_tool(caps)
     # pyperclip gère correctement le fork de xclip/xsel (Popen sans attente).
     try:
         pyperclip.copy(text)
@@ -263,7 +284,14 @@ def get_active_window_id():
 
 def _active_window_class_x11() -> str:
     ok, out = _run(["xdotool", "getactivewindow", "getwindowclassname"], _KEY_TIMEOUT)
-    return out.strip() if ok else ""
+    if ok and out.strip():
+        return out.strip()
+    window = get_active_window_id()
+    if not window or not check_command_exists("xprop"):
+        return ""
+    ok, out = _run(["xprop", "-id", window, "WM_CLASS"], _KEY_TIMEOUT)
+    names = re.findall(r'"([^"]*)"', out) if ok else []
+    return names[-1] if names else ""
 
 
 def _paste_combo_for_target() -> str:
@@ -471,8 +499,21 @@ def press_key(key_name: str, count: int = 1) -> bool:
     return _send_key(key_name, count)
 
 
+def injection_limited_to_xwayland() -> bool:
+    """Vrai en session Wayland quand seul xdotool tape : il n'atteint que les fenêtres XWayland."""
+    caps = _detect_caps()
+    return caps["session"] == "wayland" and caps["key_backend"] == "xdotool"
+
+
 def play_sound():
-    """Retour sonore de notification via paplay, si disponible."""
+    """Retour sonore de notification via paplay, si disponible. Ne bloque pas le fil
+    de l'interface : le son dure moins que le démarrage de paplay."""
     if not check_command_exists("paplay") or not config.sound_file:
         return
-    _run(["paplay", config.sound_file], _SOUND_TIMEOUT)
+    try:
+        child = subprocess.Popen(
+            ["paplay", config.sound_file], stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    except OSError:
+        return
+    threading.Thread(target=child.wait, daemon=True).start()

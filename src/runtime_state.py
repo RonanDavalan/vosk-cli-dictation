@@ -19,6 +19,7 @@ STATE_SLEEPING = "VEILLE"
 REFINE_OUTCOMES = ("done", "timeout", "error", "rejected", "skipped")
 
 _RTF_WINDOW = 30  # taille de fenêtre de la moyenne glissante du RTF
+_HOTKEY_ECHO_S = 1.0  # fenêtre où une commande de socket identique à un raccourci pynput est le même geste
 _DEBOUNCE_S = 0.5  # anti-rebond après une transition d'état (un déclenchement vocal immédiat serait un faux positif)
 
 
@@ -37,6 +38,8 @@ class RuntimeState:
         # Horodatage de la dernière transition d'état, pour l'anti-rebond des
         # déclenchements vocaux.
         self._last_transition = 0.0
+        # Instant où chaque commande est venue d'un raccourci pynput.
+        self._last_hotkey = {}
         # Finition des énoncés (src/refine) : énoncés affinés, repli sur le
         # texte de Vosk (délai dépassé, erreur du moteur, texte rejeté) et
         # énoncés-commandes laissés tels quels ; latence moyenne de la finition.
@@ -49,6 +52,17 @@ class RuntimeState:
             self.state = state
             if changed:
                 self._last_transition = time.monotonic()
+
+    def note_hotkey(self, command: str):
+        """Note l'instant où un raccourci pynput a posé `command` dans la file."""
+        with self._lock:
+            self._last_hotkey[command] = time.monotonic()
+
+    def is_hotkey_echo(self, command: str, window_s: float = _HOTKEY_ECHO_S) -> bool:
+        """True si le même geste vient d'arriver par pynput : la commande de la
+        socket qui le suit est celle d'un raccourci de bureau lié à la même touche."""
+        with self._lock:
+            return (time.monotonic() - self._last_hotkey.get(command, float("-inf"))) < window_s
 
     def in_debounce(self, window_s: float = _DEBOUNCE_S) -> bool:
         """True si une transition d'état a eu lieu il y a moins de `window_s`."""
