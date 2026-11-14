@@ -9,13 +9,25 @@
 # l'application — testables directement.
 
 import re
+import unicodedata
+
+_PUNCT_STRIP = ".,;:!?()[]«»\"„“…"
+
+
+def fold_word(word: str) -> str:
+    """Mot en minuscules sans signes diacritiques : une phrase écrite
+    « demarre » dans config.yaml doit reconnaître le « démarre » que rend un
+    modèle sans grammaire restreinte (modèle complet), et l'inverse."""
+    decomposed = unicodedata.normalize("NFD", word.lower())
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
 
 
 def normalize_tokens(text: str) -> list:
-    """Découpe en tokens comparables : minuscules, ponctuation ASCII retirée."""
+    """Découpe en tokens comparables : minuscules, ponctuation ASCII retirée,
+    accents ignorés."""
     text = (text or "").lower()
     text = re.sub(r"[.,;:!?()\[\]«»\"„“…]", " ", text)
-    return text.split()
+    return [fold_word(t) for t in text.split()]
 
 
 def phrase_tokens(phrase: str) -> list:
@@ -60,7 +72,7 @@ def strip_one_repetition(text: str, needle: list) -> str:
     if n == 0:
         return text
     words = text.split()
-    low = [w.lower().strip(".,;:!?()[]«»\"„“…") for w in words]
+    low = [fold_word(w.strip(_PUNCT_STRIP)) for w in words]
     idx = find_phrase(low, needle + needle)
     if idx == -1:
         return text
@@ -75,7 +87,7 @@ def remove_phrase_and_after(text: str, needle: list) -> str:
     if n == 0:
         return text.strip()
     words = text.split()
-    low = [w.lower().strip(".,;:!?()[]«»\"„“…") for w in words]
+    low = [fold_word(w.strip(_PUNCT_STRIP)) for w in words]
     idx = find_phrase(low, needle)
     if idx == -1:
         return text.strip()

@@ -101,3 +101,27 @@ def test_high_confidence_passes_default_threshold():
 def test_empty_needle_never_matches():
     assert find_phrase(normalize_tokens("anything at all"), []) == -1
     assert not is_doubled(normalize_tokens("anything"), [])
+
+
+# --- accents ignorés dans la comparaison --------------------------------------
+
+def test_wake_phrase_without_accent_matches_accented_text():
+    # config.yaml écrit « demarre », le modèle complet rend « démarre ».
+    assert find_phrase(normalize_tokens("bon alors démarre"), phrase_tokens("demarre")) == 2
+
+
+def test_accented_phrase_matches_text_without_accent():
+    assert find_phrase(normalize_tokens("demarre"), phrase_tokens("démarre")) == 0
+    assert find_phrase(normalize_tokens("texte stop dictee"), STOP) == 1
+
+
+def test_accent_folding_keeps_uppercase_and_punctuation_rules():
+    assert find_phrase(normalize_tokens("Texte. STOP, DICTÉE !"), phrase_tokens("stop dictee")) == 1
+
+
+def test_remove_phrase_keeps_original_accents_of_text_before():
+    assert remove_phrase_and_after("une idée réfléchie stop dictee fin", STOP) == "une idée réfléchie"
+
+
+def test_strip_one_repetition_matches_without_accents():
+    assert strip_one_repetition("noté stop dictee stop dictée", STOP) == "noté stop dictée"

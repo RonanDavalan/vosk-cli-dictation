@@ -205,6 +205,17 @@ def test_single_word_wake_phrase(monkeypatch):
     assert "DICTATION_ON" not in _drain(ctrl)
 
 
+def test_wake_phrase_without_accent_wakes_on_accented_final(monkeypatch):
+    # Le modèle complet refuse la grammaire restreinte et rend « démarre » ;
+    # la configuration écrit « demarre ». Le réveil part quand même.
+    vc = {"wake_phrase": "demarre", "stop_phrase": "zut"}
+    words = [{"word": "démarre", "conf": 1.0}]
+    script = [("final", {"text": "démarre", "result": words})]
+    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
+                                     voice_commands=vc)
+    assert "DICTATION_ON" in _drain(ctrl)
+
+
 # --- détecteur d'arrêt à grammaire restreinte en DICTÉE -------------------------
 
 def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
