@@ -3,6 +3,8 @@ WAV du corpus du banc quand faster-whisper et les poids sont présents."""
 
 import os
 import re
+import sys
+import types
 import wave
 
 import pytest
@@ -140,3 +142,20 @@ def test_transcribes_a_corpus_wav():
     )
     assert text
     assert rate <= (0.6 if size in ("tiny", "base") else 0.3)
+
+
+def test_unwritable_models_directory_is_a_load_failure(monkeypatch, tmp_path):
+    fake = types.ModuleType("faster_whisper")
+    fake.WhisperModel = lambda *a, **k: None
+    monkeypatch.setitem(sys.modules, "faster_whisper", fake)
+    monkeypatch.setattr(we, "missing_module", lambda: None)
+    monkeypatch.setattr(we, "resolve_device", lambda requested: "cpu")
+
+    def refuse(*args, **kwargs):
+        raise PermissionError("lecture seule")
+
+    monkeypatch.setattr(os, "makedirs", refuse)
+    engine = we.WhisperEngine("tiny", "cpu", "auto", directory=str(tmp_path / "w"))
+    with pytest.raises(RefineUnavailable) as err:
+        engine.load()
+    assert err.value.code == "load-failed"

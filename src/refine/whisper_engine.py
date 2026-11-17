@@ -131,8 +131,8 @@ class WhisperEngine(RefineEngine):
 
         self._device = resolve_device(self._requested_device)
         self.compute_type = resolve_compute_type(self._requested_compute, self._device)
-        os.makedirs(self._directory, exist_ok=True)
         try:
+            os.makedirs(self._directory, exist_ok=True)
             self._model = WhisperModel(
                 self.size,
                 device=self._device,
