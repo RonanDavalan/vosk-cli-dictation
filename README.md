@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://github.com/RonanDavalan/vosk-cli-dictation/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
-  <a href="#"><img src="https://img.shields.io/badge/Version-v0.5.4--beta-yellow.svg" alt="Version: v0.5.4-beta"></a>
+  <a href="#"><img src="https://img.shields.io/badge/Version-v0.6.0--beta-yellow.svg" alt="Version: v0.6.0-beta"></a>
   <a href="#"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python 3.12+"></a>
   <a href="#"><img src="https://img.shields.io/badge/Linux-Debian_%C2%B7_Fedora_%C2%B7_openSUSE_%C2%B7_Arch-blue.svg" alt="Native packages for Debian, Fedora, openSUSE and Arch Linux"></a>
   <a href="#"><img src="https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg" alt="Contributions Welcome"></a>
@@ -51,16 +51,16 @@ environment to create:
 
 ```bash
 # Debian 12+ and derivatives (Ubuntu 24.04+, Mint 22+...)
-sudo apt install ./vosk-cli-dictation_0.5.4~beta_all.deb
+sudo apt install ./vosk-cli-dictation_0.6.0~beta_all.deb
 
 # Fedora
-sudo dnf install ./vosk-cli-dictation-0.5.4~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-0.6.0~beta-1.fc42.noarch.rpm
 
 # openSUSE (Leap)
-sudo zypper install ./vosk-cli-dictation-0.5.4~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-0.6.0~beta-1.leap156.noarch.rpm
 
 # Arch Linux
-sudo pacman -U ./vosk-cli-dictation-0.5.4_beta-1-any.pkg.tar.zst
+sudo pacman -U ./vosk-cli-dictation-0.6.0_beta-1-any.pkg.tar.zst
 ```
 
 The first time the package is configured it builds a private virtual environment and installs the Vosk engine into it (this step needs network access).
@@ -187,7 +187,7 @@ Errors: `ERR bad-argument` (unknown argument), `ERR no-model` (no model installe
 
 Vosk keeps cutting and showing the text as you speak. With the refinement on, each finished utterance is also sent, as audio, to `faster-whisper`, and its text, with capitals and punctuation, replaces Vosk's just before it is typed. A command phrase (stop, wake) is never refined; utterances are typed in the order they were said; and when Whisper takes longer than `refine.timeout_ms` (2000 ms) after the end of the utterance, or returns nothing usable, the text of Vosk is typed instead. `vosk-cli-dictation --status` (a second line), `--diagnose` and `--info` count those fallbacks. Nothing changes while `refine.engine` is `none`, the factory value.
 
-**Prerequisite:** `faster-whisper` in the Python environment of the dictation: the optional package `vosk-cli-dictation-whisper` of the same version as the main one adds it (`sudo apt install ./vosk-cli-dictation-whisper_0.5.4~beta_all.deb`; the same file names with `-whisper` on Fedora, openSUSE and Arch), or `pip install faster-whisper` from a Git checkout. Without it the icon menu greys the entry with that reason and `--diagnose` says so. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models` (about 75 MB for `tiny`, 1.6 GB for `large-v3-turbo`); the icon announces the first download, and the text of Vosk is typed meanwhile.
+**Prerequisite:** `faster-whisper` in the Python environment of the dictation: the optional package `vosk-cli-dictation-whisper` of the same version as the main one adds it (`sudo apt install ./vosk-cli-dictation-whisper_0.6.0~beta_all.deb`; the same file names with `-whisper` on Fedora, openSUSE and Arch), or `pip install faster-whisper` from a Git checkout. Without it the icon menu greys the entry with that reason and `--diagnose` says so. The weights download at first use under `~/.local/share/vosk-cli-dictation/whisper-models` (about 75 MB for `tiny`, 1.6 GB for `large-v3-turbo`); the icon announces the first download, and the text of Vosk is typed meanwhile.
 
 ```yaml
 refine:
@@ -227,13 +227,13 @@ With the native packages, the icon is a second package of the same version as th
 
 ```bash
 # Debian 12+, Ubuntu 24.04+, Mint 22+...
-sudo apt install ./vosk-cli-dictation-tray_0.5.4~beta_all.deb
+sudo apt install ./vosk-cli-dictation-tray_0.6.0~beta_all.deb
 # Fedora
-sudo dnf install ./vosk-cli-dictation-tray-0.5.4~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-tray-0.6.0~beta-1.fc42.noarch.rpm
 # openSUSE Leap
-sudo zypper install ./vosk-cli-dictation-tray-0.5.4~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-tray-0.6.0~beta-1.leap156.noarch.rpm
 # Arch Linux
-sudo pacman -U ./vosk-cli-dictation-tray-0.5.4_beta-1-any.pkg.tar.zst
+sudo pacman -U ./vosk-cli-dictation-tray-0.6.0_beta-1-any.pkg.tar.zst
 ```
 
 Its graphics library, PySide6, is installed with `pip` into a private virtual environment on first configuration (network access needed at that point only); the package also adds a menu entry and a system login entry (uncheck "Launch the icon at login" in the menu to remove it for your account). From a Git checkout:
@@ -261,7 +261,7 @@ This project is built through an asymmetric human-LLM collaboration — see [CON
 This project is built through a human-LLM collaboration, with the roles written down as they were actually played. The full list is in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 *   **Ronan Davalan** — Architect and arbiter: vision, security requirements, validation and testing.
-*   **Claude Code (Anthropic)** — Systems engineer and lead developer: principal author of the source code since v0.5.0-alpha, the Debian packaging and the tooling.
+*   **Claude Code (Anthropic)** — Systems engineer and lead developer: principal author of the source code, the Debian packaging and the tooling.
 *   **Gemini (Google)** — Synthesizer and strategic advisor.
 *   **Grok (xAI)** — External validator.
 *   **GLM-5.3** — Auditor of the interaction core (blind cross-audit).
