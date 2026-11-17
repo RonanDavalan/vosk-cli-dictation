@@ -54,10 +54,10 @@ aucun environnement virtuel à créer :
 sudo apt install ./vosk-cli-dictation_0.6.0~beta_all.deb
 
 # Fedora
-sudo dnf install ./vosk-cli-dictation-0.6.0~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-0.6.0~beta-1.fc44.noarch.rpm
 
 # openSUSE (Leap)
-sudo zypper install ./vosk-cli-dictation-0.6.0~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-0.6.0~beta-1.leap160.noarch.rpm
 
 # Arch Linux
 sudo pacman -U ./vosk-cli-dictation-0.6.0_beta-1-any.pkg.tar.zst
@@ -233,9 +233,9 @@ Avec les paquets natifs, l'icône est un second paquet de la même version que l
 # Debian 12+, Ubuntu 24.04+, Mint 22+...
 sudo apt install ./vosk-cli-dictation-tray_0.6.0~beta_all.deb
 # Fedora
-sudo dnf install ./vosk-cli-dictation-tray-0.6.0~beta-1.fc42.noarch.rpm
+sudo dnf install ./vosk-cli-dictation-tray-0.6.0~beta-1.fc44.noarch.rpm
 # openSUSE Leap
-sudo zypper install ./vosk-cli-dictation-tray-0.6.0~beta-1.leap156.noarch.rpm
+sudo zypper install ./vosk-cli-dictation-tray-0.6.0~beta-1.leap160.noarch.rpm
 # Arch Linux
 sudo pacman -U ./vosk-cli-dictation-tray-0.6.0_beta-1-any.pkg.tar.zst
 ```
