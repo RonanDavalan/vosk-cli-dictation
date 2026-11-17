@@ -108,7 +108,11 @@ class TextProcessor:
         sep = self._lead_separator()
         for symbol in self.space_before:
             text = re.sub(
-                r"(?<=[^\s" + re.escape(sep) + r"])" + re.escape(symbol) + r"(?![\d/\\])",
+                r"(?<=[^\s"
+                + re.escape(sep)
+                + r"])"
+                + re.escape(symbol)
+                + r"(?![\d/\\])",
                 sep + symbol,
                 text,
             )
