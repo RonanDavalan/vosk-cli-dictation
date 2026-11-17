@@ -153,7 +153,7 @@ injection:
 
 Esta sección contiene configuraciones específicas para un idioma. La configuración de fábrica incluye cuatro: `en`, `fr`, `de`, `es`.
 
--   **`voice_commands`**: Las dos palabras `wake_phrase` y `stop_phrase` para este idioma. Dos palabras para que una oración normal nunca las active. (Las antiguas claves de una sola palabra `start_word` / `stop_word` se siguen leyendo si están presentes, para compatibilidad con versiones anteriores.)
+-   **`voice_commands`**: Las dos palabras `wake_phrase` y `stop_phrase` para este idioma. Dos palabras para que una oración normal nunca las active. Los acentos no cuentan al compararlas con lo que se oye: `demarre` reconoce «démarre». (Las antiguas claves de una sola palabra `start_word` / `stop_word` se siguen leyendo si están presentes, para compatibilidad con versiones anteriores.)
 -   **`punctuation`**: Un diccionario para insertar automáticamente la puntuación, organizado en grupos lógicos. Los signos `¿` y `¡` en español solo se insertan mediante comandos explícitos (`"abrir interrogación"`, `"abrir exclamación"`), nunca automáticamente.
 -   **`typography`**: Reglas de salida específicas para cada idioma; véase más abajo.
 -   **`recognition_aliases`**: Corrige errores de reconocimiento comunes de Vosk. La tabla incluida contiene solo correcciones genéricas y no controvertidas (por ejemplo, `"de points": "deux points"`); la tabla francesa también incluye los homófonos de la raya `"tirer"`, `"tirés"`, `"tirait"`, `"tirez"` (todos mapeados a `"tiret"`), porque el pequeño modelo francés transcribe así el comando de la raya. Las correcciones específicas del corpus se encuentran en `config/config.example.yaml`, para copiar y adaptar.

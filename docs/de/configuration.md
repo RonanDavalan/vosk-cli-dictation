@@ -153,7 +153,7 @@ injection:
 
 Dieser Abschnitt enthält Einstellungen, die für eine bestimmte Sprache gelten. Die Werkskonfiguration enthält vier: `en`, `fr`, `de`, `es`.
 
--   **`voice_commands`**: die zwei Wörter `wake_phrase` und `stop_phrase` für diese Sprache. Zwei Wörter, sodass ein normaler Satz sie nie auslöst. (Die vorherigen, einwortigen Schlüssel `start_word` / `stop_word` werden weiterhin gelesen, falls vorhanden, zur Abwärtskompatibilität.)
+-   **`voice_commands`**: die zwei Wörter `wake_phrase` und `stop_phrase` für diese Sprache. Zwei Wörter, sodass ein normaler Satz sie nie auslöst. Akzente zählen beim Vergleich mit dem Gehörten nicht: `demarre` erkennt „démarre“. (Die vorherigen, einwortigen Schlüssel `start_word` / `stop_word` werden weiterhin gelesen, falls vorhanden, zur Abwärtskompatibilität.)
 -   **`punctuation`**: Ein Wörterbuch, um automatisch Satzzeichen einzufügen, das in logische Gruppen organisiert ist. Spanische Satzzeichen `¿` und `¡` werden nur durch explizite Befehle (`"abrir interrogación"`, `"abrir exclamación"`) eingefügt, niemals automatisch.
 -   **`typography`**: Sprachspezifische Ausgaberegeln – siehe unten.
 -   **`recognition_aliases`**: Korrigiert häufige Erkennungsfehler von Vosk. Die mitgelieferte Tabelle enthält nur allgemeine, unumstrittene Korrekturen (z. B. `"de points": "deux points"`); die französische Tabelle enthält außerdem die Gedankenstrich-Homophone `"tirer"`, `"tirés"`, `"tirait"`, `"tirez"` (alle auf `"tiret"` abgebildet), weil das kleine französische Modell den Gedankenstrich-Befehl so ausgibt. Korpus-spezifische Korrekturen befinden sich in `config/config.example.yaml`, zum Kopieren und Anpassen.

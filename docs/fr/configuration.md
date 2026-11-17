@@ -154,7 +154,7 @@ injection:
 
 Cette section contient des paramètres spécifiques à une langue. La configuration par défaut comprend quatre options : `en`, `fr`, `de`, `es`.
 
--   **`voice_commands`**: les deux mots `wake_phrase` et `stop_phrase` pour cette langue. Deux mots de sorte qu'une phrase ordinaire ne les déclenche jamais. (Les anciennes clés à un seul mot `start_word` / `stop_word` sont toujours lues si elles sont présentes, pour assurer la compatibilité descendante.)
+-   **`voice_commands`**: les deux mots `wake_phrase` et `stop_phrase` pour cette langue. Deux mots de sorte qu'une phrase ordinaire ne les déclenche jamais. Les accents ne comptent pas dans la comparaison avec ce qui est entendu : `demarre` reconnaît « démarre ». (Les anciennes clés à un seul mot `start_word` / `stop_word` sont toujours lues si elles sont présentes, pour assurer la compatibilité descendante.)
 -   **`punctuation`**: Un dictionnaire pour insérer automatiquement la ponctuation, organisé en groupes logiques. Les caractères `¿` et `¡` espagnols ne sont insérés que par des commandes explicites (`"abrir interrogación"`, `"abrir exclamación"`), et jamais automatiquement.
 -   **`typography`**: règles de sortie spécifiques à chaque langue — voir ci-dessous.
 -   **`recognition_aliases`**: Corrige les erreurs de reconnaissance courantes provenant de Vosk. Le tableau fourni contient uniquement des corrections génériques et non controversées (par exemple, `"de points": "deux points"`); le tableau français fournit aussi les homophones du tiret `"tirer"`, `"tirés"`, `"tirait"`, `"tirez"` (tous mappés vers `"tiret"`), car le petit modèle français rend la commande de tiret ainsi. Les corrections spécifiques au corpus se trouvent dans `config/config.example.yaml`, à copier et à adapter.
