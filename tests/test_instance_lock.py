@@ -11,13 +11,16 @@ from src import instance_lock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-HOLDER = textwrap.dedent("""
+HOLDER = (
+    textwrap.dedent("""
     import sys, time
     sys.path.insert(0, %r)
     from src import instance_lock
     print("held" if instance_lock.acquire() else "refused", flush=True)
     time.sleep(60)
-""") % ROOT
+""")
+    % ROOT
+)
 
 
 @pytest.fixture(autouse=True)
@@ -28,7 +31,9 @@ def runtime_dir(tmp_path, monkeypatch):
 
 
 def start_holder():
-    child = subprocess.Popen([sys.executable, "-c", HOLDER], stdout=subprocess.PIPE, text=True)
+    child = subprocess.Popen(
+        [sys.executable, "-c", HOLDER], stdout=subprocess.PIPE, text=True
+    )
     assert child.stdout.readline().strip() == "held"
     return child
 
@@ -65,7 +70,9 @@ def test_owner_pid_none_for_dead_pid(runtime_dir):
 
 def test_owner_pid_none_when_birth_differs(runtime_dir):
     me = os.getpid()
-    open(instance_lock.lock_path(), "w").write("%d %d\n" % (me, instance_lock._birth_ticks(me) + 1))
+    open(instance_lock.lock_path(), "w").write(
+        "%d %d\n" % (me, instance_lock._birth_ticks(me) + 1)
+    )
     assert instance_lock.owner_pid() is None
 
 

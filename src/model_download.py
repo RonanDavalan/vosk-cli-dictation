@@ -129,8 +129,13 @@ def download_model(lang: str, size: str = "small") -> bool:
     needed = info["size"] * 3
     free = shutil.disk_usage(root).free
     if free < needed:
-        print(_("Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed.").format(
-            path=root, free=free / (1024 * 1024), needed=needed / (1024 * 1024)))
+        print(
+            _(
+                "Not enough disk space in {path}: {free:.0f} MB free, {needed:.0f} MB needed."
+            ).format(
+                path=root, free=free / (1024 * 1024), needed=needed / (1024 * 1024)
+            )
+        )
         return False
     fd, tmp_zip = tempfile.mkstemp(dir=root, suffix=".zip.part")
     os.close(fd)

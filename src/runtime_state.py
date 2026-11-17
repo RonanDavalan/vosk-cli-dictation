@@ -62,7 +62,9 @@ class RuntimeState:
         """True si le même geste vient d'arriver par pynput : la commande de la
         socket qui le suit est celle d'un raccourci de bureau lié à la même touche."""
         with self._lock:
-            return (time.monotonic() - self._last_hotkey.get(command, float("-inf"))) < window_s
+            return (
+                time.monotonic() - self._last_hotkey.get(command, float("-inf"))
+            ) < window_s
 
     def in_debounce(self, window_s: float = _DEBOUNCE_S) -> bool:
         """True si une transition d'état a eu lieu il y a moins de `window_s`."""

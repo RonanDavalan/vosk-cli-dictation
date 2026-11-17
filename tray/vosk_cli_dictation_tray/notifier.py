@@ -15,7 +15,12 @@ def notify(title: str, message: str) -> None:
     if shutil.which("notify-send") is None:
         return
     try:
-        subprocess.run(["notify-send", title, message], capture_output=True, check=False,
-                       stdin=subprocess.DEVNULL, timeout=_TIMEOUT_S)
+        subprocess.run(
+            ["notify-send", title, message],
+            capture_output=True,
+            check=False,
+            stdin=subprocess.DEVNULL,
+            timeout=_TIMEOUT_S,
+        )
     except subprocess.TimeoutExpired:
         pass

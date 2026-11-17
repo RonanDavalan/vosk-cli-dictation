@@ -26,9 +26,21 @@ SOCKET_NAME = "vosk-cli-dictation.sock"
 
 # Jetons acceptés sur la socket.
 COMMANDS = {
-    "toggle", "dictation-on", "dictation-off", "finalize", "cancel",
-    "sleep", "wake", "sleep-toggle", "status", "quit",
-    "info", "set-lang", "set-model", "set-refine", "set-correction",
+    "toggle",
+    "dictation-on",
+    "dictation-off",
+    "finalize",
+    "cancel",
+    "sleep",
+    "wake",
+    "sleep-toggle",
+    "status",
+    "quit",
+    "info",
+    "set-lang",
+    "set-model",
+    "set-refine",
+    "set-correction",
     "reset-selection",
 }
 
@@ -63,10 +75,13 @@ def _echo_notice():
     _echo_notice_shown = True
     from config.config import config
     from src.i18n import get_translation
+
     _ = get_translation()
-    print(f"\n{config.color_warning}"
-          f"{_('A desktop shortcut and the program’s own hotkey fired together; the second one was ignored. Set hotkeys.pynput_enabled to false if the desktop owns this key.')}"
-          f"{config.RESET}")
+    print(
+        f"\n{config.color_warning}"
+        f"{_('A desktop shortcut and the program’s own hotkey fired together; the second one was ignored. Set hotkeys.pynput_enabled to false if the desktop owns this key.')}"
+        f"{config.RESET}"
+    )
 
 
 def socket_path() -> str:
@@ -81,6 +96,7 @@ def socket_path() -> str:
 # --------------------------------------------------------------------------- #
 # Client — utilisé par le binaire invoqué avec un drapeau de contrôle          #
 # --------------------------------------------------------------------------- #
+
 
 def _read_line(sock) -> bytes:
     """Lit jusqu'au saut de ligne, à la fin du flux ou à MAX_LINE octets. Un
@@ -127,6 +143,7 @@ def instance_running() -> bool:
 # Serveur — tourne dans un thread de l'instance principale                     #
 # --------------------------------------------------------------------------- #
 
+
 def _info_fallback() -> dict:
     snap = runtime_state.snapshot()
     return {"state": snap["state"], "loading": False, "last_error": None}
@@ -149,7 +166,9 @@ def _handle(raw: str, control_queue, controller=None) -> str:
         return "OK " + json.dumps(data, ensure_ascii=False, separators=(",", ":"))
     if token == "reset-selection":
         refusal = controller.request(token, "") if controller else "unsupported"
-        return "ERR " + refusal if refusal else "OK " + runtime_state.snapshot()["state"]
+        return (
+            "ERR " + refusal if refusal else "OK " + runtime_state.snapshot()["state"]
+        )
     if token in ARG_COMMANDS:
         if controller is None:
             return "ERR unsupported"

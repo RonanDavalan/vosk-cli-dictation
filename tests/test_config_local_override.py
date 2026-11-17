@@ -48,13 +48,17 @@ def test_no_local_file_leaves_base_untouched(tmp_path, monkeypatch):
 
 
 def test_local_file_overlays_only_named_leaves(tmp_path, monkeypatch):
-    cfg = _fresh_config(tmp_path, monkeypatch, """
+    cfg = _fresh_config(
+        tmp_path,
+        monkeypatch,
+        """
         language_settings:
           fr:
             voice_commands:
               wake_phrase: "démarre"
               stop_phrase: "zut"
-    """)
+    """,
+    )
     assert cfg.local_config_path == str(tmp_path / "config_local.yaml")
     assert cfg.WAKE_PHRASE == "démarre"
     assert cfg.STOP_PHRASE == "zut"

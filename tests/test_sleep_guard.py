@@ -13,7 +13,10 @@ from config.config import config
 from src.i18n import set_ui_language
 from src.text_processing import TextProcessor
 from src.runtime_state import (
-    runtime_state, STATE_LISTENING, STATE_DICTATING, STATE_SLEEPING,
+    runtime_state,
+    STATE_LISTENING,
+    STATE_DICTATING,
+    STATE_SLEEPING,
 )
 
 
@@ -70,8 +73,8 @@ def sleeping(monkeypatch):
 
 
 def _assert_woke_into_dictation(sleep_ev, wake_ev):
-    assert not sleep_ev.is_set()          # sorti de veille
-    assert wake_ev.is_set()               # thread de reconnaissance débloqué
+    assert not sleep_ev.is_set()  # sorti de veille
+    assert wake_ev.is_set()  # thread de reconnaissance débloqué
     assert runtime_state.state == STATE_DICTATING
 
 

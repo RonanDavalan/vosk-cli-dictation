@@ -23,22 +23,21 @@ def fmt(lang, raw):
 # --------------------------------------------------------------------------- #
 
 FR_CASES = [
-    ("bonjour virgule comment allez-vous point d'interrogation",
-     f"Bonjour, comment allez-vous{NNBSP}? "),
-    ("il fait beau point il pleuvra demain",
-     "Il fait beau. Il pleuvra demain"),
-    ("attention deux points c'est important",
-     f"Attention{NNBSP}: c'est important"),
-    ("un point-virgule ici point-virgule et là",
-     f"Un{NNBSP}; ici{NNBSP}; et là"),
-    ("il dit ouvrez les guillemets salut fermez les guillemets point",
-     f"Il dit « Salut{NNBSP}». "),
+    (
+        "bonjour virgule comment allez-vous point d'interrogation",
+        f"Bonjour, comment allez-vous{NNBSP}? ",
+    ),
+    ("il fait beau point il pleuvra demain", "Il fait beau. Il pleuvra demain"),
+    ("attention deux points c'est important", f"Attention{NNBSP}: c'est important"),
+    ("un point-virgule ici point-virgule et là", f"Un{NNBSP}; ici{NNBSP}; et là"),
+    (
+        "il dit ouvrez les guillemets salut fermez les guillemets point",
+        f"Il dit « Salut{NNBSP}». ",
+    ),
     # alias d'usine : "fermer la parenthèse" -> "fermez la parenthèse" -> ')'
-    ("le texte fermer la parenthèse suite",
-     "Le texte) suite"),
+    ("le texte fermer la parenthèse suite", "Le texte) suite"),
     # custom_vocabulary : casse fixe
-    ("vosk et gemini virgule c'est de l'ia",
-     "Vosk et Gemini, c'est de l'IA"),
+    ("vosk et gemini virgule c'est de l'ia", "Vosk et Gemini, c'est de l'IA"),
 ]
 
 
@@ -58,13 +57,10 @@ def test_french_thin_space_is_narrow_nobreak():
 # --------------------------------------------------------------------------- #
 
 EN_CASES = [
-    ("hello comma how are you question mark",
-     "Hello, how are you? "),
-    ("first sentence period second sentence",
-     "First sentence. Second sentence"),
+    ("hello comma how are you question mark", "Hello, how are you? "),
+    ("first sentence period second sentence", "First sentence. Second sentence"),
     # `!` termine la phrase : le mot suivant prend une majuscule.
-    ("wait exclamation mark now",
-     "Wait! Now"),
+    ("wait exclamation mark now", "Wait! Now"),
 ]
 
 # Les guillemets droits anglais (" ") utilisent le même glyphe à l'ouverture
@@ -89,14 +85,13 @@ def test_english_has_no_thin_space():
 # --------------------------------------------------------------------------- #
 
 DE_CASES = [
-    ("hallo komma wie geht es dir fragezeichen",
-     "Hallo, wie geht es dir? "),
-    ("erster satz punkt zweiter satz",
-     "Erster satz. Zweiter satz"),
-    ("er sagte anführungszeichen auf hallo anführungszeichen zu punkt",
-     "Er sagte „Hallo“. "),
-    ("das haus doppelpunkt es ist gross",
-     "Das haus: es ist gross"),
+    ("hallo komma wie geht es dir fragezeichen", "Hallo, wie geht es dir? "),
+    ("erster satz punkt zweiter satz", "Erster satz. Zweiter satz"),
+    (
+        "er sagte anführungszeichen auf hallo anführungszeichen zu punkt",
+        "Er sagte „Hallo“. ",
+    ),
+    ("das haus doppelpunkt es ist gross", "Das haus: es ist gross"),
 ]
 
 
@@ -121,14 +116,10 @@ def test_german_no_space_before_question_mark():
 # --------------------------------------------------------------------------- #
 
 ES_CASES = [
-    ("abrir interrogación cómo estás interrogación",
-     "¿Cómo estás? "),
-    ("dice abrir exclamación qué bien exclamación",
-     "Dice ¡qué bien! "),
-    ("primera frase punto segunda frase",
-     "Primera frase. Segunda frase"),
-    ("hola coma cómo estás",
-     "Hola, cómo estás"),
+    ("abrir interrogación cómo estás interrogación", "¿Cómo estás? "),
+    ("dice abrir exclamación qué bien exclamación", "Dice ¡qué bien! "),
+    ("primera frase punto segunda frase", "Primera frase. Segunda frase"),
+    ("hola coma cómo estás", "Hola, cómo estás"),
 ]
 
 
@@ -151,6 +142,7 @@ def test_spanish_no_space_before_marks():
 # Correction de capitalize : ne jamais minusculiser la fin du mot              #
 # --------------------------------------------------------------------------- #
 
+
 def test_capitalize_does_not_lowercase_rest_of_word():
     # entrée déjà capitalisée (cas custom_vocabulary en début de phrase)
     tp = TextProcessor("en")
@@ -164,6 +156,7 @@ def test_capitalize_does_not_lowercase_rest_of_word():
 # Tokeniseur : une commande de ponctuation n'est reconnue que sur des jetons   #
 # COMPLETS (jamais comme préfixe d'un mot plus long)                           #
 # --------------------------------------------------------------------------- #
+
 
 def test_point_inside_longer_word_is_not_a_command():
     # "points" = mot ordinaire (préfixe "point" ne doit pas être reconnu).
@@ -196,6 +189,7 @@ def test_isolated_point_recognized_as_command():
 # --------------------------------------------------------------------------- #
 # Mode de saisie de la ponctuation par langue (inline | explicit)             #
 # --------------------------------------------------------------------------- #
+
 
 def _set_fr_punctuation_mode(monkeypatch, mode, trigger=None):
     """Force le mode / déclencheur de ponctuation fr pour un seul test."""
@@ -247,6 +241,7 @@ def test_explicit_no_dot_inside_plain_words(monkeypatch):
 # Appariement des commandes de ponctuation insensible aux accents             #
 # (le modèle Vosk rend parfois "a la ligne" pour "à la ligne")                #
 # --------------------------------------------------------------------------- #
+
 
 def test_command_matches_without_accents():
     out = TextProcessor("fr").process("va a la ligne puis ecris")

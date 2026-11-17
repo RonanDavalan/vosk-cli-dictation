@@ -15,22 +15,37 @@ def state(tmp_path, monkeypatch):
     return tmp_path
 
 
-def make_config(tmp_path, monkeypatch, default_model=None, models=("fr", "en", "de", "es"),
-                create=("fr", "en", "de", "es")):
+def make_config(
+    tmp_path,
+    monkeypatch,
+    default_model=None,
+    models=("fr", "en", "de", "es"),
+    create=("fr", "en", "de", "es"),
+):
     """Config isolée : des dossiers de modèles factices dans XDG_DATA_HOME."""
     data_home = tmp_path / "data"
     monkeypatch.setenv("XDG_DATA_HOME", str(data_home))
-    names = {"en": "vosk-model-small-en-us-0.15", "fr": "vosk-model-small-fr-0.22",
-             "de": "vosk-model-small-de-0.15", "es": "vosk-model-small-es-0.42"}
+    names = {
+        "en": "vosk-model-small-en-us-0.15",
+        "fr": "vosk-model-small-fr-0.22",
+        "de": "vosk-model-small-de-0.15",
+        "es": "vosk-model-small-es-0.42",
+    }
     for lang in create:
         (data_home / "vosk-models" / names[lang]).mkdir(parents=True, exist_ok=True)
     # Seule la racine factice compte : le ./vosk-model/ du dépôt de
     # développement ne doit pas faire apparaître un modèle absent.
     monkeypatch.setattr(
-        Config, "model_search_roots",
-        lambda self, rel: [str(data_home / "vosk-models" / os.path.basename(rel))])
+        Config,
+        "model_search_roots",
+        lambda self, rel: [str(data_home / "vosk-models" / os.path.basename(rel))],
+    )
     cfg = tmp_path / "config.yaml"
-    body = {"vosk_models": [{"name": l, "path_relative": "vosk-model/" + names[l]} for l in models]}
+    body = {
+        "vosk_models": [
+            {"name": l, "path_relative": "vosk-model/" + names[l]} for l in models
+        ]
+    }
     if default_model is not None:
         body["default_model"] = default_model
     cfg.write_text(yaml.safe_dump(body), encoding="utf-8")
@@ -69,14 +84,21 @@ def test_german_session_with_german_model_gives_de(state, monkeypatch):
 
 def test_german_session_without_german_model_gives_en(state, monkeypatch):
     set_session_lang(monkeypatch, "de_DE.UTF-8")
-    cfg = make_config(state, monkeypatch, default_model="system", create=("fr", "en", "es"))
+    cfg = make_config(
+        state, monkeypatch, default_model="system", create=("fr", "en", "es")
+    )
     assert cfg.startup_language() == ("en", "system")
 
 
 def test_key_absent_and_value_system_behave_the_same(state, monkeypatch):
     set_session_lang(monkeypatch, "es_ES.UTF-8")
-    assert make_config(state, monkeypatch, default_model=None).startup_language() == ("es", "system")
-    assert make_config(state, monkeypatch, default_model="system").startup_language() == ("es", "system")
+    assert make_config(state, monkeypatch, default_model=None).startup_language() == (
+        "es",
+        "system",
+    )
+    assert make_config(
+        state, monkeypatch, default_model="system"
+    ).startup_language() == ("es", "system")
 
 
 def test_config_value_beats_the_system(state, monkeypatch):
@@ -131,6 +153,7 @@ def test_damaged_selection_file_is_ignored(state, monkeypatch):
 
 def test_diagnose_gives_the_origin_of_each_value(state, monkeypatch, capsys):
     from src import diagnose
+
     set_session_lang(monkeypatch, "de_DE.UTF-8")
     cfg = make_config(state, monkeypatch, default_model="en")
     sel.save_selection({"lang": "fr"})

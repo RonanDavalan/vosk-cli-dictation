@@ -21,7 +21,9 @@ def test_interaction_mode_reads_config_data(monkeypatch):
 
 def test_global_value_used_without_per_language_override(monkeypatch):
     monkeypatch.setitem(config.data["interaction"], "silence_timeout_ms", 500)
-    monkeypatch.delitem(config.language_settings["fr"], "silence_timeout_ms", raising=False)
+    monkeypatch.delitem(
+        config.language_settings["fr"], "silence_timeout_ms", raising=False
+    )
     assert config.interaction_setting("silence_timeout_ms", 999, "fr") == 500
 
 
@@ -34,7 +36,9 @@ def test_per_language_overrides_global(monkeypatch):
 
 def test_default_when_key_absent_everywhere(monkeypatch):
     monkeypatch.delitem(config.data["interaction"], "silence_timeout_ms", raising=False)
-    monkeypatch.delitem(config.language_settings["fr"], "silence_timeout_ms", raising=False)
+    monkeypatch.delitem(
+        config.language_settings["fr"], "silence_timeout_ms", raising=False
+    )
     assert config.interaction_setting("silence_timeout_ms", 700, "fr") == 700
 
 

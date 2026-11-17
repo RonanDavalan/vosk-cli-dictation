@@ -37,7 +37,8 @@ class Translator:
         for directory in locale_dirs():
             if (directory / self.lang / "LC_MESSAGES" / "messages.mo").is_file():
                 self._gettext = gettext.translation(
-                    "messages", localedir=str(directory), languages=[self.lang]).gettext
+                    "messages", localedir=str(directory), languages=[self.lang]
+                ).gettext
                 return
         self._gettext = lambda text: text
 

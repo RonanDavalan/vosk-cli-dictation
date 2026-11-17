@@ -33,7 +33,9 @@ class FakeEngine(RefineEngine):
         self.calls.append((len(pcm), language))
         if self.error:
             raise self.error
-        time.sleep(self.delay if not callable(self.delay) else self.delay(len(self.calls)))
+        time.sleep(
+            self.delay if not callable(self.delay) else self.delay(len(self.calls))
+        )
         return self.answers.get(len(self.calls), "texte affiné")
 
 
@@ -83,7 +85,9 @@ def test_refined_text_replaces_vosk_text():
 
 def test_typing_order_is_the_order_of_utterances():
     # Le premier énoncé est le plus lent : le second, déjà fini, attend son tour.
-    engine = FakeEngine({1: "premier", 2: "second"}, delay=lambda n: 0.3 if n == 1 else 0.0)
+    engine = FakeEngine(
+        {1: "premier", 2: "second"}, delay=lambda n: 0.3 if n == 1 else 0.0
+    )
     pipe, sink = make(engine, timeout_ms=2000)
     pipe.submit("un", [], PCM, "fr")
     pipe.submit("deux", [], PCM, "fr")
@@ -121,7 +125,9 @@ def test_command_utterance_is_not_refined_but_keeps_its_place():
 
 def test_engine_error_falls_back_and_is_reported():
     seen = []
-    pipe, sink = make(FakeEngine(error=RuntimeError("boom")), report=lambda k, d: seen.append((k, d)))
+    pipe, sink = make(
+        FakeEngine(error=RuntimeError("boom")), report=lambda k, d: seen.append((k, d))
+    )
     pipe.submit("texte", [], PCM, "fr")
     assert sink.take(1) == [("texte", [], False)]
     assert counts()["error"] == 1 and seen == [("error", "boom")]
@@ -176,6 +182,7 @@ def test_pending_counts_until_delivery():
 
 # --- fil de reconnaissance ------------------------------------------------- #
 
+
 class FakeRec:
     def __init__(self, script):
         self.script = list(script)
@@ -217,9 +224,20 @@ def run_recognition(script, monkeypatch, pipeline, chunks=None):
         audio_q.put_nowait(b"\x01\x00" * 2048)
     t = threading.Thread(
         target=rec.recognition_thread,
-        args=(object(), fake, audio_q, text_q, queue.Queue(maxsize=32), stop,
-              threading.Event(), wake, None, pipeline),
-        daemon=True)
+        args=(
+            object(),
+            fake,
+            audio_q,
+            text_q,
+            queue.Queue(maxsize=32),
+            stop,
+            threading.Event(),
+            wake,
+            None,
+            pipeline,
+        ),
+        daemon=True,
+    )
     t.start()
     time.sleep(0.6)
     stop.set()
@@ -234,7 +252,10 @@ def run_recognition(script, monkeypatch, pipeline, chunks=None):
 
 
 def final(text):
-    return ("final", {"text": text, "result": [{"word": w, "conf": 1.0} for w in text.split()]})
+    return (
+        "final",
+        {"text": text, "result": [{"word": w, "conf": 1.0} for w in text.split()]},
+    )
 
 
 PARTIAL = ("partial", {"partial": "bon"})
@@ -258,7 +279,13 @@ def test_audio_is_kept_from_just_before_the_first_partial(monkeypatch):
     run_recognition(script, monkeypatch, pipe)
     sink.take(1)
     pcm_len = engine.calls[0][0]
-    preroll = int(rec.REFINE_PREROLL_S / (config.audio["buffer_size"] / config.audio["sample_rate"])) + 1
+    preroll = (
+        int(
+            rec.REFINE_PREROLL_S
+            / (config.audio["buffer_size"] / config.audio["sample_rate"])
+        )
+        + 1
+    )
     assert pcm_len == (preroll + 2) * chunk
 
 
@@ -267,7 +294,9 @@ def test_audio_is_capped_to_thirty_seconds(monkeypatch):
     pipe, sink = make(engine)
     chunk_s = config.audio["buffer_size"] / config.audio["sample_rate"]
     n = int(rec.REFINE_MAX_AUDIO_S / chunk_s) + 40
-    run_recognition([PARTIAL] + [SILENCE] * (n - 2) + [final("long")], monkeypatch, pipe, chunks=n)
+    run_recognition(
+        [PARTIAL] + [SILENCE] * (n - 2) + [final("long")], monkeypatch, pipe, chunks=n
+    )
     sink.take(1)
     assert engine.calls[0][0] <= int(rec.REFINE_MAX_AUDIO_S / chunk_s) * 2048 * 2
 
@@ -275,7 +304,9 @@ def test_audio_is_capped_to_thirty_seconds(monkeypatch):
 def test_stop_phrase_utterance_is_not_refined(monkeypatch):
     engine = FakeEngine({1: "premier"})
     pipe, sink = make(engine)
-    run_recognition([PARTIAL, final("bonjour"), PARTIAL, final("stop dictée")], monkeypatch, pipe)
+    run_recognition(
+        [PARTIAL, final("bonjour"), PARTIAL, final("stop dictée")], monkeypatch, pipe
+    )
     got = sink.take(2)
     assert [(t, r) for t, _w, r in got] == [("premier", True), ("stop dictée", False)]
     assert len(engine.calls) == 1
@@ -301,6 +332,7 @@ def test_without_pipeline_the_recognition_is_unchanged(monkeypatch):
 
 
 # --- UI ------------------------------------------------------------------------- #
+
 
 class FakeRefiner:
     timeout_s = 0.3
@@ -333,9 +365,18 @@ def ui_harness(monkeypatch):
         wake.set()
         t = threading.Thread(
             target=ui.ui_thread,
-            args=(text_q, ctrl_q, stop, TextProcessor("fr"), threading.Event(),
-                  threading.Event(), wake, refiner),
-            daemon=True)
+            args=(
+                text_q,
+                ctrl_q,
+                stop,
+                TextProcessor("fr"),
+                threading.Event(),
+                threading.Event(),
+                wake,
+                refiner,
+            ),
+            daemon=True,
+        )
         t.start()
         ctrl_q.put_nowait("DICTATION_ON")
         time.sleep(0.5)

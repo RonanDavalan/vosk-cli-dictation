@@ -36,7 +36,11 @@ def load_selection() -> dict:
         return {}
     if not isinstance(data, dict):
         return {}
-    return {k: v for k, v in data.items() if k in SELECTION_KEYS and isinstance(v, str) and v}
+    return {
+        k: v
+        for k, v in data.items()
+        if k in SELECTION_KEYS and isinstance(v, str) and v
+    }
 
 
 def save_selection(updates: dict) -> None:

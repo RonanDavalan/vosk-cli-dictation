@@ -8,7 +8,12 @@ from vosk_cli_dictation_tray import autostart, launcher
 from vosk_cli_dictation_tray.client import parse_info, request
 from vosk_cli_dictation_tray.i18n import Translator, system_language
 from vosk_cli_dictation_tray.icons import icon_dir, icon_files, icon_name
-from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, MEMORY_MB, MEMORY_OVER_MB, format_size
+from vosk_cli_dictation_tray.sizes import (
+    ARCHIVE_BYTES,
+    MEMORY_MB,
+    MEMORY_OVER_MB,
+    format_size,
+)
 
 
 def test_parse_info():
@@ -63,13 +68,18 @@ def test_dictation_command_priority(monkeypatch):
     monkeypatch.setenv(launcher.ENV_COMMAND, "/bin/true --x")
     assert launcher.dictation_command().argv == ["/bin/true", "--x"]
     assert launcher.dictation_command("/bin/false").argv == ["/bin/false"]
-    cmd = launcher.Command(["/bin/vosk"]).with_args(*launcher.download_arguments("fr", "big"))
+    cmd = launcher.Command(["/bin/vosk"]).with_args(
+        *launcher.download_arguments("fr", "big")
+    )
     assert cmd.argv == ["/bin/vosk", "--download-model", "fr", "--model-size", "big"]
 
 
 def test_launch_is_detached_and_logs(tmp_path):
     script = tmp_path / "dictation.sh"
-    script.write_text("#!/bin/sh\necho hello-from-dictation\nps -o sid= -p $$ > %s\n" % (tmp_path / "sid"))
+    script.write_text(
+        "#!/bin/sh\necho hello-from-dictation\nps -o sid= -p $$ > %s\n"
+        % (tmp_path / "sid")
+    )
     script.chmod(stat.S_IRWXU)
     pid = launcher.launch_detached(launcher.Command([str(script)]))
     for _ in range(100):

@@ -14,7 +14,7 @@ from pathlib import Path
 ENTRY_NAME = "vosk-cli-dictation-tray.desktop"
 SYSTEM_ENTRY = Path("/etc/xdg/autostart") / ENTRY_NAME
 
-_CHARS_TO_QUOTE = set(' \t\n"\'\\><~|&;$*?#()`')
+_CHARS_TO_QUOTE = set(" \t\n\"'\\><~|&;$*?#()`")
 
 
 def user_entry() -> Path:
@@ -47,8 +47,10 @@ def _read_entry(path: Path) -> dict:
 
 
 def _hidden(values: dict) -> bool:
-    return (values.get("Hidden", "").lower() == "true"
-            or values.get("X-GNOME-Autostart-enabled", "").lower() == "false")
+    return (
+        values.get("Hidden", "").lower() == "true"
+        or values.get("X-GNOME-Autostart-enabled", "").lower() == "false"
+    )
 
 
 def _write(path: Path, lines: list) -> None:
@@ -83,5 +85,12 @@ def enable(icon: str | None = None) -> None:
 
 
 def disable() -> None:
-    _write(user_entry(), ["Type=Application", "Name=vosk-cli-dictation-tray",
-                          "Exec=vosk-cli-dictation-tray", "Hidden=true"])
+    _write(
+        user_entry(),
+        [
+            "Type=Application",
+            "Name=vosk-cli-dictation-tray",
+            "Exec=vosk-cli-dictation-tray",
+            "Hidden=true",
+        ],
+    )

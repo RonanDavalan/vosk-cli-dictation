@@ -27,12 +27,12 @@ from src.i18n import get_translation
 
 # Keycodes physiques Linux (repli ydotool uniquement — dépendants de la
 # disposition clavier, d'où la préférence pour wtype qui parle keysyms).
-KEYCODE = {'ctrl': 29, 'shift': 42, 'v': 47, 'BackSpace': 14}
+KEYCODE = {"ctrl": 29, "shift": 42, "v": 47, "BackSpace": 14}
 
 _KEY_TIMEOUT = 2.0
 _CLIP_TIMEOUT = 2.0
 
-_caps = None          # capacités détectées (session + outils), calculées une fois
+_caps = None  # capacités détectées (session + outils), calculées une fois
 _last_warn = 0.0
 
 # Restauration différée du presse-papiers (clipboard.defer_restore).
@@ -45,12 +45,13 @@ _deferred_clip = {"pending": False, "value": None}
 _deferred_atexit_registered = False
 
 _RESTORE_POLL_S = 0.08  # granularité de la fenêtre de restauration adaptative
-                        # (chaque sondage du presse-papiers = un sous-processus)
+# (chaque sondage du presse-papiers = un sous-processus)
 
 
 # --------------------------------------------------------------------------- #
 # Détection de l'environnement                                                #
 # --------------------------------------------------------------------------- #
+
 
 def check_command_exists(command: str) -> bool:
     """Vrai si une commande externe est disponible dans le PATH du système."""
@@ -73,8 +74,13 @@ def _ydotool_ready() -> bool:
     if not check_command_exists("ydotool"):
         return False
     try:
-        subprocess.run(["ydotool", "key", "0:0"], check=True,
-                       capture_output=True, text=True, timeout=_KEY_TIMEOUT)
+        subprocess.run(
+            ["ydotool", "key", "0:0"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=_KEY_TIMEOUT,
+        )
         return True
     except (subprocess.SubprocessError, FileNotFoundError, OSError):
         return False
@@ -124,6 +130,7 @@ def ydotool_disponible() -> bool:
 # Utilitaires                                                                 #
 # --------------------------------------------------------------------------- #
 
+
 def _warn(msg: str):
     """Avertissement throttlé (au plus un par seconde) sur stderr coloré."""
     global _last_warn
@@ -138,8 +145,12 @@ def _run(cmd, timeout, stdin_text=None):
     _ = get_translation()
     try:
         r = subprocess.run(
-            cmd, input=stdin_text, capture_output=True, text=True,
-            timeout=timeout, check=True,
+            cmd,
+            input=stdin_text,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            check=True,
         )
         return True, r.stdout
     except subprocess.TimeoutExpired:
@@ -165,6 +176,7 @@ def _parse_combo(combo: str):
 # Presse-papiers                                                              #
 # --------------------------------------------------------------------------- #
 
+
 def _clipboard_is_text() -> bool:
     """Faux si le presse-papiers tient un contenu non textuel (image, fichier)."""
     caps = _detect_caps()
@@ -174,11 +186,13 @@ def _clipboard_is_text() -> bool:
             return any(t.startswith("text/") or "STRING" in t for t in out.split())
         return True  # presse-papiers vide -> wl-paste échoue ; rien à préserver
     if caps["xclip"]:
-        ok, out = _run(["xclip", "-selection", "clipboard", "-o", "-t", "TARGETS"],
-                       _CLIP_TIMEOUT)
+        ok, out = _run(
+            ["xclip", "-selection", "clipboard", "-o", "-t", "TARGETS"], _CLIP_TIMEOUT
+        )
         if ok:
-            return any(t in out for t in ("UTF8_STRING", "STRING", "text/plain",
-                                          "TEXT"))
+            return any(
+                t in out for t in ("UTF8_STRING", "STRING", "text/plain", "TEXT")
+            )
         return True
     return True  # pas d'outil de sonde : on suppose du texte
 
@@ -208,8 +222,10 @@ def _wl_copy(text: str) -> bool:
     """
     try:
         p = subprocess.Popen(
-            ["wl-copy"], stdin=subprocess.PIPE,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            ["wl-copy"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
         p.communicate(input=text.encode("utf-8"), timeout=_CLIP_TIMEOUT)
         return p.returncode == 0
@@ -278,6 +294,7 @@ def _clipboard_confirm(text: str, timeout_ms: int) -> bool:
 # Frappe                                                                      #
 # --------------------------------------------------------------------------- #
 
+
 def get_active_window_id():
     """ID de la fenêtre active via xdotool (chemin X11 uniquement)."""
     ok, out = _run(["xdotool", "getactivewindow"], _KEY_TIMEOUT)
@@ -300,9 +317,20 @@ def _paste_combo_for_target() -> str:
     """Combo de collage : Ctrl+Shift+V si la fenêtre active est un terminal."""
     default = _cfg("injection", "paste_combo", "ctrl+v")
     term = _cfg("injection", "terminal_paste_combo", "ctrl+shift+v")
-    classes = _cfg("injection", "terminal_window_classes",
-                   ["konsole", "gnome-terminal-server", "xterm", "st",
-                    "alacritty", "kitty", "foot", "xterm-256color"])
+    classes = _cfg(
+        "injection",
+        "terminal_window_classes",
+        [
+            "konsole",
+            "gnome-terminal-server",
+            "xterm",
+            "st",
+            "alacritty",
+            "kitty",
+            "foot",
+            "xterm-256color",
+        ],
+    )
     if _detect_caps()["session"] == "x11":
         cls = _active_window_class_x11().lower()
         if cls and any(c.lower() in cls for c in classes):
@@ -391,6 +419,7 @@ def _send_key(key_name: str, count: int) -> bool:
 # Restauration du presse-papiers après collage                                #
 # --------------------------------------------------------------------------- #
 
+
 def _settle_before_restore(text: str, budget_s: float) -> bool:
     """Laisse à la cible le temps de lire la sélection avant de restaurer.
 
@@ -439,6 +468,7 @@ def flush_deferred_clipboard() -> None:
 # --------------------------------------------------------------------------- #
 # API publique                                                               #
 # --------------------------------------------------------------------------- #
+
 
 def type_text(text: str) -> bool:
     """Injecte `text` via presse-papiers + collage. Retourne False -> mode dégradé."""
@@ -514,8 +544,12 @@ def play_sound():
         return
     try:
         child = subprocess.Popen(
-            ["paplay", config.sound_file], stdin=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            ["paplay", config.sound_file],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
     except OSError:
         return
     threading.Thread(target=child.wait, daemon=True).start()

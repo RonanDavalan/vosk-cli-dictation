@@ -16,7 +16,10 @@ import src.recognition as rec
 from config.config import config
 from src.recognition import _target_mode, MODE_FULL, MODE_LISTENING, MODE_STOP
 from src.runtime_state import (
-    runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
+    runtime_state,
+    STATE_DICTATING,
+    STATE_LISTENING,
+    STATE_SLEEPING,
 )
 
 
@@ -66,8 +69,9 @@ class FakeRec:
         pass
 
 
-def _run_thread(script, state, monkeypatch, feed=None, stop_script=None,
-                voice_commands=None):
+def _run_thread(
+    script, state, monkeypatch, feed=None, stop_script=None, voice_commands=None
+):
     if voice_commands is not None:
         monkeypatch.setitem(
             config.language_settings["fr"], "voice_commands", voice_commands
@@ -77,7 +81,8 @@ def _run_thread(script, state, monkeypatch, feed=None, stop_script=None,
     fake_stop = FakeRec(stop_script or [])
     fake.stop = fake_stop  # accès pour les tests du recognizer d'arrêt (7 bis)
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: fake_stop if mode == MODE_STOP else fake,
     )
 
@@ -125,8 +130,10 @@ def _drain(q):
 def test_wake_phrase_on_partial_never_wakes(monkeypatch):
     # Un partiel ne déclenche jamais le réveil : sous grammaire restreinte il
     # laisserait passer le faux positif « active » seul.
-    script = [("partial", {"partial": "active dictée"}),
-              ("partial", {"partial": "active dictée"})]
+    script = [
+        ("partial", {"partial": "active dictée"}),
+        ("partial", {"partial": "active dictée"}),
+    ]
     _text, ctrl, fake = _run_thread(script, STATE_LISTENING, monkeypatch)
     assert "DICTATION_ON" not in _drain(ctrl)
 
@@ -160,8 +167,12 @@ def test_dictating_final_forwards_text_and_words(monkeypatch):
 def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
     # grammaire complète en ÉCOUTE -> le garde de confiance s'applique.
     # On force le mode complet global ET pour fr (surcharge par langue).
-    monkeypatch.setitem(config.data["recognition"], "restricted_grammar_in_listening", False)
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_grammar_in_listening", False)
+    monkeypatch.setitem(
+        config.data["recognition"], "restricted_grammar_in_listening", False
+    )
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_grammar_in_listening", False
+    )
     low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
     script = [("final", {"text": "active dictée", "result": low})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)
@@ -193,15 +204,17 @@ def test_single_word_wake_phrase(monkeypatch):
     vc = {"wake_phrase": "démarre", "stop_phrase": "zut"}
     high = [{"word": "démarre", "conf": 0.96}]
     script = [("final", {"text": "démarre", "result": high})]
-    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
-                                     voice_commands=vc)
+    _text, ctrl, _fake = _run_thread(
+        script, STATE_LISTENING, monkeypatch, voice_commands=vc
+    )
     assert "DICTATION_ON" in _drain(ctrl)
 
     # Un final hors phrase (bruit ambiant) ne réveille pas.
     low = [{"word": "demain", "conf": 0.90}]
     script = [("final", {"text": "demain", "result": low})]
-    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
-                                     voice_commands=vc)
+    _text, ctrl, _fake = _run_thread(
+        script, STATE_LISTENING, monkeypatch, voice_commands=vc
+    )
     assert "DICTATION_ON" not in _drain(ctrl)
 
 
@@ -211,15 +224,19 @@ def test_wake_phrase_without_accent_wakes_on_accented_final(monkeypatch):
     vc = {"wake_phrase": "demarre", "stop_phrase": "zut"}
     words = [{"word": "démarre", "conf": 1.0}]
     script = [("final", {"text": "démarre", "result": words})]
-    _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch,
-                                     voice_commands=vc)
+    _text, ctrl, _fake = _run_thread(
+        script, STATE_LISTENING, monkeypatch, voice_commands=vc
+    )
     assert "DICTATION_ON" in _drain(ctrl)
 
 
 # --- détecteur d'arrêt à grammaire restreinte en DICTÉE -------------------------
 
+
 def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
     stop_script = [("final", {"text": "stop dictée", "result": []})]
     _text, ctrl, fake = _run_thread(
         [], STATE_DICTATING, monkeypatch, stop_script=stop_script
@@ -231,9 +248,13 @@ def test_restricted_stop_recognizer_finalizes_on_final(monkeypatch):
 def test_restricted_stop_recognizer_ignores_partials(monkeypatch):
     # Conservateur : un partiel « stop dictée » ne déclenche PAS —
     # les partiels sous grammaire restreinte sont instables.
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
-    stop_script = [("partial", {"partial": "stop dictée"}),
-                   ("partial", {"partial": "stop dictée"})]
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
+    stop_script = [
+        ("partial", {"partial": "stop dictée"}),
+        ("partial", {"partial": "stop dictée"}),
+    ]
     _text, ctrl, _fake = _run_thread(
         [], STATE_DICTATING, monkeypatch, stop_script=stop_script
     )
@@ -243,7 +264,9 @@ def test_restricted_stop_recognizer_ignores_partials(monkeypatch):
 def test_restricted_stop_recognizer_ignores_low_confidence_final(monkeypatch):
     # Correspondance exacte mais confiance faible (match « forcé » sur audio
     # ambigu) -> pas de déclenchement.
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
     low = [{"word": "stop", "conf": 0.2}, {"word": "dictée", "conf": 0.2}]
     stop_script = [("final", {"text": "stop dictée", "result": low})]
     _text, ctrl, _fake = _run_thread(
@@ -254,7 +277,9 @@ def test_restricted_stop_recognizer_ignores_low_confidence_final(monkeypatch):
 
 def test_restricted_stop_recognizer_ignores_phrase_with_extra_words(monkeypatch):
     # Le final doit être EXACTEMENT la phrase, pas la contenir.
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
     stop_script = [("final", {"text": "voilà stop dictée maintenant", "result": []})]
     _text, ctrl, _fake = _run_thread(
         [], STATE_DICTATING, monkeypatch, stop_script=stop_script
@@ -263,7 +288,9 @@ def test_restricted_stop_recognizer_ignores_phrase_with_extra_words(monkeypatch)
 
 
 def test_restricted_stop_recognizer_ignores_unk(monkeypatch):
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
     stop_script = [
         ("partial", {"partial": "bla bla"}),
         ("final", {"text": "", "result": []}),
@@ -295,7 +322,9 @@ def test_restricted_stop_recognizer_absent_in_listening(monkeypatch):
 
 
 def test_dictating_text_suppressed_while_stop_pending(monkeypatch):
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", True)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", True
+    )
     # Le recognizer d'arrêt matche au 1er bloc ; le final tardif du recognizer
     # complet contenant encore « stop dictée » ne doit pas être tapé.
     script = [
@@ -311,6 +340,7 @@ def test_dictating_text_suppressed_while_stop_pending(monkeypatch):
 
 
 # --- fenêtre d'ignorance après le réveil ---------------------------------------
+
 
 def test_wake_discard_window_drops_audio_buffered_before_transition(monkeypatch):
     """Après ÉCOUTE->DICTÉE, l'audio déjà en file (fin de « active dictée ») est

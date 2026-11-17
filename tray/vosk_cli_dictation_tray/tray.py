@@ -15,7 +15,12 @@ from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
 from vosk_cli_dictation_tray import autostart, launcher, notifier
 from vosk_cli_dictation_tray.icons import icon_name, load_icon
-from vosk_cli_dictation_tray.sizes import ARCHIVE_BYTES, MEMORY_MB, MEMORY_OVER_MB, format_size
+from vosk_cli_dictation_tray.sizes import (
+    ARCHIVE_BYTES,
+    MEMORY_MB,
+    MEMORY_OVER_MB,
+    format_size,
+)
 
 APP_TITLE = "vosk-cli-dictation"
 LANGS = ("fr", "en", "de", "es")
@@ -23,7 +28,9 @@ SYSTEM = "system"
 
 
 class DictationTray(QSystemTrayIcon):
-    def __init__(self, client, translator, system_lang, dictation_command=None, notify=None):
+    def __init__(
+        self, client, translator, system_lang, dictation_command=None, notify=None
+    ):
         super().__init__()
         self._client = client
         self._t = translator
@@ -62,7 +69,9 @@ class DictationTray(QSystemTrayIcon):
         self._menu.addSeparator()
         self.a_dictation = self._action(self._menu, self._toggle_dictation)
         self.a_sleep = self._action(self._menu, self._toggle_sleep)
-        self.a_finalize = self._action(self._menu, lambda: self._client.send("finalize"))
+        self.a_finalize = self._action(
+            self._menu, lambda: self._client.send("finalize")
+        )
         self.a_cancel = self._action(self._menu, lambda: self._client.send("cancel"))
         self._menu.addSeparator()
 
@@ -70,7 +79,9 @@ class DictationTray(QSystemTrayIcon):
         self._lang_group = QActionGroup(self)
         self.a_lang = {}
         for code in (SYSTEM, *LANGS):
-            action = self._action(self.m_lang, lambda _=False, c=code: self._choose_lang(c))
+            action = self._action(
+                self.m_lang, lambda _=False, c=code: self._choose_lang(c)
+            )
             action.setCheckable(True)
             self._lang_group.addAction(action)
             self.a_lang[code] = action
@@ -79,7 +90,9 @@ class DictationTray(QSystemTrayIcon):
         self._model_group = QActionGroup(self)
         self.a_model = {}
         for size in ("small", "big"):
-            action = self._action(self.m_model, lambda _=False, s=size: self._choose_model(s))
+            action = self._action(
+                self.m_model, lambda _=False, s=size: self._choose_model(s)
+            )
             action.setCheckable(True)
             self._model_group.addAction(action)
             self.a_model[size] = action
@@ -87,7 +100,9 @@ class DictationTray(QSystemTrayIcon):
         self.m_refine = self._menu.addMenu("")
         self.m_correction = self._menu.addMenu("")
         self._menu.addSeparator()
-        self.a_revert = self._action(self._menu, lambda: self._client.send("reset-selection"))
+        self.a_revert = self._action(
+            self._menu, lambda: self._client.send("reset-selection")
+        )
         self._menu.addSeparator()
         self.a_launch = self._action(self._menu, self._toggle_process)
         self.a_autostart = self._action(self._menu, self._set_autostart)
@@ -99,18 +114,31 @@ class DictationTray(QSystemTrayIcon):
 
     def _language_name(self, code: str) -> str:
         t = self._t
-        return {"fr": t("French"), "en": t("English"),
-                "de": t("German"), "es": t("Spanish")}.get(code, code)
+        return {
+            "fr": t("French"),
+            "en": t("English"),
+            "de": t("German"),
+            "es": t("Spanish"),
+        }.get(code, code)
 
     def _state_label(self, state) -> str:
         t = self._t
-        return {"DICTÉE": t("Dictating"), "ÉCOUTE": t("Listening"),
-                "VEILLE": t("Deep sleep")}.get(state, state or "")
+        return {
+            "DICTÉE": t("Dictating"),
+            "ÉCOUTE": t("Listening"),
+            "VEILLE": t("Deep sleep"),
+        }.get(state, state or "")
 
     def _engine_label(self, info: dict) -> str:
         t = self._t
-        size = next((m.get("size") for m in info.get("models", [])
-                     if m.get("folder") == info.get("model")), None)
+        size = next(
+            (
+                m.get("size")
+                for m in info.get("models", [])
+                if m.get("folder") == info.get("model")
+            ),
+            None,
+        )
         engine = t("Vosk full") if size == "big" else t("Vosk light")
         refine = info.get("refine") or "none"
         if refine.startswith("whisper:"):
@@ -123,24 +151,33 @@ class DictationTray(QSystemTrayIcon):
             if self.alive_pid is not None:
                 return self._t("The dictation is not answering yet")
             return self._t("Dictation not running")
-        return " — ".join([self._state_label(info.get("state")),
-                           self._language_name(info.get("lang") or self._system_lang),
-                           self._engine_label(info)])
+        return " — ".join(
+            [
+                self._state_label(info.get("state")),
+                self._language_name(info.get("lang") or self._system_lang),
+                self._engine_label(info),
+            ]
+        )
 
     def _missing_suffix(self, lang: str, size: str) -> str:
         n = ARCHIVE_BYTES.get((lang, size))
-        return self._t("to download, {size}").format(size=format_size(n, self._t.lang)) if n \
+        return (
+            self._t("to download, {size}").format(size=format_size(n, self._t.lang))
+            if n
             else self._t("to download")
+        )
 
     def _memory_tip(self, lang: str, size: str) -> str:
         mb = MEMORY_MB.get((lang, size))
         if mb:
             return self._t("Memory after loading: about {size}").format(
-                size=format_size(mb * 1_000_000, self._t.lang))
+                size=format_size(mb * 1_000_000, self._t.lang)
+            )
         mb = MEMORY_OVER_MB.get((lang, size))
         if mb:
-            return self._t("Memory after loading: more than {size}, not advised under 8 GB of memory").format(
-                size=format_size(mb * 1_000_000, self._t.lang))
+            return self._t(
+                "Memory after loading: more than {size}, not advised under 8 GB of memory"
+            ).format(size=format_size(mb * 1_000_000, self._t.lang))
         return ""
 
     def _refresh_texts(self) -> None:
@@ -152,12 +189,16 @@ class DictationTray(QSystemTrayIcon):
         self.m_lang.setTitle(t("Language"))
         self.a_lang[SYSTEM].setText(
             t("Follow the system ({language})").format(
-                language=self._language_name(self._system_lang)))
+                language=self._language_name(self._system_lang)
+            )
+        )
         for code in LANGS:
             name = self._language_name(code)
             self.a_lang[code].setText(
-                name if (code in installed or info is None)
-                else "{} ({})".format(name, self._missing_suffix(code, "small")))
+                name
+                if (code in installed or info is None)
+                else "{} ({})".format(name, self._missing_suffix(code, "small"))
+            )
 
         self.m_model.setTitle(t("Model"))
         have = {m.get("size") for m in (info or {}).get("models", [])}
@@ -165,8 +206,10 @@ class DictationTray(QSystemTrayIcon):
         for size, label in (("small", t("Light model")), ("big", t("Full model"))):
             self.a_model[size].setToolTip(self._memory_tip(lang, size))
             self.a_model[size].setText(
-                label if (size in have or info is None)
-                else "{} ({})".format(label, self._missing_suffix(lang, size)))
+                label
+                if (size in have or info is None)
+                else "{} ({})".format(label, self._missing_suffix(lang, size))
+            )
 
         self.a_revert.setText(t("Revert to the configuration"))
         self.a_autostart.setText(t("Launch the icon at login"))
@@ -207,9 +250,12 @@ class DictationTray(QSystemTrayIcon):
         loading = running and bool(info.get("loading"))
         state = info.get("state") if running else None
 
-        self.a_dictation.setText(t("Turn dictation off") if state == "DICTÉE"
-                                 else t("Turn dictation on"))
-        self.a_sleep.setText(t("Leave deep sleep") if state == "VEILLE" else t("Enter deep sleep"))
+        self.a_dictation.setText(
+            t("Turn dictation off") if state == "DICTÉE" else t("Turn dictation on")
+        )
+        self.a_sleep.setText(
+            t("Leave deep sleep") if state == "VEILLE" else t("Enter deep sleep")
+        )
         self.a_finalize.setText(t("Finish and copy the text"))
         self.a_cancel.setText(t("Cancel the session"))
         self.a_dictation.setEnabled(running)
@@ -225,20 +271,41 @@ class DictationTray(QSystemTrayIcon):
             checked = SYSTEM if source == "system" else info.get("lang")
             for code, action in self.a_lang.items():
                 action.setChecked(code == checked)
-            size = next((m.get("size") for m in info.get("models", [])
-                         if m.get("folder") == info.get("model")), None)
+            size = next(
+                (
+                    m.get("size")
+                    for m in info.get("models", [])
+                    if m.get("folder") == info.get("model")
+                ),
+                None,
+            )
             for key, action in self.a_model.items():
                 action.setChecked(key == size)
 
-        self._refresh_dynamic(self.m_refine, "refine", t("Refinement"),
-                              (info or {}).get("refine_options"), (info or {}).get("refine"),
-                              (info or {}).get("refine_reason"), running and not loading)
-        self._refresh_dynamic(self.m_correction, "correction", t("Correction"),
-                              (info or {}).get("correction_options"), (info or {}).get("correction"),
-                              (info or {}).get("correction_reason"), running and not loading)
+        self._refresh_dynamic(
+            self.m_refine,
+            "refine",
+            t("Refinement"),
+            (info or {}).get("refine_options"),
+            (info or {}).get("refine"),
+            (info or {}).get("refine_reason"),
+            running and not loading,
+        )
+        self._refresh_dynamic(
+            self.m_correction,
+            "correction",
+            t("Correction"),
+            (info or {}).get("correction_options"),
+            (info or {}).get("correction"),
+            (info or {}).get("correction_reason"),
+            running and not loading,
+        )
 
-        self.a_launch.setText(t("Quit dictation") if (running or self.alive_pid is not None)
-                              else t("Launch dictation"))
+        self.a_launch.setText(
+            t("Quit dictation")
+            if (running or self.alive_pid is not None)
+            else t("Launch dictation")
+        )
 
     def _option_label(self, value: str, device) -> str:
         t = self._t
@@ -248,20 +315,29 @@ class DictationTray(QSystemTrayIcon):
         if kind == "whisper":
             label = "Whisper " + detail
             if device:
-                label += " ({})".format({"cuda": "GPU", "gpu": "GPU", "cpu": "CPU"}
-                                         .get(str(device).lower(), str(device)))
+                label += " ({})".format(
+                    {"cuda": "GPU", "gpu": "GPU", "cpu": "CPU"}.get(
+                        str(device).lower(), str(device)
+                    )
+                )
             return label
         if kind == "ollama":
             return "Ollama " + detail
         return value
 
-    def _refresh_dynamic(self, menu, key, title, options, current, reason, usable) -> None:
+    def _refresh_dynamic(
+        self, menu, key, title, options, current, reason, usable
+    ) -> None:
         """Sous-menu annoncé par `info` (`<clé>_options`) : grisé, avec sa raison,
         tant que la dictée n'annonce aucune option."""
         announced = [o for o in (options or []) if isinstance(o, str)]
         offered = [o for o in announced if o != "none"]
         if not offered:
-            why = reason if isinstance(reason, str) and reason else self._t("not available in this dictation")
+            why = (
+                reason
+                if isinstance(reason, str) and reason
+                else self._t("not available in this dictation")
+            )
             menu.setTitle("{} — {}".format(title, why))
             menu.setEnabled(False)
             menu.setToolTipsVisible(True)
@@ -281,7 +357,10 @@ class DictationTray(QSystemTrayIcon):
                 action.setData(value)
                 group.addAction(action)
                 action.triggered.connect(
-                    lambda _=False, v=value: self._client.send("set-{} {}".format(key, v)))
+                    lambda _=False, v=value: self._client.send(
+                        "set-{} {}".format(key, v)
+                    )
+                )
         for action in menu.actions():
             action.setChecked(action.data() == (current or "none"))
 
@@ -300,9 +379,17 @@ class DictationTray(QSystemTrayIcon):
             return
         size = self.info.get("refine_download")
         if size and size != self._shown_download:
-            self._notify(self._t("Downloading the Whisper {size} model (first use, this can take a few minutes)...").format(size=size))
+            self._notify(
+                self._t(
+                    "Downloading the Whisper {size} model (first use, this can take a few minutes)..."
+                ).format(size=size)
+            )
         elif self._shown_download and not size and not self.info.get("last_error"):
-            self._notify(self._t("The Whisper {size} model is ready.").format(size=self._shown_download))
+            self._notify(
+                self._t("The Whisper {size} model is ready.").format(
+                    size=self._shown_download
+                )
+            )
         self._shown_download = size
 
     # --- gestes ------------------------------------------------------------ #
@@ -355,10 +442,16 @@ class DictationTray(QSystemTrayIcon):
             self._notify(t("The dictation does not answer."))
         elif reply.startswith("ERR"):
             reason = reply[3:].strip()
-            text = {"busy": t("A model is loading, try again in a moment."),
-                    "no-model": t("No model is installed for this choice."),
-                    "unsupported": t("This choice is not available in this dictation.")}.get(
-                reason, t("The dictation refused the request ({reason}).").format(reason=reason))
+            text = {
+                "busy": t("A model is loading, try again in a moment."),
+                "no-model": t("No model is installed for this choice."),
+                "unsupported": t("This choice is not available in this dictation."),
+            }.get(
+                reason,
+                t("The dictation refused the request ({reason}).").format(
+                    reason=reason
+                ),
+            )
             self._notify(text)
 
     # --- processus ----------------------------------------------------------- #
@@ -366,7 +459,11 @@ class DictationTray(QSystemTrayIcon):
     def launch_dictation(self) -> None:
         t = self._t
         if launcher.running_pid() is not None:
-            self._notify(t("The dictation is already running; wait for it to answer, or quit it from the menu."))
+            self._notify(
+                t(
+                    "The dictation is already running; wait for it to answer, or quit it from the menu."
+                )
+            )
             return
         command = launcher.dictation_command(self._dictation_command)
         if command is None:
@@ -375,7 +472,9 @@ class DictationTray(QSystemTrayIcon):
         try:
             launcher.launch_detached(command)
         except OSError as error:
-            self._notify(t("Could not launch the dictation: {error}").format(error=error))
+            self._notify(
+                t("Could not launch the dictation: {error}").format(error=error)
+            )
 
     def download_model(self, lang: str, size: str) -> None:
         t = self._t
@@ -396,15 +495,24 @@ class DictationTray(QSystemTrayIcon):
         log.parent.mkdir(parents=True, exist_ok=True)
         process.setProcessChannelMode(QProcess.ProcessChannelMode.MergedChannels)
         process.setStandardOutputFile(str(log), QProcess.OpenModeFlag.Append)
-        process.finished.connect(lambda code, status: self._download_finished(lang, size, code, status))
+        process.finished.connect(
+            lambda code, status: self._download_finished(lang, size, code, status)
+        )
         process.errorOccurred.connect(
-            lambda _e: self._download_finished(lang, size, -1, QProcess.ExitStatus.CrashExit)
-            if process.state() == QProcess.ProcessState.NotRunning else None)
+            lambda _e: (
+                self._download_finished(lang, size, -1, QProcess.ExitStatus.CrashExit)
+                if process.state() == QProcess.ProcessState.NotRunning
+                else None
+            )
+        )
         self._download = process
         process.start()
-        self._notify(t("Downloading the model ({size}, {language})…").format(
-            size=t("full") if size == "big" else t("light"),
-            language=self._language_name(lang)))
+        self._notify(
+            t("Downloading the model ({size}, {language})…").format(
+                size=t("full") if size == "big" else t("light"),
+                language=self._language_name(lang),
+            )
+        )
 
     def _download_finished(self, lang, size, code, status) -> None:
         t = self._t
@@ -413,11 +521,16 @@ class DictationTray(QSystemTrayIcon):
         self._download.deleteLater()
         self._download = None
         if code == 0 and status == QProcess.ExitStatus.NormalExit:
-            self._notify(t("Model download finished ({size}, {language}).").format(
-                size=t("full") if size == "big" else t("light"),
-                language=self._language_name(lang)))
+            self._notify(
+                t("Model download finished ({size}, {language}).").format(
+                    size=t("full") if size == "big" else t("light"),
+                    language=self._language_name(lang),
+                )
+            )
         else:
-            self._notify(t("Model download failed (see {log}).").format(log=launcher.log_path()))
+            self._notify(
+                t("Model download failed (see {log}).").format(log=launcher.log_path())
+            )
 
     def _sync_autostart(self) -> None:
         self.a_autostart.setChecked(autostart.is_enabled())

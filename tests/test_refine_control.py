@@ -15,7 +15,12 @@ from src.refine import whisper_engine as we
 from src.runtime_state import STATE_LISTENING, runtime_state
 
 INSTALLED = [
-    {"folder": "vosk-model-small-fr-0.22", "path": "/m/fr-small", "lang": "fr", "size": "small"},
+    {
+        "folder": "vosk-model-small-fr-0.22",
+        "path": "/m/fr-small",
+        "lang": "fr",
+        "size": "small",
+    },
 ]
 
 
@@ -66,7 +71,9 @@ def wait_until(predicate, timeout=3.0):
 def make(conf=None, selected=None):
     delivered = []
     controller = ctl.RefineController(lambda *a: delivered.append(a), conf, selected)
-    switch = EngineSwitch("fr", "vosk-model-small-fr-0.22", "small", "config", refine=controller)
+    switch = EngineSwitch(
+        "fr", "vosk-model-small-fr-0.22", "small", "config", refine=controller
+    )
     return switch, controller
 
 
@@ -80,11 +87,23 @@ def test_default_is_no_refinement_and_changes_nothing():
 
 def test_configured_spec_follows_the_survey_defaults(monkeypatch):
     monkeypatch.setattr(we, "probe_device", lambda requested="auto": "cuda")
-    assert ctl.configured_spec({"engine": "whisper", "model": "auto"}) == ("whisper:large-v3-turbo", None)
+    assert ctl.configured_spec({"engine": "whisper", "model": "auto"}) == (
+        "whisper:large-v3-turbo",
+        None,
+    )
     monkeypatch.setattr(we, "probe_device", lambda requested="auto": "cpu")
-    assert ctl.configured_spec({"engine": "whisper", "model": "auto"}) == ("none", "cpu-no-default")
-    assert ctl.configured_spec({"engine": "whisper", "model": "small"}) == ("whisper:small", None)
-    assert ctl.configured_spec({"engine": "whisper", "model": "huge"}) == ("none", "bad-model")
+    assert ctl.configured_spec({"engine": "whisper", "model": "auto"}) == (
+        "none",
+        "cpu-no-default",
+    )
+    assert ctl.configured_spec({"engine": "whisper", "model": "small"}) == (
+        "whisper:small",
+        None,
+    )
+    assert ctl.configured_spec({"engine": "whisper", "model": "huge"}) == (
+        "none",
+        "bad-model",
+    )
     assert ctl.configured_spec({"engine": "none", "model": "small"}) == ("none", None)
 
 
@@ -93,11 +112,13 @@ def test_start_loads_the_configured_engine_in_the_background():
     controller.start()
     assert wait_until(lambda: controller.pipeline.active())
     assert controller.spec == "whisper:base"
-    assert sel.load_selection() == {}      # le lancement ne mémorise rien
+    assert sel.load_selection() == {}  # le lancement ne mémorise rien
 
 
 def test_a_remembered_choice_wins_over_the_configuration():
-    switch, controller = make({"engine": "whisper", "model": "base"}, selected="whisper:small")
+    switch, controller = make(
+        {"engine": "whisper", "model": "base"}, selected="whisper:small"
+    )
     controller.start()
     assert wait_until(lambda: controller.spec == "whisper:small")
 
@@ -110,7 +131,10 @@ def test_set_refine_on_the_socket_loads_and_remembers():
     assert sel.load_selection() == {"refine": "whisper:tiny"}
     info = switch.info()
     assert info["refine"] == "whisper:tiny" and info["device"] == "cpu"
-    assert "whisper:large-v3-turbo" in info["refine_options"] and info["refine_options"][0] == "none"
+    assert (
+        "whisper:large-v3-turbo" in info["refine_options"]
+        and info["refine_options"][0] == "none"
+    )
     assert info["refine_reason"] is None
 
 
@@ -178,8 +202,15 @@ def test_download_is_announced_until_the_weights_are_there(monkeypatch):
 
 def test_no_download_announced_when_weights_are_cached(tmp_path):
     switch, controller = make()
-    (tmp_path / "data" / "vosk-cli-dictation" / "whisper-models"
-     / "models--Systran--faster-whisper-small" / "snapshots" / "x").mkdir(parents=True)
+    (
+        tmp_path
+        / "data"
+        / "vosk-cli-dictation"
+        / "whisper-models"
+        / "models--Systran--faster-whisper-small"
+        / "snapshots"
+        / "x"
+    ).mkdir(parents=True)
     seen = []
 
     class Cached(FakeWhisper):

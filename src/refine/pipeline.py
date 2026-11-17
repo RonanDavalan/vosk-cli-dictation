@@ -22,11 +22,16 @@ MAX_CHARS_SLACK = 20
 
 
 def plausible(text: str, audio_seconds: float) -> bool:
-    return bool(text) and len(text) <= audio_seconds * MAX_CHARS_PER_SECOND + MAX_CHARS_SLACK
+    return (
+        bool(text)
+        and len(text) <= audio_seconds * MAX_CHARS_PER_SECOND + MAX_CHARS_SLACK
+    )
 
 
 class _Job:
-    def __init__(self, text, words, language, future, submitted, deadline, audio_seconds, guard):
+    def __init__(
+        self, text, words, language, future, submitted, deadline, audio_seconds, guard
+    ):
         self.text = text
         self.words = words
         self.language = language
@@ -52,8 +57,12 @@ class RefinePipeline:
         self._lock = threading.Lock()
         self._pending = 0
         self._jobs = queue.Queue()
-        self._pool = concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix="refine")
-        self._worker = threading.Thread(target=self._run, name="refine-order", daemon=True)
+        self._pool = concurrent.futures.ThreadPoolExecutor(
+            max_workers=1, thread_name_prefix="refine"
+        )
+        self._worker = threading.Thread(
+            target=self._run, name="refine-order", daemon=True
+        )
         self._worker.start()
 
     # --- moteur ------------------------------------------------------------ #
@@ -78,12 +87,18 @@ class RefinePipeline:
         engine = self.engine if refine else None
         now = self._clock()
         seconds = len(pcm) / 2.0 / _refine_pkg.SAMPLE_RATE if pcm else 0.0
-        future = self._pool.submit(engine.refine, pcm, language) if engine and pcm else None
+        future = (
+            self._pool.submit(engine.refine, pcm, language) if engine and pcm else None
+        )
         if engine is not None and not pcm:
             runtime_state.note_refine("skipped")
         with self._lock:
             self._pending += 1
-        self._jobs.put(_Job(text, words, language, future, now, now + self.timeout_s, seconds, guard))
+        self._jobs.put(
+            _Job(
+                text, words, language, future, now, now + self.timeout_s, seconds, guard
+            )
+        )
 
     def pending(self) -> int:
         """Énoncés soumis dont le texte n'est pas encore rendu."""
@@ -123,7 +138,9 @@ class RefinePipeline:
                 self._report("error", str(e))
             return job.text, False
         result = (result or "").strip()
-        if not plausible(result, job.audio_seconds) or (job.guard and not job.guard(result)):
+        if not plausible(result, job.audio_seconds) or (
+            job.guard and not job.guard(result)
+        ):
             runtime_state.note_refine("rejected")
             return job.text, False
         runtime_state.note_refine("done", (self._clock() - job.submitted) * 1000.0)

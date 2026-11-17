@@ -20,9 +20,17 @@ def tray_msgids():
             if not isinstance(node, ast.Call) or not node.args:
                 continue
             func = node.func
-            name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", None)
+            name = (
+                func.attr
+                if isinstance(func, ast.Attribute)
+                else getattr(func, "id", None)
+            )
             first = node.args[0]
-            if name in TRANSLATOR_NAMES and isinstance(first, ast.Constant) and isinstance(first.value, str):
+            if (
+                name in TRANSLATOR_NAMES
+                and isinstance(first, ast.Constant)
+                and isinstance(first.value, str)
+            ):
                 ids.add(first.value)
     return ids
 
@@ -33,9 +41,15 @@ def test_the_tray_has_translatable_strings():
 
 @pytest.mark.parametrize("lang", ["en", "fr", "de", "es"])
 def test_every_tray_string_is_translated_in_the_compiled_catalog(lang):
-    catalog = gettext.translation("messages", localedir=str(ROOT / "locales"), languages=[lang])
-    missing = [m for m in sorted(tray_msgids()) if not catalog.gettext(m) or
-               (lang != "en" and catalog.gettext(m) == m and m not in ("Correction",))]
+    catalog = gettext.translation(
+        "messages", localedir=str(ROOT / "locales"), languages=[lang]
+    )
+    missing = [
+        m
+        for m in sorted(tray_msgids())
+        if not catalog.gettext(m)
+        or (lang != "en" and catalog.gettext(m) == m and m not in ("Correction",))
+    ]
     assert missing == []
 
 
@@ -46,4 +60,5 @@ def test_tray_size_table_matches_the_model_catalog():
     finally:
         sys.path.remove(str(ROOT / "tray"))
     from src.model_download import CATALOG
+
     assert ARCHIVE_BYTES == {key: info["size"] for key, info in CATALOG.items()}

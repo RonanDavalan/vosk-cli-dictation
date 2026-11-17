@@ -25,9 +25,18 @@ from config.config import config
 from config.selection import load_selection
 from src.i18n import set_ui_language, get_translation
 from src.version import __version__
-from src.system_control import check_command_exists, injection_backend_available, injection_limited_to_xwayland
+from src.system_control import (
+    check_command_exists,
+    injection_backend_available,
+    injection_limited_to_xwayland,
+)
 from src.audio_capture import initialize_audio, audio_capture_thread
-from src.recognition import load_model, recognition_thread, force_c_numeric_locale, put_text
+from src.recognition import (
+    load_model,
+    recognition_thread,
+    force_c_numeric_locale,
+    put_text,
+)
 from src.refine.control import RefineController, settings as refine_settings
 from src.ui import ui_thread
 from src.keyboard_listener import keyboard_listener_thread
@@ -35,17 +44,26 @@ from src.text_processing import TextProcessor
 from src.engine_switch import EngineSwitch
 from src import instance_lock
 from src.control_socket import (
-    start_control_server, send_control_command, socket_path,
+    start_control_server,
+    send_control_command,
+    socket_path,
 )
 
 # Sous-commandes de contrôle : drapeau -> jeton socket.
 CONTROL_FLAGS = [
-    ("toggle", "toggle"), ("dictation_on", "dictation-on"),
-    ("dictation_off", "dictation-off"), ("finalize", "finalize"),
-    ("cancel", "cancel"), ("sleep", "sleep"), ("wake", "wake"),
-    ("sleep_toggle", "sleep-toggle"), ("status", "status"), ("stop", "quit"),
+    ("toggle", "toggle"),
+    ("dictation_on", "dictation-on"),
+    ("dictation_off", "dictation-off"),
+    ("finalize", "finalize"),
+    ("cancel", "cancel"),
+    ("sleep", "sleep"),
+    ("wake", "wake"),
+    ("sleep_toggle", "sleep-toggle"),
+    ("status", "status"),
+    ("stop", "quit"),
     ("info", "info"),
 ]
+
 
 def print_refine_summary():
     """Sous la ligne d'état : la finition en cours et ses compteurs. Rien n'est
@@ -59,17 +77,29 @@ def print_refine_summary():
         return
     _ = get_translation()
     stats = info.get("refine_stats", {})
-    fallbacks = stats.get("timeout", 0) + stats.get("error", 0) + stats.get("rejected", 0)
-    print(_("Refinement: {engine} ({device}), {done} refined, {fallbacks} fell back to Vosk "
-            "({timeout} too slow), {skipped} commands left as heard, {ms} ms on average").format(
-        engine=info["refine"], device=info.get("device") or "?", done=stats.get("done", 0),
-        fallbacks=fallbacks, timeout=stats.get("timeout", 0), skipped=stats.get("skipped", 0),
-        ms=stats.get("mean_ms", 0)))
+    fallbacks = (
+        stats.get("timeout", 0) + stats.get("error", 0) + stats.get("rejected", 0)
+    )
+    print(
+        _(
+            "Refinement: {engine} ({device}), {done} refined, {fallbacks} fell back to Vosk "
+            "({timeout} too slow), {skipped} commands left as heard, {ms} ms on average"
+        ).format(
+            engine=info["refine"],
+            device=info.get("device") or "?",
+            done=stats.get("done", 0),
+            fallbacks=fallbacks,
+            timeout=stats.get("timeout", 0),
+            skipped=stats.get("skipped", 0),
+            ms=stats.get("mean_ms", 0),
+        )
+    )
 
 
 def print_status(message, color):
     """Affiche un message de statut en couleur, puis restaure le défaut du terminal."""
     print(f"{color}{message}{config.RESET}")
+
 
 # Glyphes typographiques que la plupart des terminaux rendent sur deux cellules
 # (largeur « ambiguë » Est-asiatique) : guillemets courbes, chevrons, tirets
@@ -79,9 +109,11 @@ def print_status(message, color):
 # tableau d'aide en escalier ; on les compte pour 2 dans le calcul de largeur.
 _WIDE_GLYPHS = set("„“”‘’«»—–…¡¿")
 
+
 def _display_width(text):
     """Largeur d'affichage de `text` en cellules de terminal (voir _WIDE_GLYPHS)."""
     return sum(2 if ch in _WIDE_GLYPHS else 1 for ch in text)
+
 
 def _wrap_help_line(text, width=74):
     """Replie une ligne d'aide à puce (« - … ») pour tenir dans un terminal de
@@ -89,9 +121,13 @@ def _wrap_help_line(text, width=74):
     `width` reste sous 80 pour absorber les glyphes larges que `textwrap` compte
     pour un (les chevrons « » des libellés fr/de)."""
     return textwrap.fill(
-        text, width=width, subsequent_indent="    ",
-        break_long_words=False, break_on_hyphens=False,
+        text,
+        width=width,
+        subsequent_indent="    ",
+        break_long_words=False,
+        break_on_hyphens=False,
     )
+
 
 def print_help_message():
     """
@@ -105,43 +141,73 @@ def print_help_message():
 
     wake_phrase = config.WAKE_PHRASE
     stop_phrase = config.STOP_PHRASE
-    toggle_hotkey = config.hotkeys['toggle_recording']['display_name']
-    finalize_hotkey = config.hotkeys['finalize_session']['display_name']
+    toggle_hotkey = config.hotkeys["toggle_recording"]["display_name"]
+    finalize_hotkey = config.hotkeys["finalize_session"]["display_name"]
 
     # La bannière décrit le mode de déclenchement réellement actif plutôt que
     # de toujours présenter toggle — un banc en maintenue/silence affichant
     # des instructions toggle induirait l'utilisateur en erreur.
     mode = config.interaction_mode
-    if mode == 'maintenue':
-        ptt_key = config.hotkeys.get('push_to_talk') or '?'
+    if mode == "maintenue":
+        ptt_key = config.hotkeys.get("push_to_talk") or "?"
         intro_lines = (
-            _("  - Hold [{key}] to dictate; release to stop and copy.").format(key=ptt_key),
-            _("  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early.").format(stop_phrase=stop_phrase),
-            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+            _("  - Hold [{key}] to dictate; release to stop and copy.").format(
+                key=ptt_key
+            ),
+            _(
+                "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop early."
+            ).format(stop_phrase=stop_phrase),
+            _(
+                "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
+            ),
         )
-    elif mode == 'silence':
-        timeout_ms = config.interaction_setting('silence_timeout_ms', 700)
+    elif mode == "silence":
+        timeout_ms = config.interaction_setting("silence_timeout_ms", 700)
         intro_lines = (
-            _("  - Say '{wake_phrase}' or press {hotkey} to start.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
-            _("  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early.").format(timeout_ms=timeout_ms, stop_phrase=stop_phrase, hotkey=finalize_hotkey),
-            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+            _("  - Say '{wake_phrase}' or press {hotkey} to start.").format(
+                wake_phrase=wake_phrase, hotkey=toggle_hotkey
+            ),
+            _(
+                "  - Stops and copies on its own after {timeout_ms} ms of silence, or say '{stop_phrase}' / press {hotkey} / run 'vosk-cli-dictation --finalize' to stop early."
+            ).format(
+                timeout_ms=timeout_ms, stop_phrase=stop_phrase, hotkey=finalize_hotkey
+            ),
+            _(
+                "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
+            ),
         )
     else:
         intro_lines = (
-            _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(wake_phrase=wake_phrase, hotkey=toggle_hotkey),
-            _("  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy.").format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
-            _("  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."),
+            _("  - Say '{wake_phrase}' or press {hotkey} to start/stop.").format(
+                wake_phrase=wake_phrase, hotkey=toggle_hotkey
+            ),
+            _(
+                "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation --finalize' to stop and copy."
+            ).format(stop_phrase=stop_phrase, hotkey=finalize_hotkey),
+            _(
+                "  - Hotkeys reach the focused window and miss native-Wayland windows; use --finalize."
+            ),
         )
     for line in intro_lines:
         print_status(_wrap_help_line(line), config.color_help_text)
 
-    print_status(_("\n{style}  Manual commands:{reset}").format(style=title_style, reset=config.RESET), config.color_help_text)
+    print_status(
+        _("\n{style}  Manual commands:{reset}").format(
+            style=title_style, reset=config.RESET
+        ),
+        config.color_help_text,
+    )
     print_status(_("  - '/cancel', '/delete-word', '/nl'"), config.color_help_text)
 
     lang_settings = config.language_settings.get(config.current_lang, {})
-    punctuation_sections = lang_settings.get('punctuation', {})
+    punctuation_sections = lang_settings.get("punctuation", {})
     if punctuation_sections:
-        print_status(_("\n{style}  Punctuation commands:{reset}").format(style=title_style, reset=config.RESET), config.color_help_text)
+        print_status(
+            _("\n{style}  Punctuation commands:{reset}").format(
+                style=title_style, reset=config.RESET
+            ),
+            config.color_help_text,
+        )
 
         all_punctuation_cmds = {}
         for section in punctuation_sections.values():
@@ -201,6 +267,7 @@ def exit_cleanup():
     except (TypeError, NameError):
         print_status("\nProgram stopped cleanly.", config.color_info)
 
+
 def main():
     """Fonction principale."""
     # Neutralise LC_NUMERIC pour tout le processus avant que Vosk ne sérialise
@@ -225,49 +292,91 @@ def main():
     argv = sys.argv[1:]
     # Sortie avant l'initialisation de la langue, qui écrit une ligne sur la
     # sortie standard : --version ne doit rendre que la version.
-    if '--version' in argv:
-        print('vosk-cli-dictation ' + __version__)
+    if "--version" in argv:
+        print("vosk-cli-dictation " + __version__)
         sys.exit(0)
     for i, token in enumerate(argv):
-        if token in ('-l', '--lang') and i + 1 < len(argv):
+        if token in ("-l", "--lang") and i + 1 < len(argv):
             pre_lang = argv[i + 1]
             break
-        if token.startswith('--lang='):
-            pre_lang = token.split('=', 1)[1]
+        if token.startswith("--lang="):
+            pre_lang = token.split("=", 1)[1]
             break
 
     set_ui_language(config.startup_language(pre_lang)[0])
     _ = get_translation()
 
-    parser = argparse.ArgumentParser(description=_("A Vosk-based command-line dictation tool."))
-    parser.add_argument('-l', '--lang', type=str, default=None, help=_("Force the interface and model language."))
-    parser.add_argument('--version', action='version', version='vosk-cli-dictation ' + __version__,
-                        help=_("print the version and exit"))
+    parser = argparse.ArgumentParser(
+        description=_("A Vosk-based command-line dictation tool.")
+    )
+    parser.add_argument(
+        "-l",
+        "--lang",
+        type=str,
+        default=None,
+        help=_("Force the interface and model language."),
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="vosk-cli-dictation " + __version__,
+        help=_("print the version and exit"),
+    )
     ctl = parser.add_argument_group(_("control an already running session"))
-    ctl.add_argument('--toggle', action='store_true', help=_("toggle dictation on/off"))
-    ctl.add_argument('--dictation-on', action='store_true', help=_("start dictation"))
-    ctl.add_argument('--dictation-off', action='store_true', help=_("stop dictation, keep listening"))
-    ctl.add_argument('--finalize', action='store_true', help=_("finalize the session and copy the text"))
-    ctl.add_argument('--cancel', action='store_true', help=_("discard the current session buffer"))
-    ctl.add_argument('--sleep', action='store_true', help=_("enter deep sleep (release the microphone)"))
-    ctl.add_argument('--wake', action='store_true', help=_("leave deep sleep"))
-    ctl.add_argument('--sleep-toggle', action='store_true', help=_("toggle deep sleep"))
-    ctl.add_argument('--status', action='store_true', help=_("print the current state"))
-    ctl.add_argument('--stop', action='store_true', help=_("stop the running session"))
-    ctl.add_argument('--info', action='store_true', help=_("print the full state of the running session as one JSON line"))
-    ctl.add_argument('--diagnose', action='store_true', help=_("check the environment and exit"))
-    parser.add_argument('--download-model', nargs='?', const='', default=None, metavar='LANG',
-                        help=_("download the model for LANG (or the current language) and exit"))
-    parser.add_argument('--model-size', choices=('small', 'big'), default='small',
-                        help=_("with --download-model: small (default) or big (full) model"))
+    ctl.add_argument("--toggle", action="store_true", help=_("toggle dictation on/off"))
+    ctl.add_argument("--dictation-on", action="store_true", help=_("start dictation"))
+    ctl.add_argument(
+        "--dictation-off", action="store_true", help=_("stop dictation, keep listening")
+    )
+    ctl.add_argument(
+        "--finalize",
+        action="store_true",
+        help=_("finalize the session and copy the text"),
+    )
+    ctl.add_argument(
+        "--cancel", action="store_true", help=_("discard the current session buffer")
+    )
+    ctl.add_argument(
+        "--sleep",
+        action="store_true",
+        help=_("enter deep sleep (release the microphone)"),
+    )
+    ctl.add_argument("--wake", action="store_true", help=_("leave deep sleep"))
+    ctl.add_argument("--sleep-toggle", action="store_true", help=_("toggle deep sleep"))
+    ctl.add_argument("--status", action="store_true", help=_("print the current state"))
+    ctl.add_argument("--stop", action="store_true", help=_("stop the running session"))
+    ctl.add_argument(
+        "--info",
+        action="store_true",
+        help=_("print the full state of the running session as one JSON line"),
+    )
+    ctl.add_argument(
+        "--diagnose", action="store_true", help=_("check the environment and exit")
+    )
+    parser.add_argument(
+        "--download-model",
+        nargs="?",
+        const="",
+        default=None,
+        metavar="LANG",
+        help=_("download the model for LANG (or the current language) and exit"),
+    )
+    parser.add_argument(
+        "--model-size",
+        choices=("small", "big"),
+        default="small",
+        help=_("with --download-model: small (default) or big (full) model"),
+    )
     args = parser.parse_args()
 
     if args.diagnose:
         from src.diagnose import run_diagnose
+
         sys.exit(run_diagnose(args.lang))
 
     if args.download_model is not None:
         from src.model_download import download_model
+
         lang = args.download_model or config.startup_language(args.lang)[0]
         sys.exit(0 if download_model(lang, args.model_size) else 1)
 
@@ -275,10 +384,15 @@ def main():
         if getattr(args, attr, False):
             reply = send_control_command(wire)
             if reply is None and instance_lock.owner_pid() is not None:
-                print_status(_("The dictation is starting; try again once the model is loaded."), config.color_warning)
+                print_status(
+                    _("The dictation is starting; try again once the model is loaded."),
+                    config.color_warning,
+                )
                 sys.exit(1)
             if reply is None:
-                print_status(_("No running vosk-cli-dictation session."), config.color_error)
+                print_status(
+                    _("No running vosk-cli-dictation session."), config.color_error
+                )
                 sys.exit(1)
             print(reply)
             if wire == "status" and reply.startswith("OK"):
@@ -297,41 +411,83 @@ def main():
     # Instance unique : le verrou se prend avant le chargement du modèle, qui
     # dure jusqu'à 12 s, pendant lesquelles la socket n'existe pas encore.
     if not instance_lock.acquire():
-        print_status(_("A vosk-cli-dictation session is already running (see --status)."), config.color_error)
+        print_status(
+            _("A vosk-cli-dictation session is already running (see --status)."),
+            config.color_error,
+        )
         return
 
     print_status(_("Checking external dependencies..."), config.color_info)
     if not injection_backend_available():
-        print_status(_("No text-injection backend available for this session."), config.color_error)
-        print_status(_("Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."), config.color_error)
+        print_status(
+            _("No text-injection backend available for this session."),
+            config.color_error,
+        )
+        print_status(
+            _(
+                "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' also works."
+            ),
+            config.color_error,
+        )
         return
     if injection_limited_to_xwayland():
-        print_status(_("On a Wayland session, 'xdotool' only types into XWayland windows; install 'ydotool' or 'wtype' for native Wayland windows."), config.color_warning)
+        print_status(
+            _(
+                "On a Wayland session, 'xdotool' only types into XWayland windows; install 'ydotool' or 'wtype' for native Wayland windows."
+            ),
+            config.color_warning,
+        )
     if not check_command_exists("paplay"):
-        print_status(_("'paplay' not found. Sound notifications will be disabled."), config.color_warning)
+        print_status(
+            _("'paplay' not found. Sound notifications will be disabled."),
+            config.color_warning,
+        )
     print_status(_("Dependencies checked."), config.color_info)
 
-    print_status(_("Attempting to load model for language: {lang}").format(lang=ui_lang), config.color_info)
-    selected = load_selection().get('model')
+    print_status(
+        _("Attempting to load model for language: {lang}").format(lang=ui_lang),
+        config.color_info,
+    )
+    selected = load_selection().get("model")
     model, recognizer, loaded_model_name = load_model(ui_lang, selected)
 
     if not recognizer:
         default_model_name = config.default_model_name
         if ui_lang != default_model_name:
-            print_status(_("Failed. Attempting to load default model: {model_name}").format(model_name=default_model_name), config.color_info)
+            print_status(
+                _("Failed. Attempting to load default model: {model_name}").format(
+                    model_name=default_model_name
+                ),
+                config.color_info,
+            )
             model, recognizer, loaded_model_name = load_model(default_model_name)
 
     if not recognizer and sys.stdin.isatty():
-        answer = input(_("No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] ").format(lang=ui_lang))
+        answer = input(
+            _(
+                "No speech recognition model could be loaded. Download the small model for '{lang}' now? [y/N] "
+            ).format(lang=ui_lang)
+        )
         if answer.strip().lower() in ("y", "yes", "o", "oui"):
             from src.model_download import download_model
+
             if download_model(ui_lang):
                 model, recognizer, loaded_model_name = load_model(ui_lang)
 
     if not recognizer:
-        print_status(_("No speech recognition model could be loaded."), config.color_error)
-        print_status(_("Run 'vosk-cli-dictation --download-model {lang}' to download one.").format(lang=ui_lang), config.color_error)
-        print_status(_("Please check the model paths and integrity in your config.yaml file."), config.color_error)
+        print_status(
+            _("No speech recognition model could be loaded."), config.color_error
+        )
+        print_status(
+            _(
+                "Run 'vosk-cli-dictation --download-model {lang}' to download one."
+            ).format(lang=ui_lang),
+            config.color_error,
+        )
+        print_status(
+            _("Please check the model paths and integrity in your config.yaml file."),
+            config.color_error,
+        )
         return 1
 
     lang_of_loaded_model = config.get_lang_from_model_name(loaded_model_name)
@@ -341,13 +497,14 @@ def main():
         _ = get_translation()
 
     p, stream = initialize_audio()
-    if not p or not stream: return 1
+    if not p or not stream:
+        return 1
 
     # Files bornées. audio_queue : ~2 s d'audio ; au-delà,
     # audio_capture_thread jette le bloc le plus ancien pour interdire la dérive
     # de latence. text_queue / control_queue : un remplissage y est
     # pathologique (UI figée), signalé bruyamment, jamais masqué.
-    audio_queue = queue.Queue(maxsize=config.audio.get('queue_max_chunks', 16))
+    audio_queue = queue.Queue(maxsize=config.audio.get("queue_max_chunks", 16))
     text_queue = queue.Queue(maxsize=64)
     control_queue = queue.Queue(maxsize=32)
     stop_event = threading.Event()
@@ -362,19 +519,53 @@ def main():
     loaded_entry = config.installed_model(loaded_model_name) or {}
     refine = RefineController(
         lambda text, words, refined: put_text(text_queue, text, words, refined),
-        refine_settings(), load_selection().get('refine'))
+        refine_settings(),
+        load_selection().get("refine"),
+    )
     switch = EngineSwitch(
-        config.current_lang, loaded_model_name,
-        loaded_entry.get('size', 'small'),
-        lang_source if config.current_lang == ui_lang else 'config',
+        config.current_lang,
+        loaded_model_name,
+        loaded_entry.get("size", "small"),
+        lang_source if config.current_lang == ui_lang else "config",
         refine=refine,
     )
 
     threads = [
-        threading.Thread(target=recognition_thread, args=(model, recognizer, audio_queue, text_queue, control_queue, stop_event, display_partials_event, wake_event, switch, refine.pipeline)),
-        threading.Thread(target=audio_capture_thread, args=(p, stream, audio_queue, stop_event, sleep_event, wake_event)),
-        threading.Thread(target=keyboard_listener_thread, args=(control_queue, stop_event)),
-        threading.Thread(target=ui_thread, args=(text_queue, control_queue, stop_event, processor, display_partials_event, sleep_event, wake_event, refine.pipeline))
+        threading.Thread(
+            target=recognition_thread,
+            args=(
+                model,
+                recognizer,
+                audio_queue,
+                text_queue,
+                control_queue,
+                stop_event,
+                display_partials_event,
+                wake_event,
+                switch,
+                refine.pipeline,
+            ),
+        ),
+        threading.Thread(
+            target=audio_capture_thread,
+            args=(p, stream, audio_queue, stop_event, sleep_event, wake_event),
+        ),
+        threading.Thread(
+            target=keyboard_listener_thread, args=(control_queue, stop_event)
+        ),
+        threading.Thread(
+            target=ui_thread,
+            args=(
+                text_queue,
+                control_queue,
+                stop_event,
+                processor,
+                display_partials_event,
+                sleep_event,
+                wake_event,
+                refine.pipeline,
+            ),
+        ),
     ]
 
     for t in threads:
@@ -394,12 +585,20 @@ def main():
     # utilisable en interactif, seules les sous-commandes CLI sont
     # indisponibles.
     control_server = None
-    if config.data.get('control_socket', True):
+    if config.data.get("control_socket", True):
         try:
             control_server = start_control_server(control_queue, stop_event, switch)
-            print_status(_("Control socket: {path}").format(path=socket_path()), config.color_info)
+            print_status(
+                _("Control socket: {path}").format(path=socket_path()),
+                config.color_info,
+            )
         except OSError as e:
-            print_status(_("Could not open the control socket ({err}); CLI subcommands disabled.").format(err=e), config.color_warning)
+            print_status(
+                _(
+                    "Could not open the control socket ({err}); CLI subcommands disabled."
+                ).format(err=e),
+                config.color_warning,
+            )
 
     def _cleanup_socket():
         try:
@@ -419,7 +618,9 @@ def main():
     # à se rappeler ~/.local/share contre ~/.config, et pour les rapports de bug.
     model_path = config.get_model_path_by_name(loaded_model_name)
     if model_path:
-        print_status(_("Model directory: {path}").format(path=model_path), config.color_info)
+        print_status(
+            _("Model directory: {path}").format(path=model_path), config.color_info
+        )
     config_line = _("Config file in use: {path}").format(path=config.config_path)
     if config.local_config_path:
         config_line += f"  (+ {os.path.basename(config.local_config_path)})"
@@ -432,29 +633,37 @@ def main():
         ).format(current=config.CURRENT_CONFIG_VERSION, path=config.config_path)
         print_status(outdated_notice, config.color_info)
 
-    ready_message = _("The script is ready. Current model: {model_name}").format(model_name=loaded_model_name)
+    ready_message = _("The script is ready. Current model: {model_name}").format(
+        model_name=loaded_model_name
+    )
     print_status(ready_message, config.color_ready_message)
     print_help_message()
 
     try:
-        for t in threads: t.start()
+        for t in threads:
+            t.start()
         refine.start()
 
         while not stop_event.is_set():
             dead = supervise_threads(supervised, stop_event)
             if dead is not None:
                 print_status(
-                    _("The {name} thread stopped; ending the session.").format(name=dead),
+                    _("The {name} thread stopped; ending the session.").format(
+                        name=dead
+                    ),
                     config.color_error,
                 )
                 break
             if sys.stdin.isatty() and select.select([sys.stdin], [], [], 0.1)[0]:
                 line = sys.stdin.readline().strip()
-                if line.startswith('/'):
+                if line.startswith("/"):
                     try:
                         control_queue.put_nowait(line)
                     except queue.Full:
-                        print_status(_("Control queue full; command ignored."), config.color_error)
+                        print_status(
+                            _("Control queue full; command ignored."),
+                            config.color_error,
+                        )
             else:
                 stop_event.wait(0.1)
 
@@ -463,7 +672,7 @@ def main():
     finally:
         if not stop_event.is_set():
             stop_event.set()
-        wake_event.set()          # débloque le thread de reconnaissance
+        wake_event.set()  # débloque le thread de reconnaissance
         refine.shutdown()
 
         # Attendre la sortie effective des threads *avant* de fermer le flux et
@@ -490,6 +699,7 @@ def main():
                 pass
 
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main() or 0)

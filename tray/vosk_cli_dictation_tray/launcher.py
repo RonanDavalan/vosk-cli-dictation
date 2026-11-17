@@ -55,8 +55,13 @@ def launch_detached(command: Command) -> int:
     with open(log, "ab") as out:
         out.write(time.strftime("\n=== %Y-%m-%d %H:%M:%S ===\n").encode())
         process = subprocess.Popen(
-            command.argv, cwd=command.cwd, stdin=subprocess.DEVNULL,
-            stdout=out, stderr=subprocess.STDOUT, start_new_session=True)
+            command.argv,
+            cwd=command.cwd,
+            stdin=subprocess.DEVNULL,
+            stdout=out,
+            stderr=subprocess.STDOUT,
+            start_new_session=True,
+        )
         out.write(("pid %d\n" % process.pid).encode())
     return process.pid
 

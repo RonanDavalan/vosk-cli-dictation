@@ -16,10 +16,16 @@ from vosk import Model, KaldiRecognizer
 from config.config import config
 from src.i18n import get_translation
 from src.runtime_state import (
-    runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
+    runtime_state,
+    STATE_DICTATING,
+    STATE_LISTENING,
+    STATE_SLEEPING,
 )
 from src.voice_commands import (
-    normalize_tokens, phrase_tokens, find_phrase, mean_confidence,
+    normalize_tokens,
+    phrase_tokens,
+    find_phrase,
+    mean_confidence,
 )
 
 MODE_FULL = "full"
@@ -109,9 +115,11 @@ def put_text(text_queue, text, words, refined=False):
     try:
         text_queue.put_nowait((text, words, True) if refined else (text, words))
     except queue.Full:
-        print(f"\n{config.color_error}"
-              f"{_('Text queue full; the UI thread is not consuming. Dropping a result.')}"
-              f"{config.RESET}")
+        print(
+            f"\n{config.color_error}"
+            f"{_('Text queue full; the UI thread is not consuming. Dropping a result.')}"
+            f"{config.RESET}"
+        )
 
 
 def load_model(model_name: str, folder: str = None):
@@ -129,43 +137,66 @@ def load_model(model_name: str, folder: str = None):
     model_path = None
     if folder:
         chosen = config.installed_model(folder, model_name)
-        model_path = chosen['path'] if chosen else None
+        model_path = chosen["path"] if chosen else None
     model_path = model_path or config.get_model_path_by_name(model_name)
     if not model_path:
         # Langue sans modèle déclaré dans config.yaml : un modèle du catalogue
         # installé pour elle (p. ex. un modèle complet téléchargé seul).
-        model_path = next((m['path'] for m in sorted(
-            config.installed_models(), key=lambda m: m['size'] != 'small')
-            if m['lang'] == model_name), None)
+        model_path = next(
+            (
+                m["path"]
+                for m in sorted(
+                    config.installed_models(), key=lambda m: m["size"] != "small"
+                )
+                if m["lang"] == model_name
+            ),
+            None,
+        )
 
     if not model_path:
-        for model in config.data.get('vosk_models', []):
-            if model['name'] != model_name or os.path.isabs(model['path_relative']):
+        for model in config.data.get("vosk_models", []):
+            if model["name"] != model_name or os.path.isabs(model["path_relative"]):
                 continue
-            print(f"{config.color_error}{_('No model found for')} '{model_name}'.{config.RESET}")
+            print(
+                f"{config.color_error}{_('No model found for')} '{model_name}'.{config.RESET}"
+            )
             print(f"{config.color_info}{_('Searched:')}{config.RESET}")
-            for racine in config.model_search_roots(model['path_relative']):
+            for racine in config.model_search_roots(model["path_relative"]):
                 print(f"  - {racine}")
-            print(f"{config.color_info}{_('Download Vosk models from:')} https://alphacephei.com/vosk/models{config.RESET}")
-            print(f"{config.color_info}{_('Or run:')} vosk-cli-dictation --download-model {model_name}{config.RESET}")
+            print(
+                f"{config.color_info}{_('Download Vosk models from:')} https://alphacephei.com/vosk/models{config.RESET}"
+            )
+            print(
+                f"{config.color_info}{_('Or run:')} vosk-cli-dictation --download-model {model_name}{config.RESET}"
+            )
             break
         return None, None, None
 
     model_name_on_disk = os.path.basename(model_path)
 
     if not os.path.isdir(model_path):
-        print(f"{config.color_error}{_('Error: Model folder not found:')} {model_path}{config.RESET}")
-        print(f"{config.color_info}{_('Please check your config.yaml and ensure the model is unzipped.')}{config.RESET}")
+        print(
+            f"{config.color_error}{_('Error: Model folder not found:')} {model_path}{config.RESET}"
+        )
+        print(
+            f"{config.color_info}{_('Please check your config.yaml and ensure the model is unzipped.')}{config.RESET}"
+        )
         return None, None, None
 
     try:
-        print(f"{config.color_info}{_('Attempting to load model:')} {model_name_on_disk}...{config.RESET}")
+        print(
+            f"{config.color_info}{_('Attempting to load model:')} {model_name_on_disk}...{config.RESET}"
+        )
         model = Model(model_path)
         recognizer = build_recognizer(model, MODE_FULL)
-        print(f"{config.color_success}{_('Model loaded successfully:')} {model_name_on_disk}{config.RESET}")
+        print(
+            f"{config.color_success}{_('Model loaded successfully:')} {model_name_on_disk}{config.RESET}"
+        )
         return model, recognizer, model_name_on_disk
     except Exception as e:
-        error_msg = _("Fatal error while loading model '{model_name}': {error}").format(model_name=model_name_on_disk, error=e)
+        error_msg = _("Fatal error while loading model '{model_name}': {error}").format(
+            model_name=model_name_on_disk, error=e
+        )
         print(f"{config.color_error}{error_msg}{config.RESET}")
         return None, None, None
 
@@ -180,7 +211,7 @@ def build_recognizer(model, mode: str):
       Reconstruit en MODE_FULL au réveil.
     """
     force_c_numeric_locale()
-    sample_rate = config.audio['sample_rate']
+    sample_rate = config.audio["sample_rate"]
     if mode in (MODE_LISTENING, MODE_STOP):
         # ensure_ascii=False est indispensable : Vosk ne déséchappe pas les
         # \uXXXX dans la grammaire, il traiterait « dictée » comme le mot
@@ -205,13 +236,22 @@ def _target_mode(state: str) -> str:
     """
     if state != STATE_LISTENING:
         return MODE_FULL
-    per_lang = config.recognition_setting('restricted_grammar_in_listening', True)
+    per_lang = config.recognition_setting("restricted_grammar_in_listening", True)
     return MODE_LISTENING if per_lang else MODE_FULL
 
 
-def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: queue.Queue,
-                       control_queue: queue.Queue, stop_event, display_partials_event, wake_event,
-                       switch=None, refiner=None):
+def recognition_thread(
+    model,
+    recognizer,
+    audio_queue: queue.Queue,
+    text_queue: queue.Queue,
+    control_queue: queue.Queue,
+    stop_event,
+    display_partials_event,
+    wake_event,
+    switch=None,
+    refiner=None,
+):
     """
     Décode l'audio et pilote la sémantique des commandes vocales.
 
@@ -236,7 +276,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     last_partial_length = 0
     in_progress_label = _("[In progress]")
 
-    chunk_audio_s = config.audio['buffer_size'] / config.audio['sample_rate']
+    chunk_audio_s = config.audio["buffer_size"] / config.audio["sample_rate"]
     last_rtf_warning = 0.0
     # Cadence fixe du log d'erreur de décodage : une trame malformée est
     # journalisée au plus une fois toutes les DECODE_ERROR_THROTTLE_S secondes.
@@ -247,19 +287,19 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     consecutive_decode_errors = 0
     malformed_result_captured = False
 
-    conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+    conf_threshold = config.recognition_setting("confidence_threshold", 0.55)
     wake_tokens = phrase_tokens(config.WAKE_PHRASE)
     # Après un réveil ÉCOUTE->DICTÉE, l'audio mis en file pendant la
     # reconstruction du recognizer contient la fin de « active dictée » et du
     # silence — décodé, il produisait un mot parasite (« Les »). On vide la
     # file à la transition et on ignore les résultats du recognizer complet
     # pendant cette courte fenêtre.
-    wake_discard_ms = config.recognition_setting('wake_discard_ms', 300)
+    wake_discard_ms = config.recognition_setting("wake_discard_ms", 300)
     discard_until = 0.0
     # Détecteur d'arrêt à grammaire restreinte en DICTÉE.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
     restricted_stop_enabled = bool(
-        config.recognition_setting('restricted_stop_in_dictation', True)
+        config.recognition_setting("restricted_stop_in_dictation", True)
     )
 
     # Mode silence — arrêt automatique en DICTÉE après silence_timeout_ms
@@ -268,7 +308,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # parler finaliserait une session vide). Réglages relus au point d'échange
     # d'un modèle (swap_point), car la langue peut changer en cours de session.
     interaction_mode = config.interaction_mode
-    silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
+    silence_timeout_s = config.interaction_setting("silence_timeout_ms", 700) / 1000.0
     last_dictation_result_ts = 0.0
     word_captured_in_session = False
 
@@ -290,7 +330,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     def clear_partial():
         nonlocal last_partial_length
         if last_partial_length > 0:
-            print(f"\r{' ' * last_partial_length}\r", end='', flush=True)
+            print(f"\r{' ' * last_partial_length}\r", end="", flush=True)
             last_partial_length = 0
 
     def rebuild_for(state):
@@ -311,9 +351,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             control_queue.put_nowait("DICTATION_ON")
             pending_wake = True
         except queue.Full:
-            print(f"\n{config.color_error}"
-                  f"{_('Control queue full; the UI thread is not responding.')}"
-                  f"{config.RESET}")
+            print(
+                f"\n{config.color_error}"
+                f"{_('Control queue full; the UI thread is not responding.')}"
+                f"{config.RESET}"
+            )
 
     def rebuild_stop_rec(state):
         """(Re)construit le recognizer d'arrêt en DICTÉE, le libère ailleurs.
@@ -336,17 +378,22 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             control_queue.put_nowait("FINALIZE_SESSION")
             pending_stop = True
         except queue.Full:
-            print(f"\n{config.color_error}"
-                  f"{_('Control queue full; the UI thread is not responding.')}"
-                  f"{config.RESET}")
+            print(
+                f"\n{config.color_error}"
+                f"{_('Control queue full; the UI thread is not responding.')}"
+                f"{config.RESET}"
+            )
 
     def check_silence_timeout():
         """Pousse FINALIZE_SESSION (même chemin que la phrase d'arrêt) si le
         mode silence est actif, qu'un mot a déjà été capté, et qu'aucun
         résultat non vide n'est arrivé depuis silence_timeout_s."""
-        if (interaction_mode == 'silence' and word_captured_in_session
-                and not pending_stop
-                and time.monotonic() - last_dictation_result_ts >= silence_timeout_s):
+        if (
+            interaction_mode == "silence"
+            and word_captured_in_session
+            and not pending_stop
+            and time.monotonic() - last_dictation_result_ts >= silence_timeout_s
+        ):
             request_stop()
 
     def stop_rec_hit(data) -> bool:
@@ -369,7 +416,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             toks = normalize_tokens(res.get("text", ""))
             if toks != stop_tokens:
                 return False
-            return mean_confidence(res.get("result", []), 0, len(stop_tokens)) >= conf_threshold
+            return (
+                mean_confidence(res.get("result", []), 0, len(stop_tokens))
+                >= conf_threshold
+            )
         except Exception:
             return False
 
@@ -380,8 +430,12 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     # (voice_mark) arrive après le début de la voix : on remonte de
     # REFINE_PREROLL_S pour ne pas la couper, et on laisse de côté le silence
     # qui précède, sur lequel un moteur de finition invente du texte.
-    refine_max_chunks = max(1, int(REFINE_MAX_AUDIO_S / chunk_audio_s)) if chunk_audio_s > 0 else 1
-    refine_preroll_chunks = int(REFINE_PREROLL_S / chunk_audio_s) + 1 if chunk_audio_s > 0 else 0
+    refine_max_chunks = (
+        max(1, int(REFINE_MAX_AUDIO_S / chunk_audio_s)) if chunk_audio_s > 0 else 1
+    )
+    refine_preroll_chunks = (
+        int(REFINE_PREROLL_S / chunk_audio_s) + 1 if chunk_audio_s > 0 else 0
+    )
     utterance_audio = collections.deque()
     voice_mark = None
 
@@ -410,8 +464,10 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     def is_command_utterance(text):
         tokens = normalize_tokens(text)
-        return (find_phrase(tokens, stop_tokens) != -1
-                or find_phrase(tokens, wake_tokens) != -1)
+        return (
+            find_phrase(tokens, stop_tokens) != -1
+            or find_phrase(tokens, wake_tokens) != -1
+        )
 
     def hand_over_text(text, words):
         """Donne le texte final d'un énoncé de DICTÉE à l'UI, par la file de
@@ -425,9 +481,13 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         if command and refiner.active():
             runtime_state.note_refine("skipped")
         refiner.submit(
-            text, words, pcm, config.current_lang,
+            text,
+            words,
+            pcm,
+            config.current_lang,
             refine=refiner.active() and not command,
-            guard=lambda refined: not is_command_utterance(refined))
+            guard=lambda refined: not is_command_utterance(refined),
+        )
 
     def swap_point():
         """Prend le modèle que `switch` a fini de charger, à condition qu'aucun
@@ -435,7 +495,11 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         relus, les recognizers refaits sur le nouveau modèle."""
         nonlocal model, recognizer, current_mode, stop_rec, pending_wake, pending_stop
         nonlocal _, in_progress_label, conf_threshold, wake_tokens, wake_discard_ms
-        nonlocal stop_tokens, restricted_stop_enabled, interaction_mode, silence_timeout_s
+        nonlocal \
+            stop_tokens, \
+            restricted_stop_enabled, \
+            interaction_mode, \
+            silence_timeout_s
         if switch is None or utterance_open or not switch.has_ready():
             return
         engine = switch.take_ready()
@@ -443,14 +507,17 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
         model = engine.model
         _ = get_translation()
         in_progress_label = _("[In progress]")
-        conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+        conf_threshold = config.recognition_setting("confidence_threshold", 0.55)
         wake_tokens = phrase_tokens(config.WAKE_PHRASE)
-        wake_discard_ms = config.recognition_setting('wake_discard_ms', 300)
+        wake_discard_ms = config.recognition_setting("wake_discard_ms", 300)
         stop_tokens = phrase_tokens(config.STOP_PHRASE)
         restricted_stop_enabled = bool(
-            config.recognition_setting('restricted_stop_in_dictation', True))
+            config.recognition_setting("restricted_stop_in_dictation", True)
+        )
         interaction_mode = config.interaction_mode
-        silence_timeout_s = config.interaction_setting('silence_timeout_ms', 700) / 1000.0
+        silence_timeout_s = (
+            config.interaction_setting("silence_timeout_ms", 700) / 1000.0
+        )
         clear_partial()
         forget_utterance_audio()
         pending_wake = False
@@ -538,14 +605,20 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     if now - last_rtf_warning >= 5.0:
                         last_rtf_warning = now
                         snap = runtime_state.snapshot()
-                        print(f"\n{config.color_warning}"
-                              f"{_('Decoding is slower than real time (RTF {rtf}); latency may drift.').format(rtf=snap['rtf_mean'])}"
-                              f"{config.RESET}")
+                        print(
+                            f"\n{config.color_warning}"
+                            f"{_('Decoding is slower than real time (RTF {rtf}); latency may drift.').format(rtf=snap['rtf_mean'])}"
+                            f"{config.RESET}"
+                        )
 
             # Arrêt vocal de haute confiance via le recognizer restreint, avant
             # même que le recognizer complet ait finalisé.
-            if (state == STATE_DICTATING and stop_rec is not None
-                    and not pending_stop and not runtime_state.in_debounce()):
+            if (
+                state == STATE_DICTATING
+                and stop_rec is not None
+                and not pending_stop
+                and not runtime_state.in_debounce()
+            ):
                 if stop_rec_hit(data):
                     try:
                         recognizer.Reset()
@@ -608,12 +681,12 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 # avec confiance (bloc ci-dessus).
 
                 if display_partials_event.is_set() and partial_text:
-                    print(f"\r{' ' * last_partial_length}\r", end='', flush=True)
+                    print(f"\r{' ' * last_partial_length}\r", end="", flush=True)
                     display_text = f"{config.color_info}{in_progress_label} {partial_text}{config.RESET}"
-                    print(display_text, end='', flush=True)
+                    print(display_text, end="", flush=True)
                     last_partial_length = len(in_progress_label) + 1 + len(partial_text)
                 elif last_partial_length > 0:
-                    print(f"\r{' ' * last_partial_length}\r", end='', flush=True)
+                    print(f"\r{' ' * last_partial_length}\r", end="", flush=True)
                     last_partial_length = 0
 
             if state == STATE_DICTATING:
@@ -640,21 +713,27 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                 raw = getattr(e, "doc", "") or ""
                 path = _capture_malformed_result(raw)
                 where = f" — {path}" if path else ""
-                print(f"\n{config.color_error}"
-                      f"{_('Malformed decoder output captured:')} {raw[:200]!r}{where}"
-                      f"{config.RESET}")
+                print(
+                    f"\n{config.color_error}"
+                    f"{_('Malformed decoder output captured:')} {raw[:200]!r}{where}"
+                    f"{config.RESET}"
+                )
 
             now = time.monotonic()
             if now - last_decode_error_warning >= DECODE_ERROR_THROTTLE_S:
                 last_decode_error_warning = now
-                print(f"\n{config.color_error}"
-                      f"{_('Recognition error on a frame (recovering):')} {e}"
-                      f"{config.RESET}")
+                print(
+                    f"\n{config.color_error}"
+                    f"{_('Recognition error on a frame (recovering):')} {e}"
+                    f"{config.RESET}"
+                )
 
             if consecutive_decode_errors >= DECODE_ERROR_MAX_CONSECUTIVE:
-                print(f"\n{config.color_error}"
-                      f"{_('The recognition engine is not recovering; ending the session. Please restart the tool.')}"
-                      f"{config.RESET}")
+                print(
+                    f"\n{config.color_error}"
+                    f"{_('The recognition engine is not recovering; ending the session. Please restart the tool.')}"
+                    f"{config.RESET}"
+                )
                 stop_event.set()
                 break
 

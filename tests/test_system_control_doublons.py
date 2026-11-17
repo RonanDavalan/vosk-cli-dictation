@@ -63,14 +63,21 @@ def test_window_class_falls_back_to_xprop(monkeypatch):
         if cmd[0] == "xprop":
             return True, 'WM_CLASS(STRING) = "xterm", "XTerm"\n'
         return False, ""
+
     monkeypatch.setattr(sc, "_run", fake_run)
     monkeypatch.setattr(sc, "check_command_exists", lambda name: True)
     assert sc._active_window_class_x11() == "XTerm"
 
 
 def test_injection_limited_to_xwayland(monkeypatch):
-    for session, backend, expected in (("wayland", "xdotool", True), ("wayland", "wtype", False),
-                                       ("x11", "xdotool", False)):
-        monkeypatch.setattr(sc, "_detect_caps",
-                            lambda s=session, b=backend: {"session": s, "key_backend": b})
+    for session, backend, expected in (
+        ("wayland", "xdotool", True),
+        ("wayland", "wtype", False),
+        ("x11", "xdotool", False),
+    ):
+        monkeypatch.setattr(
+            sc,
+            "_detect_caps",
+            lambda s=session, b=backend: {"session": s, "key_backend": b},
+        )
         assert sc.injection_limited_to_xwayland() is expected

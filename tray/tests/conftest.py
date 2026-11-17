@@ -25,6 +25,7 @@ def isolated_env(tmp_path, monkeypatch):
 @pytest.fixture(scope="session")
 def qapp():
     from PySide6.QtWidgets import QApplication
+
     return QApplication.instance() or QApplication([])
 
 

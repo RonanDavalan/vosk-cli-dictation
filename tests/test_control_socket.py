@@ -115,8 +115,13 @@ class FakeController:
         self.refuse = None
 
     def info(self):
-        return {"state": runtime_state.state, "lang": "fr", "loading": False,
-                "last_error": None, "accents": "éàü"}
+        return {
+            "state": runtime_state.state,
+            "lang": "fr",
+            "loading": False,
+            "last_error": None,
+            "accents": "éàü",
+        }
 
     def request(self, token, arg):
         self.requests.append((token, arg))
@@ -198,6 +203,7 @@ def test_reset_selection_needs_a_controller_and_takes_no_argument(server):
 
 
 # --- écho d'un raccourci pynput et d'une commande de bureau ------------------ #
+
 
 def test_socket_command_right_after_hotkey_is_ignored(monkeypatch):
     monkeypatch.setattr(cs, "_echo_notice_shown", True)

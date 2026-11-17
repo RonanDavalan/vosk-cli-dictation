@@ -28,7 +28,9 @@ def _canonical_user_path(xdg):
 
 def test_outdated_notice_fires_for_stale_user_config(tmp_path, monkeypatch, _isolate):
     user_cfg = _canonical_user_path(_isolate)
-    user_cfg.write_text("default_model: en\n", encoding="utf-8")  # pas de config_version
+    user_cfg.write_text(
+        "default_model: en\n", encoding="utf-8"
+    )  # pas de config_version
     monkeypatch.setenv("VOSK_CONFIG", str(user_cfg))
     cfg = Config()
     assert cfg.config_is_outdated is True
@@ -45,9 +47,13 @@ def test_no_notice_when_user_config_is_current(tmp_path, monkeypatch, _isolate):
     assert cfg.config_is_outdated is False
 
 
-def test_no_notice_for_a_config_path_outside_the_xdg_user_file(tmp_path, monkeypatch, _isolate):
+def test_no_notice_for_a_config_path_outside_the_xdg_user_file(
+    tmp_path, monkeypatch, _isolate
+):
     other = tmp_path / "elsewhere.yaml"
-    other.write_text("default_model: en\n", encoding="utf-8")  # pas de config_version non plus
+    other.write_text(
+        "default_model: en\n", encoding="utf-8"
+    )  # pas de config_version non plus
     monkeypatch.setenv("VOSK_CONFIG", str(other))
     cfg = Config()
     assert cfg.config_is_outdated is False

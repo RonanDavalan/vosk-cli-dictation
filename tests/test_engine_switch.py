@@ -17,10 +17,25 @@ from src.recognition import MODE_STOP
 from src.runtime_state import runtime_state, STATE_LISTENING, STATE_SLEEPING
 
 INSTALLED = [
-    {"folder": "vosk-model-small-fr-0.22", "path": "/m/fr-small", "lang": "fr", "size": "small"},
+    {
+        "folder": "vosk-model-small-fr-0.22",
+        "path": "/m/fr-small",
+        "lang": "fr",
+        "size": "small",
+    },
     {"folder": "vosk-model-fr-0.22", "path": "/m/fr-big", "lang": "fr", "size": "big"},
-    {"folder": "vosk-model-small-en-us-0.15", "path": "/m/en-small", "lang": "en", "size": "small"},
-    {"folder": "vosk-model-small-de-0.15", "path": "/m/de-small", "lang": "de", "size": "small"},
+    {
+        "folder": "vosk-model-small-en-us-0.15",
+        "path": "/m/en-small",
+        "lang": "en",
+        "size": "small",
+    },
+    {
+        "folder": "vosk-model-small-de-0.15",
+        "path": "/m/de-small",
+        "lang": "de",
+        "size": "small",
+    },
 ]
 
 
@@ -49,7 +64,9 @@ class FakeLoader:
         return "model@" + path
 
 
-def make_switch(loader=None, folder="vosk-model-small-fr-0.22", lang="fr", size="small"):
+def make_switch(
+    loader=None, folder="vosk-model-small-fr-0.22", lang="fr", size="small"
+):
     return EngineSwitch(lang, folder, size, "config", loader or FakeLoader())
 
 
@@ -77,20 +94,29 @@ def test_set_lang_loads_in_background_then_waits_for_the_swap_point():
     assert sw.request("set-lang", "en") is None
     assert wait_until(sw.has_ready)
     assert loader.paths == ["/m/en-small"]
-    assert sw.info()["loading"] is True      # tant que l'échange n'est pas fait
-    assert sw.info()["lang"] == "fr"         # l'ancien modèle sert encore
+    assert sw.info()["loading"] is True  # tant que l'échange n'est pas fait
+    assert sw.info()["lang"] == "fr"  # l'ancien modèle sert encore
     engine = sw.take_ready()
     sw.commit(engine)
     info = sw.info()
-    assert (info["lang"], info["model"], info["loading"]) == ("en", "vosk-model-small-en-us-0.15", False)
+    assert (info["lang"], info["model"], info["loading"]) == (
+        "en",
+        "vosk-model-small-en-us-0.15",
+        False,
+    )
     assert info["lang_source"] == "selection"
     assert config.current_lang == "en"
-    assert sel.load_selection() == {"lang": "en", "model": "vosk-model-small-en-us-0.15"}
+    assert sel.load_selection() == {
+        "lang": "en",
+        "model": "vosk-model-small-en-us-0.15",
+    }
 
 
 def test_set_lang_keeps_the_chosen_size_when_it_exists():
     loader = FakeLoader()
-    sw = make_switch(loader, folder="vosk-model-small-en-us-0.15", lang="en", size="big")
+    sw = make_switch(
+        loader, folder="vosk-model-small-en-us-0.15", lang="en", size="big"
+    )
     assert sw.request("set-lang", "fr") is None
     assert wait_until(sw.has_ready)
     assert loader.paths == ["/m/fr-big"]
@@ -173,7 +199,9 @@ def test_set_lang_system_follows_the_session(monkeypatch):
     assert sel.load_selection()["lang"] == "system"
 
 
-def test_reset_selection_clears_the_choice_and_returns_to_the_session_language(monkeypatch):
+def test_reset_selection_clears_the_choice_and_returns_to_the_session_language(
+    monkeypatch,
+):
     for name in ("LC_ALL", "LC_MESSAGES", "LANGUAGE"):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv("LANG", "de_DE.UTF-8")
@@ -201,6 +229,7 @@ def test_reset_selection_without_a_model_for_the_language_keeps_the_choice(monke
 
 
 # --- point d'échange du fil de reconnaissance --------------------------------
+
 
 class SeqRec:
     """Faux recognizer : rend les étapes dans l'ordre, puis du silence."""
@@ -236,8 +265,10 @@ class Harness:
         self.built = []
         self.fake = SeqRec(script)
         monkeypatch.setattr(
-            rec, "build_recognizer",
-            lambda model, mode: (self.built.append((model, mode)), self.fake)[1])
+            rec,
+            "build_recognizer",
+            lambda model, mode: (self.built.append((model, mode)), self.fake)[1],
+        )
         self.audio = queue.Queue(maxsize=64)
         self.stop = threading.Event()
         self.wake = threading.Event()
@@ -246,9 +277,19 @@ class Harness:
         runtime_state._last_transition = 0.0
         self.thread = threading.Thread(
             target=rec.recognition_thread,
-            args=("old-model", self.fake, self.audio, queue.Queue(), queue.Queue(),
-                  self.stop, threading.Event(), self.wake, switch),
-            daemon=True)
+            args=(
+                "old-model",
+                self.fake,
+                self.audio,
+                queue.Queue(),
+                queue.Queue(),
+                self.stop,
+                threading.Event(),
+                self.wake,
+                switch,
+            ),
+            daemon=True,
+        )
         self.thread.start()
 
     def feed(self, n=1):
@@ -265,7 +306,9 @@ class Harness:
 
 
 def ready_engine(switch, lang="en"):
-    engine = LoadedEngine("new-model", lang, "vosk-model-small-en-us-0.15", "small", "selection")
+    engine = LoadedEngine(
+        "new-model", lang, "vosk-model-small-en-us-0.15", "small", "selection"
+    )
     engine.selection_updates = {"lang": lang, "model": engine.folder}
     switch._ready = engine
     switch.loading = True
@@ -287,19 +330,23 @@ def test_swap_happens_in_listening_between_two_utterances(monkeypatch):
 
 def test_swap_waits_for_the_end_of_the_utterance(monkeypatch):
     sw = make_switch()
-    script = [("partial", {"partial": "bon"}), ("partial", {"partial": "bonjour"}),
-              ("partial", {"partial": "bonjour à"}), ("final", {"text": "bonjour à tous", "result": []})]
+    script = [
+        ("partial", {"partial": "bon"}),
+        ("partial", {"partial": "bonjour"}),
+        ("partial", {"partial": "bonjour à"}),
+        ("final", {"text": "bonjour à tous", "result": []}),
+    ]
     h = Harness(monkeypatch, script, sw)
     try:
-        h.feed(1)                              # un énoncé commence
+        h.feed(1)  # un énoncé commence
         assert wait_until(lambda: h.fake.i == 1)
         ready_engine(sw)
-        h.feed(2)                              # il continue
+        h.feed(2)  # il continue
         assert wait_until(lambda: h.fake.i == 3)
         time.sleep(0.25)
         assert sw.has_ready(), "échange pendant un énoncé"
         assert config.current_lang == "fr"
-        h.feed(1)                              # le final clôt l'énoncé
+        h.feed(1)  # le final clôt l'énoncé
         assert wait_until(lambda: not sw.has_ready())
         assert config.current_lang == "en"
     finally:
@@ -324,14 +371,23 @@ def test_swap_in_sleep_takes_the_model_and_rebuilds_on_wake(monkeypatch):
 def test_ui_thread_follows_the_new_language():
     from src.text_processing import TextProcessor
     from src.ui import ui_thread
+
     config.set_language("fr")
     processor = TextProcessor("fr")
     stop = threading.Event()
     t = threading.Thread(
         target=ui_thread,
-        args=(queue.Queue(), queue.Queue(), stop, processor, threading.Event(),
-              threading.Event(), threading.Event()),
-        daemon=True)
+        args=(
+            queue.Queue(),
+            queue.Queue(),
+            stop,
+            processor,
+            threading.Event(),
+            threading.Event(),
+            threading.Event(),
+        ),
+        daemon=True,
+    )
     t.start()
     try:
         config.set_language("en")

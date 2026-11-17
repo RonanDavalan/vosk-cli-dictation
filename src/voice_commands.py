@@ -10,7 +10,7 @@
 import re
 import unicodedata
 
-_PUNCT_STRIP = ".,;:!?()[]«»\"„“…"
+_PUNCT_STRIP = '.,;:!?()[]«»"„“…'
 
 
 def fold_word(word: str) -> str:
@@ -40,7 +40,7 @@ def find_phrase(tokens: list, needle: list) -> int:
         return -1
     last = len(tokens) - len(needle)
     for i in range(last + 1):
-        if tokens[i:i + len(needle)] == needle:
+        if tokens[i : i + len(needle)] == needle:
             return i
     return -1
 
@@ -49,7 +49,7 @@ def ends_with_phrase(tokens: list, needle: list) -> bool:
     """La phrase-clé est-elle exactement la fin de la suite de tokens ?"""
     if not needle or len(needle) > len(tokens):
         return False
-    return tokens[-len(needle):] == needle
+    return tokens[-len(needle) :] == needle
 
 
 def is_doubled(tokens: list, needle: list) -> bool:
@@ -74,7 +74,7 @@ def strip_one_repetition(text: str, needle: list) -> str:
     idx = find_phrase(low, needle + needle)
     if idx == -1:
         return text
-    del words[idx:idx + n]
+    del words[idx : idx + n]
     return " ".join(words)
 
 
@@ -102,7 +102,7 @@ def mean_confidence(words: list, start_index: int, length: int) -> float:
     """
     if not words:
         return 1.0
-    span = words[start_index:start_index + length]
+    span = words[start_index : start_index + length]
     confs = [w.get("conf") for w in span if isinstance(w, dict) and "conf" in w]
     confs = [c for c in confs if isinstance(c, (int, float))]
     if not confs:

@@ -3,8 +3,14 @@
 import pytest
 
 from src.voice_commands import (
-    normalize_tokens, phrase_tokens, find_phrase, ends_with_phrase,
-    is_doubled, strip_one_repetition, remove_phrase_and_after, mean_confidence,
+    normalize_tokens,
+    phrase_tokens,
+    find_phrase,
+    ends_with_phrase,
+    is_doubled,
+    strip_one_repetition,
+    remove_phrase_and_after,
+    mean_confidence,
 )
 
 STOP = phrase_tokens("stop dictée")
@@ -13,9 +19,15 @@ WAKE = phrase_tokens("active dictée")
 
 # --- correspondance sur phrase entière, jamais sur sous-chaîne ----------------
 
+
 def test_isolated_words_do_not_trigger():
     # "stop" seul, "dictée" seul, séparés : aucune correspondance.
-    assert find_phrase(normalize_tokens("je fais un stop puis je reprends la dictée"), STOP) == -1
+    assert (
+        find_phrase(
+            normalize_tokens("je fais un stop puis je reprends la dictée"), STOP
+        )
+        == -1
+    )
 
 
 def test_full_phrase_triggers():
@@ -39,12 +51,14 @@ def test_substring_word_does_not_match():
 
 # --- réveil sur les partiels (fin de suite de tokens) -----------------------
 
+
 def test_ends_with_phrase_true_only_at_the_tail():
     assert ends_with_phrase(normalize_tokens("bla bla active dictée"), WAKE)
     assert not ends_with_phrase(normalize_tokens("active dictée bla"), WAKE)
 
 
 # --- échappatoire littérale : phrase dite deux fois -------------------------
+
 
 def test_doubling_is_detected():
     assert is_doubled(normalize_tokens("stop dictée stop dictée"), STOP)
@@ -62,15 +76,23 @@ def test_doubling_with_leading_text():
 
 # --- retrait de la phrase-clé du texte tapé --------------------------------
 
+
 def test_text_before_phrase_is_kept_rest_dropped():
-    assert remove_phrase_and_after("bonjour tout le monde stop dictée et voilà", STOP) == "bonjour tout le monde"
+    assert (
+        remove_phrase_and_after("bonjour tout le monde stop dictée et voilà", STOP)
+        == "bonjour tout le monde"
+    )
 
 
 def test_no_phrase_returns_text_unchanged():
-    assert remove_phrase_and_after("bonjour tout le monde", STOP) == "bonjour tout le monde"
+    assert (
+        remove_phrase_and_after("bonjour tout le monde", STOP)
+        == "bonjour tout le monde"
+    )
 
 
 # --- garde de confiance ---------------------------------------------------
+
 
 def _words(*pairs):
     return [{"word": w, "conf": c} for w, c in pairs]
@@ -98,6 +120,7 @@ def test_high_confidence_passes_default_threshold():
 
 # --- une phrase vide est inerte -----------------------------------------
 
+
 def test_empty_needle_never_matches():
     assert find_phrase(normalize_tokens("anything at all"), []) == -1
     assert not is_doubled(normalize_tokens("anything"), [])
@@ -105,9 +128,13 @@ def test_empty_needle_never_matches():
 
 # --- accents ignorés dans la comparaison --------------------------------------
 
+
 def test_wake_phrase_without_accent_matches_accented_text():
     # config.yaml écrit « demarre », le modèle complet rend « démarre ».
-    assert find_phrase(normalize_tokens("bon alors démarre"), phrase_tokens("demarre")) == 2
+    assert (
+        find_phrase(normalize_tokens("bon alors démarre"), phrase_tokens("demarre"))
+        == 2
+    )
 
 
 def test_accented_phrase_matches_text_without_accent():
@@ -116,12 +143,22 @@ def test_accented_phrase_matches_text_without_accent():
 
 
 def test_accent_folding_keeps_uppercase_and_punctuation_rules():
-    assert find_phrase(normalize_tokens("Texte. STOP, DICTÉE !"), phrase_tokens("stop dictee")) == 1
+    assert (
+        find_phrase(
+            normalize_tokens("Texte. STOP, DICTÉE !"), phrase_tokens("stop dictee")
+        )
+        == 1
+    )
 
 
 def test_remove_phrase_keeps_original_accents_of_text_before():
-    assert remove_phrase_and_after("une idée réfléchie stop dictee fin", STOP) == "une idée réfléchie"
+    assert (
+        remove_phrase_and_after("une idée réfléchie stop dictee fin", STOP)
+        == "une idée réfléchie"
+    )
 
 
 def test_strip_one_repetition_matches_without_accents():
-    assert strip_one_repetition("noté stop dictee stop dictée", STOP) == "noté stop dictée"
+    assert (
+        strip_one_repetition("noté stop dictee stop dictée", STOP) == "noté stop dictée"
+    )

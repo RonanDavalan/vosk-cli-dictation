@@ -110,7 +110,9 @@ def test_system_template_takes_priority_over_bundled(tmp_path, _isolate):
     assert expected.read_text(encoding="utf-8") == "default_model: es\n"
 
 
-def test_system_template_picks_locale_over_bundled_fallback(tmp_path, _isolate, monkeypatch):
+def test_system_template_picks_locale_over_bundled_fallback(
+    tmp_path, _isolate, monkeypatch
+):
     monkeypatch.setenv("LANG", "fr_FR.UTF-8")
     system_dir = tmp_path / "usr-share"
     system_dir.mkdir()
@@ -124,6 +126,9 @@ def test_system_template_picks_locale_over_bundled_fallback(tmp_path, _isolate, 
 
 def test_no_config_anywhere_returns_none(tmp_path, _isolate):
     root = _tree(tmp_path / "tree", git=False, bundled=False)
-    assert Config._get_config_path(
-        project_root=str(root), system_template_dir=NO_SYSTEM_TEMPLATE_DIR
-    ) is None
+    assert (
+        Config._get_config_path(
+            project_root=str(root), system_template_dir=NO_SYSTEM_TEMPLATE_DIR
+        )
+        is None
+    )

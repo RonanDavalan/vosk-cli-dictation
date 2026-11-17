@@ -21,14 +21,16 @@ SPEC_PREFIX = "whisper:"
 
 def models_dir() -> str:
     base = os.environ.get("XDG_DATA_HOME") or os.path.join(
-        os.path.expanduser("~"), ".local", "share")
+        os.path.expanduser("~"), ".local", "share"
+    )
     return os.path.join(base, "vosk-cli-dictation", "whisper-models")
 
 
 def is_cached(size: str, directory: str = None) -> bool:
     """Les poids de cette taille sont-ils déjà sous `directory` ?"""
     pattern = os.path.join(
-        directory or models_dir(), f"models--*--faster-whisper-{size}", "snapshots", "*")
+        directory or models_dir(), f"models--*--faster-whisper-{size}", "snapshots", "*"
+    )
     return bool(glob.glob(pattern))
 
 
@@ -45,6 +47,7 @@ def missing_module():
 def gpu_detected() -> bool:
     try:
         import ctranslate2
+
         return ctranslate2.get_cuda_device_count() > 0
     except Exception:
         return False
@@ -56,6 +59,7 @@ def cublas_loadable() -> bool:
     GPU et n'ouvre la bibliothèque qu'au premier transcribe(), d'où un échec
     tardif quand elle manque."""
     import ctypes
+
     try:
         ctypes.CDLL(CUBLAS_SONAME)
         return True
@@ -73,8 +77,7 @@ def resolve_device(requested: str) -> str:
     if requested == "cuda":
         if present and cublas_loadable():
             return "cuda"
-        raise RefineUnavailable(
-            "cuda-missing" if present else "no-gpu", CUBLAS_REMEDY)
+        raise RefineUnavailable("cuda-missing" if present else "no-gpu", CUBLAS_REMEDY)
     return "cuda" if present and cublas_loadable() else "cpu"
 
 
@@ -99,8 +102,13 @@ def resolve_compute_type(requested: str, device: str) -> str:
 
 
 class WhisperEngine(RefineEngine):
-    def __init__(self, size: str, device: str = "auto", compute_type: str = "auto",
-                 directory: str = None):
+    def __init__(
+        self,
+        size: str,
+        device: str = "auto",
+        compute_type: str = "auto",
+        directory: str = None,
+    ):
         if size not in SIZES:
             raise RefineUnavailable("bad-size", size)
         self.size = size
@@ -120,14 +128,18 @@ class WhisperEngine(RefineEngine):
         if missing:
             raise RefineUnavailable("missing-module", missing)
         from faster_whisper import WhisperModel
+
         self._device = resolve_device(self._requested_device)
         self.compute_type = resolve_compute_type(self._requested_compute, self._device)
         os.makedirs(self._directory, exist_ok=True)
         try:
             self._model = WhisperModel(
-                self.size, device=self._device, compute_type=self.compute_type,
+                self.size,
+                device=self._device,
+                compute_type=self.compute_type,
                 download_root=self._directory,
-                cpu_threads=cpu_threads() if self._device == "cpu" else 0)
+                cpu_threads=cpu_threads() if self._device == "cpu" else 0,
+            )
         except Exception as e:
             raise RefineUnavailable("load-failed", f"{self.size}: {e}") from e
 
@@ -135,10 +147,16 @@ class WhisperEngine(RefineEngine):
         if self._model is None:
             raise RefineUnavailable("not-loaded", self.size)
         import numpy as np
+
         audio = np.frombuffer(pcm, dtype=np.int16).astype(np.float32) / 32768.0
         segments, _info = self._model.transcribe(
-            audio, language=language or None, beam_size=1, temperature=0.0,
-            vad_filter=False, condition_on_previous_text=False)
+            audio,
+            language=language or None,
+            beam_size=1,
+            temperature=0.0,
+            vad_filter=False,
+            condition_on_previous_text=False,
+        )
         return "".join(segment.text for segment in segments).strip()
 
     def close(self) -> None:

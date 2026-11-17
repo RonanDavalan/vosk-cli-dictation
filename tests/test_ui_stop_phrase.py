@@ -108,7 +108,8 @@ def test_single_word_stop_phrase(monkeypatch):
 
     monkeypatch.setattr(ui, "pyperclip", _Clip)
     monkeypatch.setitem(
-        config.language_settings["fr"], "voice_commands",
+        config.language_settings["fr"],
+        "voice_commands",
         {"wake_phrase": "démarre", "stop_phrase": "zut"},
     )
     config.set_language("fr")

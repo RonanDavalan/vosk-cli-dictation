@@ -29,7 +29,10 @@ class FakeRec:
             self.step = self.script[self.i]
             self.i += 1
         else:
-            self.step = ("partial", {"partial": ""})  # silence une fois le script épuisé
+            self.step = (
+                "partial",
+                {"partial": ""},
+            )  # silence une fois le script épuisé
         return self.step[0] == "final"
 
     def Result(self):
@@ -47,22 +50,28 @@ class FakeRec:
 
 def json_dumps(d):
     import json
+
     return json.dumps(d)
 
 
 def _run_silence(monkeypatch, script, *, mode, timeout_ms, run_s=0.4):
     monkeypatch.setitem(config.data.setdefault("interaction", {}), "mode", mode)
     monkeypatch.setitem(config.data["interaction"], "silence_timeout_ms", timeout_ms)
-    monkeypatch.delitem(config.language_settings["fr"], "silence_timeout_ms", raising=False)
+    monkeypatch.delitem(
+        config.language_settings["fr"], "silence_timeout_ms", raising=False
+    )
     config.set_language("fr")
 
     fake = FakeRec(script)
     fake_stop = FakeRec([])
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, m: fake_stop if m == MODE_STOP else fake,
     )
-    monkeypatch.setitem(config.language_settings["fr"], "restricted_stop_in_dictation", False)
+    monkeypatch.setitem(
+        config.language_settings["fr"], "restricted_stop_in_dictation", False
+    )
 
     audio_q = queue.Queue(maxsize=256)
     text_q = queue.Queue(maxsize=256)
@@ -108,7 +117,9 @@ def _drain(q):
 
 
 def test_silence_mode_finalizes_after_timeout_once_a_word_was_captured(monkeypatch):
-    script = [("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})]
+    script = [
+        ("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})
+    ]
     ctrl, _text = _run_silence(monkeypatch, script, mode="silence", timeout_ms=50)
     assert "FINALIZE_SESSION" in _drain(ctrl)
 
@@ -122,13 +133,17 @@ def test_silence_mode_does_not_finalize_an_empty_session(monkeypatch):
 
 def test_toggle_mode_never_auto_finalizes_on_silence(monkeypatch):
     # Le mode par défaut ne doit jamais finaliser tout seul.
-    script = [("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})]
+    script = [
+        ("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})
+    ]
     ctrl, _text = _run_silence(monkeypatch, script, mode="toggle", timeout_ms=50)
     assert "FINALIZE_SESSION" not in _drain(ctrl)
 
 
 def test_maintenue_mode_never_auto_finalizes_on_silence(monkeypatch):
-    script = [("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})]
+    script = [
+        ("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})
+    ]
     ctrl, _text = _run_silence(monkeypatch, script, mode="maintenue", timeout_ms=50)
     assert "FINALIZE_SESSION" not in _drain(ctrl)
 
@@ -136,6 +151,10 @@ def test_maintenue_mode_never_auto_finalizes_on_silence(monkeypatch):
 def test_silence_mode_does_not_finalize_before_timeout(monkeypatch):
     # Délai généreux : sur la courte durée du test, le minuteur n'a pas le
     # temps d'expirer -- un silence court en cours de phrase ne finalise pas.
-    script = [("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})]
-    ctrl, _text = _run_silence(monkeypatch, script, mode="silence", timeout_ms=60_000, run_s=0.2)
+    script = [
+        ("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})
+    ]
+    ctrl, _text = _run_silence(
+        monkeypatch, script, mode="silence", timeout_ms=60_000, run_s=0.2
+    )
     assert "FINALIZE_SESSION" not in _drain(ctrl)

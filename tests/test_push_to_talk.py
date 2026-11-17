@@ -68,7 +68,7 @@ class FakeListener:
 @pytest.fixture(autouse=True)
 def _reset(monkeypatch):
     FakeListener.instances = []
-    monkeypatch.setattr(keyboard_listener, "get_translation", lambda: (lambda s: s))
+    monkeypatch.setattr(keyboard_listener, "get_translation", lambda: lambda s: s)
     yield
 
 
@@ -118,7 +118,9 @@ def test_toggle_mode_never_starts_push_to_talk_listener(monkeypatch, fake_pynput
     assert FakeListener.instances == []
 
 
-def test_maintenue_mode_starts_and_stops_push_to_talk_listener(monkeypatch, fake_pynput):
+def test_maintenue_mode_starts_and_stops_push_to_talk_listener(
+    monkeypatch, fake_pynput
+):
     run_listener(monkeypatch, queue.Queue(), mode="maintenue", push_to_talk="ctrl_r")
     assert len(FakeListener.instances) == 1
     listener = FakeListener.instances[0]
@@ -174,13 +176,17 @@ def test_single_character_key_resolves_via_keycode(monkeypatch, fake_pynput):
     assert _drain(ctrl) == ["DICTATION_ON", "FINALIZE_SESSION"]
 
 
-def test_missing_push_to_talk_key_disables_listener_with_warning(monkeypatch, fake_pynput, capsys):
+def test_missing_push_to_talk_key_disables_listener_with_warning(
+    monkeypatch, fake_pynput, capsys
+):
     run_listener(monkeypatch, queue.Queue(), mode="maintenue", push_to_talk=None)
     assert FakeListener.instances == []
     assert "push_to_talk" in capsys.readouterr().out
 
 
-def test_invalid_push_to_talk_key_disables_listener_with_warning(monkeypatch, fake_pynput, capsys):
+def test_invalid_push_to_talk_key_disables_listener_with_warning(
+    monkeypatch, fake_pynput, capsys
+):
     # Ni un membre de Key, ni un caractère unique -> aucune clé ne peut en sortir.
     run_listener(monkeypatch, queue.Queue(), mode="maintenue", push_to_talk="not-a-key")
     assert FakeListener.instances == []

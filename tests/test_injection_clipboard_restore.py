@@ -22,10 +22,10 @@ import src.system_control as sc
 def clip(monkeypatch):
     """Presse-papiers bouchonné + traçage ordonné des set / collages."""
     state = {"value": "ORIGINAL"}
-    trace = []          # ("set", v) | ("paste",), dans l'ordre
+    trace = []  # ("set", v) | ("paste",), dans l'ordre
     paste_result = {"ok": True}
     get_script = {"values": None}  # si défini : file de valeurs rendues par get,
-                                   # la dernière étant répétée une fois épuisée
+    # la dernière étant répétée une fois épuisée
 
     def fake_get():
         vals = get_script["values"]
@@ -42,8 +42,9 @@ def clip(monkeypatch):
         trace.append(("paste",))
         return paste_result["ok"]
 
-    monkeypatch.setattr(sc, "_detect_caps", lambda: {"key_backend": "wtype",
-                                                     "session": "wayland"})
+    monkeypatch.setattr(
+        sc, "_detect_caps", lambda: {"key_backend": "wtype", "session": "wayland"}
+    )
     monkeypatch.setattr(sc, "_clipboard_is_text", lambda: True)
     monkeypatch.setattr(sc, "_clipboard_get", fake_get)
     monkeypatch.setattr(sc, "_clipboard_set", fake_set)
@@ -54,19 +55,32 @@ def clip(monkeypatch):
     monkeypatch.setattr(sc, "_deferred_clip", {"pending": False, "value": None})
     monkeypatch.setattr(sc, "_deferred_atexit_registered", False)
     registered = []
-    monkeypatch.setattr(sc, "atexit",
-                        types.SimpleNamespace(register=registered.append))
+    monkeypatch.setattr(sc, "atexit", types.SimpleNamespace(register=registered.append))
 
     def set_cfg(**kw):
-        base = {"restore": True, "defer_restore": False,
-                "restore_delay_ms": 400, "confirm_timeout_ms": 500}
+        base = {
+            "restore": True,
+            "defer_restore": False,
+            "restore_delay_ms": 400,
+            "confirm_timeout_ms": 500,
+        }
         base.update(kw)
-        monkeypatch.setattr(sc, "_cfg",
-                            lambda section, key, default: base.get(key, default)
-                            if section == "clipboard" else default)
+        monkeypatch.setattr(
+            sc,
+            "_cfg",
+            lambda section, key, default: (
+                base.get(key, default) if section == "clipboard" else default
+            ),
+        )
 
-    return {"state": state, "trace": trace, "paste_result": paste_result,
-            "get_script": get_script, "set_cfg": set_cfg, "registered": registered}
+    return {
+        "state": state,
+        "trace": trace,
+        "paste_result": paste_result,
+        "get_script": get_script,
+        "set_cfg": set_cfg,
+        "registered": registered,
+    }
 
 
 def test_default_restores_after_paste(clip):
@@ -112,8 +126,7 @@ def test_defer_restore_skips_inline_restore(clip):
     assert sc.type_text("mot2") is True
 
     # Aucune restauration en ligne pendant la session.
-    assert clip["trace"] == [("set", "mot1"), ("paste",),
-                             ("set", "mot2"), ("paste",)]
+    assert clip["trace"] == [("set", "mot1"), ("paste",), ("set", "mot2"), ("paste",)]
     # atexit posé une seule fois malgré deux segments.
     assert registered == [sc.flush_deferred_clipboard]
 

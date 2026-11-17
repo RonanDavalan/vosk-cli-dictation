@@ -13,13 +13,14 @@ from colorama import Fore, Style, init as colorama_init
 
 colorama_init(autoreset=True)
 
+
 class Config:
     """
     Charge la configuration du projet depuis config.yaml et y donne accès.
     """
 
     # Langues pour lesquelles un gabarit config.<lang>.yaml est livré.
-    SUPPORTED_CONFIG_LANGS = ('en', 'fr', 'de', 'es')
+    SUPPORTED_CONFIG_LANGS = ("en", "fr", "de", "es")
 
     # Incrémenté chaque fois qu'un gabarit livré gagne une section qu'un
     # fichier utilisateur ancien n'aurait pas ; comparé au config_version du
@@ -48,14 +49,17 @@ class Config:
         # place) ou une surcharge VOSK_CONFIG explicite -- seul le fichier
         # utilisateur XDG réel est concerné par la notice de démarrage.
         self.config_is_outdated = (
-            os.path.abspath(self.config_path) == os.path.abspath(self._user_config_path())
-            and self.data.get('config_version', 0) < self.CURRENT_CONFIG_VERSION
+            os.path.abspath(self.config_path)
+            == os.path.abspath(self._user_config_path())
+            and self.data.get("config_version", 0) < self.CURRENT_CONFIG_VERSION
         )
 
     @staticmethod
     def _user_config_path() -> str:
-        xdg_config_home = os.environ.get('XDG_CONFIG_HOME') or os.path.join(os.path.expanduser('~'), '.config')
-        return os.path.join(xdg_config_home, 'vosk-cli-dictation', 'config.yaml')
+        xdg_config_home = os.environ.get("XDG_CONFIG_HOME") or os.path.join(
+            os.path.expanduser("~"), ".config"
+        )
+        return os.path.join(xdg_config_home, "vosk-cli-dictation", "config.yaml")
 
     @staticmethod
     def _detect_config_lang() -> str:
@@ -63,16 +67,17 @@ class Config:
         ``src/i18n.py::set_ui_language`` (``LANGUAGE`` puis ``LANG``), repli
         sur ``en`` si la variable est absente ou ne correspond à aucun
         gabarit livré (``SUPPORTED_CONFIG_LANGS``)."""
-        env_lang = os.environ.get('LANGUAGE') or os.environ.get('LANG')
+        env_lang = os.environ.get("LANGUAGE") or os.environ.get("LANG")
         if env_lang:
-            candidate = env_lang.split('.')[0].split('_')[0].lower()
+            candidate = env_lang.split(".")[0].split("_")[0].lower()
             if candidate in Config.SUPPORTED_CONFIG_LANGS:
                 return candidate
-        return 'en'
+        return "en"
 
     @staticmethod
-    def _get_config_path(project_root=None,
-                         system_template_dir='/usr/share/vosk-cli-dictation'):
+    def _get_config_path(
+        project_root=None, system_template_dir="/usr/share/vosk-cli-dictation"
+    ):
         """Localise config.yaml via la cascade XDG.
 
         Premier niveau concordant gagne :
@@ -104,7 +109,7 @@ class Config:
         if project_root is None:
             project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-        env_path = os.environ.get('VOSK_CONFIG')
+        env_path = os.environ.get("VOSK_CONFIG")
         if env_path:
             return env_path
 
@@ -113,15 +118,15 @@ class Config:
         def _template_in(directory):
             if not directory:
                 return None
-            candidate = os.path.join(directory, f'config.{lang}.yaml')
+            candidate = os.path.join(directory, f"config.{lang}.yaml")
             if os.path.exists(candidate):
                 return candidate
-            fallback = os.path.join(directory, 'config.en.yaml')
+            fallback = os.path.join(directory, "config.en.yaml")
             return fallback if os.path.exists(fallback) else None
 
-        bundled_dir = os.path.join(project_root, 'config')
+        bundled_dir = os.path.join(project_root, "config")
         bundled_config = _template_in(bundled_dir)
-        if os.path.isdir(os.path.join(project_root, '.git')) and bundled_config:
+        if os.path.isdir(os.path.join(project_root, ".git")) and bundled_config:
             return bundled_config
 
         user_config = Config._user_config_path()
@@ -148,14 +153,16 @@ class Config:
         liste) remplace celle de la base. Une surcharge absente ou vide laisse
         la base intacte.
         """
-        with open(self.config_path, 'r', encoding='utf-8') as f:
+        with open(self.config_path, "r", encoding="utf-8") as f:
             data = yaml.safe_load(f) or {}
 
         local_path = os.path.join(
-            os.path.dirname(os.path.abspath(self.config_path)), 'config_local.yaml'
+            os.path.dirname(os.path.abspath(self.config_path)), "config_local.yaml"
         )
-        if os.path.exists(local_path) and not os.environ.get('VOSK_IGNORE_LOCAL_CONFIG'):
-            with open(local_path, 'r', encoding='utf-8') as f:
+        if os.path.exists(local_path) and not os.environ.get(
+            "VOSK_IGNORE_LOCAL_CONFIG"
+        ):
+            with open(local_path, "r", encoding="utf-8") as f:
                 overrides = yaml.safe_load(f)
             if overrides:
                 data = self._deep_merge(data, overrides)
@@ -184,24 +191,37 @@ class Config:
         objets colorama. Fournit des défauts sains si la section theme manque.
         """
         color_map = {
-            'BLACK': Fore.BLACK, 'RED': Fore.RED, 'GREEN': Fore.GREEN,
-            'YELLOW': Fore.YELLOW, 'BLUE': Fore.BLUE, 'MAGENTA': Fore.MAGENTA,
-            'CYAN': Fore.CYAN, 'WHITE': Fore.WHITE, 'RESET': Fore.RESET,
+            "BLACK": Fore.BLACK,
+            "RED": Fore.RED,
+            "GREEN": Fore.GREEN,
+            "YELLOW": Fore.YELLOW,
+            "BLUE": Fore.BLUE,
+            "MAGENTA": Fore.MAGENTA,
+            "CYAN": Fore.CYAN,
+            "WHITE": Fore.WHITE,
+            "RESET": Fore.RESET,
         }
 
-        user_theme = self.data.get('theme', {})
+        user_theme = self.data.get("theme", {})
         # La couleur ne marque que les accents (titres, bandeau « prêt ») ; le
         # corps du texte prend la couleur par défaut du terminal via `RESET`,
         # lisible sur thème clair comme sombre. `BLUE` proscrit pour du courant.
         defaults = {
-            'ready_message': 'GREEN', 'help_text': 'RESET', 'help_title': 'CYAN',
-            'info': 'RESET', 'success': 'GREEN', 'warning': 'YELLOW', 'error': 'RED',
+            "ready_message": "GREEN",
+            "help_text": "RESET",
+            "help_title": "CYAN",
+            "info": "RESET",
+            "success": "GREEN",
+            "warning": "YELLOW",
+            "error": "RED",
         }
 
         # Crée dynamiquement des attributs comme self.color_ready_message
         for key, default_color in defaults.items():
             color_name = user_theme.get(key, default_color).upper()
-            color_obj = color_map.get(color_name, Fore.WHITE) # blanc par défaut si couleur invalide
+            color_obj = color_map.get(
+                color_name, Fore.WHITE
+            )  # blanc par défaut si couleur invalide
             setattr(self, f"color_{key}", color_obj)
 
         # Style attributes
@@ -211,12 +231,16 @@ class Config:
     # Défauts de repli des phrases de déclenchement, par langue. N'entrent en
     # jeu que si la langue n'a pas de bloc voice_commands dans config.yaml.
     _WAKE_PHRASE_FALLBACK = {
-        'en': 'start dictation', 'fr': 'active dictée',
-        'de': 'diktat starten', 'es': 'iniciar dictado',
+        "en": "start dictation",
+        "fr": "active dictée",
+        "de": "diktat starten",
+        "es": "iniciar dictado",
     }
     _STOP_PHRASE_FALLBACK = {
-        'en': 'stop dictation', 'fr': 'stop dictée',
-        'de': 'diktat stoppen', 'es': 'terminar dictado',
+        "en": "stop dictation",
+        "fr": "stop dictée",
+        "de": "diktat stoppen",
+        "es": "terminar dictado",
     }
 
     def set_language(self, lang_code: str):
@@ -225,17 +249,17 @@ class Config:
         """
         self.current_lang = lang_code
         lang_settings = self.language_settings.get(lang_code, {})
-        voice_commands = lang_settings.get('voice_commands', {})
+        voice_commands = lang_settings.get("voice_commands", {})
         # Phrases de déclenchement à deux mots. Les anciennes clés mono-mot
         # start_word / stop_word sont encore lues pour ne pas casser une
         # config utilisateur non migrée.
-        default_wake = self._WAKE_PHRASE_FALLBACK.get(lang_code, 'start dictation')
-        default_stop = self._STOP_PHRASE_FALLBACK.get(lang_code, 'stop dictation')
+        default_wake = self._WAKE_PHRASE_FALLBACK.get(lang_code, "start dictation")
+        default_stop = self._STOP_PHRASE_FALLBACK.get(lang_code, "stop dictation")
         self.WAKE_PHRASE = voice_commands.get(
-            'wake_phrase', voice_commands.get('start_word', default_wake)
+            "wake_phrase", voice_commands.get("start_word", default_wake)
         )
         self.STOP_PHRASE = voice_commands.get(
-            'stop_phrase', voice_commands.get('stop_word', default_stop)
+            "stop_phrase", voice_commands.get("stop_word", default_stop)
         )
 
     def recognition_setting(self, key: str, default, lang_code: str = None):
@@ -246,7 +270,7 @@ class Config:
         dans ``recognition._target_mode``.
         """
         lang_code = lang_code or self.current_lang
-        global_value = self.data.get('recognition', {}).get(key, default)
+        global_value = self.data.get("recognition", {}).get(key, default)
         return self.language_settings.get(lang_code, {}).get(key, global_value)
 
     def interaction_setting(self, key: str, default, lang_code: str = None):
@@ -258,13 +282,13 @@ class Config:
         lui-même sur ``default``.
         """
         lang_code = lang_code or self.current_lang
-        global_value = self.data.get('interaction', {}).get(key, default)
+        global_value = self.data.get("interaction", {}).get(key, default)
         return self.language_settings.get(lang_code, {}).get(key, global_value)
 
     @property
     def interaction_mode(self) -> str:
         """``toggle`` (défaut, inchangé) | ``maintenue`` | ``silence`` (modes de déclenchement de la dictée)."""
-        return self.data.get('interaction', {}).get('mode', 'toggle')
+        return self.data.get("interaction", {}).get("mode", "toggle")
 
     def typography(self, lang_code: str = None) -> dict:
         """Profil typographique d'une langue.
@@ -274,24 +298,26 @@ class Config:
         majuscule en début de phrase, guillemets ASCII).
         """
         lang_code = lang_code or self.current_lang
-        raw = self.language_settings.get(lang_code, {}).get('typography', {})
+        raw = self.language_settings.get(lang_code, {}).get("typography", {})
         return {
-            'thin_space': raw.get('thin_space', False),
-            'space_before': list(raw.get('space_before', [])),
-            'space_after': list(raw.get('space_after', [',', '.', ';', ':', '?', '!'])),
-            'capitalize_sentence_start': raw.get('capitalize_sentence_start', True),
-            'quote_open': raw.get('quote_open', '"'),
-            'quote_close': raw.get('quote_close', '"'),
+            "thin_space": raw.get("thin_space", False),
+            "space_before": list(raw.get("space_before", [])),
+            "space_after": list(raw.get("space_after", [",", ".", ";", ":", "?", "!"])),
+            "capitalize_sentence_start": raw.get("capitalize_sentence_start", True),
+            "quote_open": raw.get("quote_open", '"'),
+            "quote_close": raw.get("quote_close", '"'),
         }
 
     def model_search_roots(self, path_relative: str) -> list[str]:
         """Liste ordonnée des racines cherchées pour un dossier de modèle, pour les messages d'erreur."""
         nom_dossier = os.path.basename(path_relative)
-        xdg_data_home = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
+        xdg_data_home = os.environ.get("XDG_DATA_HOME") or os.path.join(
+            os.path.expanduser("~"), ".local", "share"
+        )
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         return [
-            os.path.join(xdg_data_home, 'vosk-models', nom_dossier),
-            os.path.join('/usr/share/vosk-models', nom_dossier),
+            os.path.join(xdg_data_home, "vosk-models", nom_dossier),
+            os.path.join("/usr/share/vosk-models", nom_dossier),
             os.path.join(project_root, path_relative),
         ]
 
@@ -303,10 +329,10 @@ class Config:
         existant parmi $XDG_DATA_HOME/vosk-models/, /usr/share/vosk-models/ et
         le ./vosk-model/ de développement d'un clone git.
         """
-        for model in self.data.get('vosk_models', []):
-            if model['name'] != model_name:
+        for model in self.data.get("vosk_models", []):
+            if model["name"] != model_name:
                 continue
-            path_relative = model['path_relative']
+            path_relative = model["path_relative"]
             if os.path.isabs(path_relative):
                 return path_relative if os.path.isdir(path_relative) else None
             for candidat in self.model_search_roots(path_relative):
@@ -319,23 +345,24 @@ class Config:
         """
         Retrouve le code de langue ('fr', 'en') depuis un nom de dossier de modèle.
         """
-        for model in self.data.get('vosk_models', []):
-            if model['path_relative'].endswith(model_name_on_disk):
-                return model['name']
+        for model in self.data.get("vosk_models", []):
+            if model["path_relative"].endswith(model_name_on_disk):
+                return model["name"]
         return None
 
     # --- Propriétés d'accès simple aux données de configuration ---
     @property
     def default_model_setting(self) -> str | None:
         """Valeur brute de ``default_model`` dans config.yaml (None si absente)."""
-        return self.data.get('default_model')
+        return self.data.get("default_model")
 
     @property
     def default_model(self) -> str:
         """Langue du modèle par défaut d'après config.yaml seul ; « system » ou
         l'absence de clé donne la langue de la session (voir startup_language)."""
         return resolve_language(
-            None, {}, self.default_model_setting, self.installed_languages())[0]
+            None, {}, self.default_model_setting, self.installed_languages()
+        )[0]
 
     def installed_models(self) -> list[dict]:
         """Modèles présents sur le disque : ceux du catalogue de
@@ -343,27 +370,38 @@ class Config:
         racines, puis ceux que config.yaml déclare en plus. Chaque entrée :
         folder, path, lang, size (``small`` ou ``big``)."""
         from src.model_download import known_folders
+
         found = {}
         for folder, (lang, size) in known_folders().items():
-            for racine in self.model_search_roots(os.path.join('vosk-model', folder)):
+            for racine in self.model_search_roots(os.path.join("vosk-model", folder)):
                 if os.path.isdir(racine):
-                    found[folder] = {'folder': folder, 'path': racine, 'lang': lang, 'size': size}
+                    found[folder] = {
+                        "folder": folder,
+                        "path": racine,
+                        "lang": lang,
+                        "size": size,
+                    }
                     break
-        for model in self.data.get('vosk_models', []):
-            path = self.get_model_path_by_name(model['name'])
+        for model in self.data.get("vosk_models", []):
+            path = self.get_model_path_by_name(model["name"])
             folder = os.path.basename(path) if path else None
             if folder and folder not in found:
-                size = 'small' if 'small' in folder else 'big'
-                found[folder] = {'folder': folder, 'path': path, 'lang': model['name'], 'size': size}
+                size = "small" if "small" in folder else "big"
+                found[folder] = {
+                    "folder": folder,
+                    "path": path,
+                    "lang": model["name"],
+                    "size": size,
+                }
         return list(found.values())
 
     def installed_languages(self) -> list[str]:
-        return sorted({m['lang'] for m in self.installed_models()})
+        return sorted({m["lang"] for m in self.installed_models()})
 
     def installed_model(self, folder: str, lang: str = None) -> dict | None:
         """Entrée d'installed_models() pour ce dossier (et cette langue si donnée)."""
         for m in self.installed_models():
-            if m['folder'] == folder and (lang is None or m['lang'] == lang):
+            if m["folder"] == folder and (lang is None or m["lang"] == lang):
                 return m
         return None
 
@@ -371,8 +409,11 @@ class Config:
         """(langue, origine) au lancement : ligne de commande, sélection
         mémorisée, config.yaml, puis langue de la session."""
         return resolve_language(
-            cli_lang, load_selection(), self.default_model_setting,
-            self.installed_languages())
+            cli_lang,
+            load_selection(),
+            self.default_model_setting,
+            self.installed_languages(),
+        )
 
     @property
     def default_model_name(self) -> str | None:
@@ -381,19 +422,20 @@ class Config:
 
     @property
     def audio(self) -> dict:
-        return self.data.get('audio', {})
+        return self.data.get("audio", {})
 
     @property
     def hotkeys(self) -> dict:
-        return self.data.get('hotkeys', {})
+        return self.data.get("hotkeys", {})
 
     @property
     def language_settings(self) -> dict:
-        return self.data.get('language_settings', {})
+        return self.data.get("language_settings", {})
 
     @property
     def sound_file(self) -> str:
-        return self.data.get('sound_file', '')
+        return self.data.get("sound_file", "")
+
 
 # Instance unique de la configuration
 config = Config()

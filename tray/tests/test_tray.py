@@ -11,9 +11,18 @@ from vosk_cli_dictation_tray.client import ControlClient
 from vosk_cli_dictation_tray.i18n import Translator
 from vosk_cli_dictation_tray.tray import DictationTray
 
-COLORS = {"dictating": (0xE5, 0x32, 0x2D), "listening": (0xDB, 0x75, 0x00),
-          "sleeping": (0x3B, 0x82, 0xF6), "off": (0x2E, 0x9E, 0x4F)}
-STATES = {"DICTÉE": "dictating", "ÉCOUTE": "listening", "VEILLE": "sleeping", None: "off"}
+COLORS = {
+    "dictating": (0xE5, 0x32, 0x2D),
+    "listening": (0xDB, 0x75, 0x00),
+    "sleeping": (0x3B, 0x82, 0xF6),
+    "off": (0x2E, 0x9E, 0x4F),
+}
+STATES = {
+    "DICTÉE": "dictating",
+    "ÉCOUTE": "listening",
+    "VEILLE": "sleeping",
+    None: "off",
+}
 
 
 class StubClient(QObject):
@@ -32,13 +41,22 @@ class StubClient(QObject):
 
 
 def info(**kw):
-    data = {"state": "ÉCOUTE", "lang": "en", "lang_source": "config",
-            "langs": ["fr", "en", "de", "es"],
-            "model": "vosk-model-small-fr-0.22",
-            "models": [{"folder": "vosk-model-small-fr-0.22", "size": "small"},
-                       {"folder": "vosk-model-fr-0.22", "size": "big"}],
-            "refine": "none", "device": None, "correction": "none",
-            "loading": False, "last_error": None}
+    data = {
+        "state": "ÉCOUTE",
+        "lang": "en",
+        "lang_source": "config",
+        "langs": ["fr", "en", "de", "es"],
+        "model": "vosk-model-small-fr-0.22",
+        "models": [
+            {"folder": "vosk-model-small-fr-0.22", "size": "small"},
+            {"folder": "vosk-model-fr-0.22", "size": "big"},
+        ],
+        "refine": "none",
+        "device": None,
+        "correction": "none",
+        "loading": False,
+        "last_error": None,
+    }
     data.update(kw)
     return data
 
@@ -73,8 +91,11 @@ def dominant_color(tray):
 
 def mask(tray):
     image = tray.icon().pixmap(48, 48).toImage()
-    return tuple(image.pixelColor(x, y).alpha() > 128
-                 for y in range(image.height()) for x in range(image.width()))
+    return tuple(
+        image.pixelColor(x, y).alpha() > 128
+        for y in range(image.height())
+        for x in range(image.width())
+    )
 
 
 @pytest.mark.parametrize("state", list(STATES))
@@ -110,11 +131,14 @@ def test_socket_absent_gives_green_and_launch_entry(make):
     assert tray.status_text() == "Dictation not running"
 
 
-@pytest.mark.parametrize("state,dictation,sleep", [
-    ("DICTÉE", "Turn dictation off", "Enter deep sleep"),
-    ("ÉCOUTE", "Turn dictation on", "Enter deep sleep"),
-    ("VEILLE", "Turn dictation on", "Leave deep sleep"),
-])
+@pytest.mark.parametrize(
+    "state,dictation,sleep",
+    [
+        ("DICTÉE", "Turn dictation off", "Enter deep sleep"),
+        ("ÉCOUTE", "Turn dictation on", "Enter deep sleep"),
+        ("VEILLE", "Turn dictation on", "Leave deep sleep"),
+    ],
+)
 def test_entries_follow_the_state(make, state, dictation, sleep):
     tray, client, _ = make()
     tray.on_info(info(state=state))
@@ -125,21 +149,35 @@ def test_entries_follow_the_state(make, state, dictation, sleep):
     assert tray.a_cancel.isEnabled() == (state != "VEILLE")
     tray.a_dictation.trigger()
     tray.a_sleep.trigger()
-    assert client.sent == [("dictation-off" if state == "DICTÉE" else "dictation-on"),
-                           ("wake" if state == "VEILLE" else "sleep")]
+    assert client.sent == [
+        ("dictation-off" if state == "DICTÉE" else "dictation-on"),
+        ("wake" if state == "VEILLE" else "sleep"),
+    ]
 
 
 def test_menu_order(make):
     tray, _, _ = make()
     tray.on_info(info())
-    titles = [(a.menu().title() if a.menu() else a.text()) or "-"
-              for a in tray.contextMenu().actions()]
+    titles = [
+        (a.menu().title() if a.menu() else a.text()) or "-"
+        for a in tray.contextMenu().actions()
+    ]
     texts = [t.split(" — ")[0] for t in titles]
     assert texts[0].startswith("Listening")
-    order = ["Turn dictation on", "Enter deep sleep", "Finish and copy the text",
-             "Cancel the session", "Language", "Model", "Refinement", "Correction",
-             "Revert to the configuration", "Quit dictation",
-             "Launch the icon at login", "Quit the icon"]
+    order = [
+        "Turn dictation on",
+        "Enter deep sleep",
+        "Finish and copy the text",
+        "Cancel the session",
+        "Language",
+        "Model",
+        "Refinement",
+        "Correction",
+        "Revert to the configuration",
+        "Quit dictation",
+        "Launch the icon at login",
+        "Quit the icon",
+    ]
     positions = [texts.index(o) for o in order]
     assert positions == sorted(positions)
 
@@ -147,15 +185,23 @@ def test_menu_order(make):
 def test_refinement_and_correction_are_greyed_with_their_reason(make):
     tray, _, _ = make()
     tray.on_info(info())
-    for menu, name in ((tray.m_refine, "Refinement"), (tray.m_correction, "Correction")):
+    for menu, name in (
+        (tray.m_refine, "Refinement"),
+        (tray.m_correction, "Correction"),
+    ):
         assert not menu.isEnabled()
         assert menu.title() == name + " — not available in this dictation"
 
 
 def test_refinement_announced_by_info_is_offered(make):
     tray, client, _ = make()
-    tray.on_info(info(refine_options=["none", "whisper:small", "whisper:medium"],
-                      refine="whisper:small", device="cuda"))
+    tray.on_info(
+        info(
+            refine_options=["none", "whisper:small", "whisper:medium"],
+            refine="whisper:small",
+            device="cuda",
+        )
+    )
     assert tray.m_refine.isEnabled()
     labels = [a.text() for a in tray.m_refine.actions()]
     assert labels == ["None", "Whisper small (GPU)", "Whisper medium (GPU)"]
@@ -166,14 +212,18 @@ def test_refinement_announced_by_info_is_offered(make):
 
 def test_refinement_reason_comes_from_info(make):
     tray, _, _ = make()
-    tray.on_info(info(refine_options=["none"], refine_reason="faster-whisper is not installed"))
+    tray.on_info(
+        info(refine_options=["none"], refine_reason="faster-whisper is not installed")
+    )
     assert not tray.m_refine.isEnabled()
     assert tray.m_refine.title() == "Refinement — faster-whisper is not installed"
 
 
 def test_status_line_and_tooltip(make):
     tray, _, _ = make()
-    tray.on_info(info(state="DICTÉE", model="vosk-model-fr-0.22", refine="whisper:small"))
+    tray.on_info(
+        info(state="DICTÉE", model="vosk-model-fr-0.22", refine="whisper:small")
+    )
     assert tray.status_text() == "Dictating — English — Vosk full + Whisper small"
     assert tray.toolTip() == tray.status_text()
     tray.on_info(info(loading=True))
@@ -196,17 +246,34 @@ def test_language_entries_and_choice(make):
 
 def test_missing_model_size_uses_the_language_units(make):
     tray, _client, _ = make()
-    tray.on_info(info(lang="fr", langs=["fr"], models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
+    tray.on_info(
+        info(
+            lang="fr",
+            langs=["fr"],
+            models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}],
+        )
+    )
     assert tray.a_model["big"].text() == "Modèle complet (à télécharger, 1,5 Go)"
     assert tray.a_lang["es"].text() == "Espagnol (à télécharger, 40 Mo)"
 
 
 def test_model_entries_carry_the_measured_memory_in_their_tooltip(make):
     tray, _client, _ = make()
-    tray.on_info(info(lang="fr", models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
-    assert tray.a_model["small"].toolTip() == "Mémoire après chargement : environ 171 Mo"
+    tray.on_info(
+        info(
+            lang="fr", models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]
+        )
+    )
+    assert (
+        tray.a_model["small"].toolTip() == "Mémoire après chargement : environ 171 Mo"
+    )
     assert tray.a_model["big"].toolTip() == "Mémoire après chargement : environ 3,3 Go"
-    tray.on_info(info(lang="en", models=[{"folder": "vosk-model-small-en-us-0.15", "size": "small"}]))
+    tray.on_info(
+        info(
+            lang="en",
+            models=[{"folder": "vosk-model-small-en-us-0.15", "size": "small"}],
+        )
+    )
     assert "more than 5.0 GB" in tray.a_model["big"].toolTip()
 
 
@@ -223,8 +290,15 @@ def test_model_entries_and_choice(make):
 def test_missing_model_starts_a_download(make, monkeypatch):
     tray, client, notes = make()
     asked = []
-    monkeypatch.setattr(tray, "download_model", lambda lang, size: asked.append((lang, size)))
-    tray.on_info(info(langs=["en"], models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}]))
+    monkeypatch.setattr(
+        tray, "download_model", lambda lang, size: asked.append((lang, size))
+    )
+    tray.on_info(
+        info(
+            langs=["en"],
+            models=[{"folder": "vosk-model-small-fr-0.22", "size": "small"}],
+        )
+    )
     tray.a_model["big"].trigger()
     tray.a_lang["de"].trigger()
     assert asked == [("en", "big"), ("de", "small")]
@@ -281,9 +355,17 @@ def test_failed_download_is_not_announced_as_ready(make):
 
 def test_choosing_a_whisper_size_sends_set_refine(make):
     tray, client, _ = make()
-    tray.on_info(info(device="cuda", refine_options=["none", "whisper:small", "whisper:large-v3-turbo"]))
+    tray.on_info(
+        info(
+            device="cuda",
+            refine_options=["none", "whisper:small", "whisper:large-v3-turbo"],
+        )
+    )
     assert [a.text() for a in tray.m_refine.actions()] == [
-        "None", "Whisper small (GPU)", "Whisper large-v3-turbo (GPU)"]
+        "None",
+        "Whisper small (GPU)",
+        "Whisper large-v3-turbo (GPU)",
+    ]
     tray.m_refine.actions()[2].trigger()
     assert client.sent == ["set-refine whisper:large-v3-turbo"]
 
@@ -307,7 +389,9 @@ def test_menu_follows_the_language_of_the_dictation(make):
 
 def test_dictation_command_missing_is_notified(make, monkeypatch):
     tray, _, notes = make()
-    monkeypatch.setattr("vosk_cli_dictation_tray.launcher.dictation_command", lambda o=None: None)
+    monkeypatch.setattr(
+        "vosk_cli_dictation_tray.launcher.dictation_command", lambda o=None: None
+    )
     tray.launch_dictation()
     tray.download_model("fr", "big")
     assert notes == ["The dictation program was not found."] * 2
@@ -348,6 +432,7 @@ def test_end_to_end_with_the_fake_server(qapp, server):
 def test_request_times_out_quickly_on_a_silent_socket(tmp_path):
     import socket
     from vosk_cli_dictation_tray.client import INFO_TIMEOUT_S, request
+
     path = str(tmp_path / "x.sock")
     silent = socket.socket(socket.AF_UNIX)
     silent.bind(path)
@@ -362,8 +447,10 @@ def test_alive_daemon_without_socket_offers_quit_not_launch(make, monkeypatch):
     tray, client, notes = make()
     monkeypatch.setattr("vosk_cli_dictation_tray.launcher.running_pid", lambda: 4242)
     launched = []
-    monkeypatch.setattr("vosk_cli_dictation_tray.launcher.launch_detached",
-                        lambda command: launched.append(command))
+    monkeypatch.setattr(
+        "vosk_cli_dictation_tray.launcher.launch_detached",
+        lambda command: launched.append(command),
+    )
     tray.on_info(None)
     assert tray.icon_name == "off"
     assert tray.a_launch.text() == "Quit dictation"
@@ -375,6 +462,7 @@ def test_alive_daemon_without_socket_offers_quit_not_launch(make, monkeypatch):
 
 def test_quit_on_alive_daemon_sends_sigterm(make, monkeypatch):
     import signal
+
     tray, client, _ = make()
     monkeypatch.setattr("vosk_cli_dictation_tray.launcher.running_pid", lambda: 4242)
     killed = []
@@ -401,6 +489,7 @@ def test_running_pid_cases(monkeypatch, tmp_path):
     import os
     import subprocess
     from vosk_cli_dictation_tray import launcher
+
     monkeypatch.setenv("XDG_RUNTIME_DIR", str(tmp_path))
     path = launcher.lock_path()
     assert launcher.running_pid() is None
@@ -419,6 +508,7 @@ def test_running_pid_cases(monkeypatch, tmp_path):
 
 def test_launch_detached_writes_header_in_log(monkeypatch, tmp_path):
     from vosk_cli_dictation_tray import launcher
+
     pid = launcher.launch_detached(launcher.Command(["true"]))
     text = launcher.log_path().read_text()
     assert "=== " in text and "pid %d" % pid in text

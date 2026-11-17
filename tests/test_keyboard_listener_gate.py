@@ -22,6 +22,7 @@ class FakeKey:
     la véritable énumération — un nom absent lève AttributeError, exactement
     le signal dont `_parse_single_key` a besoin pour retomber sur
     KeyCode.from_char."""
+
     ctrl_r = object()
     ctrl_l = object()
     f9 = object()
@@ -92,7 +93,7 @@ def _reset_fake(monkeypatch):
     # `src.i18n._` est un état global : un test antérieur peut l'avoir bascule
     # dans une autre langue. On assertionne sur les msgid anglais, donc on
     # neutralise la traduction pour ce module.
-    monkeypatch.setattr(keyboard_listener, "get_translation", lambda: (lambda s: s))
+    monkeypatch.setattr(keyboard_listener, "get_translation", lambda: lambda s: s)
     yield
 
 
@@ -175,19 +176,25 @@ def test_x11_starts_without_xwayland_notice(monkeypatch, capsys, fake_pynput, ho
     assert "XWayland" not in out
 
 
-def test_wayland_with_display_starts_best_effort_with_notice(monkeypatch, capsys, fake_pynput, hotkeys):
+def test_wayland_with_display_starts_best_effort_with_notice(
+    monkeypatch, capsys, fake_pynput, hotkeys
+):
     run_listener(monkeypatch, display=":0", session="wayland")
     assert len(FakeGlobalHotKeys.instances) == 1
     assert "XWayland" in capsys.readouterr().out
 
 
-def test_unknown_session_with_display_starts_with_notice(monkeypatch, capsys, fake_pynput, hotkeys):
+def test_unknown_session_with_display_starts_with_notice(
+    monkeypatch, capsys, fake_pynput, hotkeys
+):
     run_listener(monkeypatch, display=":0", session=None)
     assert len(FakeGlobalHotKeys.instances) == 1
     assert "XWayland" in capsys.readouterr().out
 
 
-def test_backend_import_failure_is_survived(monkeypatch, capsys, broken_pynput, hotkeys):
+def test_backend_import_failure_is_survived(
+    monkeypatch, capsys, broken_pynput, hotkeys
+):
     run_listener(monkeypatch, display=":0", session="x11")
     out = capsys.readouterr().out
     assert "not available on this session" in out

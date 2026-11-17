@@ -6,8 +6,9 @@ from config.config import config
 
 def test_global_value_used_without_per_language_override(monkeypatch):
     monkeypatch.setitem(config.data["recognition"], "confidence_threshold", 0.5)
-    monkeypatch.delitem(config.language_settings["fr"], "confidence_threshold",
-                        raising=False)
+    monkeypatch.delitem(
+        config.language_settings["fr"], "confidence_threshold", raising=False
+    )
     assert config.recognition_setting("confidence_threshold", 0.99, "fr") == 0.5
 
 
@@ -19,10 +20,12 @@ def test_per_language_overrides_global(monkeypatch):
 
 
 def test_default_when_key_absent_everywhere(monkeypatch):
-    monkeypatch.delitem(config.data["recognition"], "confidence_threshold",
-                        raising=False)
-    monkeypatch.delitem(config.language_settings["fr"], "confidence_threshold",
-                        raising=False)
+    monkeypatch.delitem(
+        config.data["recognition"], "confidence_threshold", raising=False
+    )
+    monkeypatch.delitem(
+        config.language_settings["fr"], "confidence_threshold", raising=False
+    )
     assert config.recognition_setting("confidence_threshold", 0.42, "fr") == 0.42
 
 
@@ -46,4 +49,7 @@ def test_shipped_defaults():
 
 def test_restricted_stop_shipped_off_for_all_languages():
     for lang in ("en", "fr", "de", "es"):
-        assert config.recognition_setting("restricted_stop_in_dictation", None, lang) is False
+        assert (
+            config.recognition_setting("restricted_stop_in_dictation", None, lang)
+            is False
+        )

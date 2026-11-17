@@ -11,16 +11,28 @@ import pyperclip
 
 from config.config import config
 from src.system_control import (
-    type_text, press_key, play_sound, flush_deferred_clipboard, ensure_clipboard_text,
+    type_text,
+    press_key,
+    play_sound,
+    flush_deferred_clipboard,
+    ensure_clipboard_text,
 )
 from src.i18n import get_translation, set_ui_language
 from src.text_processing import TextProcessor
 from src.runtime_state import (
-    runtime_state, STATE_DICTATING, STATE_LISTENING, STATE_SLEEPING,
+    runtime_state,
+    STATE_DICTATING,
+    STATE_LISTENING,
+    STATE_SLEEPING,
 )
 from src.voice_commands import (
-    normalize_tokens, phrase_tokens, find_phrase, is_doubled,
-    strip_one_repetition, remove_phrase_and_after, mean_confidence,
+    normalize_tokens,
+    phrase_tokens,
+    find_phrase,
+    is_doubled,
+    strip_one_repetition,
+    remove_phrase_and_after,
+    mean_confidence,
 )
 
 # Cadence du rappel « micro en veille » tant que la VEILLE dure. Assez espacé
@@ -31,11 +43,25 @@ SLEEP_REMINDER_INTERVAL_S = 30.0
 # Commandes qui ferment la dictée ou la session : avec une finition en cours,
 # elles attendent que les énoncés déjà dits soient tapés, sinon leur texte
 # arriverait hors dictée et serait perdu.
-DRAIN_FIRST = ("FINALIZE_SESSION", "TOGGLE_RECORDING", "DICTATION_OFF",
-               "TOGGLE_SLEEP", "SLEEP_ON")
+DRAIN_FIRST = (
+    "FINALIZE_SESSION",
+    "TOGGLE_RECORDING",
+    "DICTATION_OFF",
+    "TOGGLE_SLEEP",
+    "SLEEP_ON",
+)
 
 
-def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, processor: TextProcessor, display_partials_event, sleep_event, wake_event, refiner=None):
+def ui_thread(
+    text_queue: queue.Queue,
+    control_queue: queue.Queue,
+    stop_event,
+    processor: TextProcessor,
+    display_partials_event,
+    sleep_event,
+    wake_event,
+    refiner=None,
+):
     recording = False
     full_text_log = ""
     xdotool_failed_once = False
@@ -44,7 +70,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
     # ÉCOUTE) est piloté par le thread de reconnaissance, qui a accès aux
     # résultats partiels et à la grammaire restreinte.
     stop_tokens = phrase_tokens(config.STOP_PHRASE)
-    conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+    conf_threshold = config.recognition_setting("confidence_threshold", 0.55)
     last_low_conf_hint = [0.0]  # horodatage du dernier indice, pour le throttle
     last_sleep_reminder = [0.0]  # horodatage du dernier rappel « micro en veille »
     ui_lang = config.current_lang
@@ -56,7 +82,7 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         ui_lang = config.current_lang
         processor.update_language(ui_lang)
         stop_tokens = phrase_tokens(config.STOP_PHRASE)
-        conf_threshold = config.recognition_setting('confidence_threshold', 0.55)
+        conf_threshold = config.recognition_setting("confidence_threshold", 0.55)
 
     def start_recording():
         nonlocal recording, full_text_log, xdotool_failed_once
@@ -83,7 +109,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         # de « veille désactivée » suivi de « enregistrement démarré » — deux
         # messages qui se lisent comme contradictoires.
         if woke_from_sleep:
-            print(f"\n{config.color_success}{_('Waking from sleep; recording started.')}{config.RESET}")
+            print(
+                f"\n{config.color_success}{_('Waking from sleep; recording started.')}{config.RESET}"
+            )
         else:
             print(f"\n{config.color_success}{_('Recording started.')}{config.RESET}")
         play_sound()
@@ -127,11 +155,16 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                 ensure_clipboard_text(text_to_copy)
             except Exception:
                 copied = False
-                print(f"\n{config.color_warning}"
-                      f"{_('Clipboard unavailable — session text below:')}"
-                      f"{config.RESET}\n{text_to_copy}")
-        msg = _('Recording finished. Text copied.') if copied \
-            else _('Recording finished. Clipboard unavailable — text printed above.')
+                print(
+                    f"\n{config.color_warning}"
+                    f"{_('Clipboard unavailable — session text below:')}"
+                    f"{config.RESET}\n{text_to_copy}"
+                )
+        msg = (
+            _("Recording finished. Text copied.")
+            if copied
+            else _("Recording finished. Clipboard unavailable — text printed above.")
+        )
         # Couleurs du thème depuis la configuration
         print(f"\n{config.color_error}{msg}{config.RESET}")
         full_text_log = ""
@@ -145,7 +178,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             sleep_event.clear()
             wake_event.set()
             runtime_state.set_state(STATE_LISTENING)
-            print(f"\n{config.color_success}{_('Sleep mode disabled — listening resumed.')}{config.RESET}")
+            print(
+                f"\n{config.color_success}{_('Sleep mode disabled — listening resumed.')}{config.RESET}"
+            )
         else:
             if recording:
                 stop_recording()
@@ -159,7 +194,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             # Le premier rappel « micro en veille » attend un intervalle complet
             # après l'entrée en VEILLE.
             last_sleep_reminder[0] = time.monotonic()
-            print(f"\n{config.color_warning}{_('Sleep mode enabled — the microphone is released.')}{config.RESET}")
+            print(
+                f"\n{config.color_warning}{_('Sleep mode enabled — the microphone is released.')}{config.RESET}"
+            )
         play_sound()
 
     def maybe_sleep_reminder():
@@ -172,51 +209,65 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         if now - last_sleep_reminder[0] >= SLEEP_REMINDER_INTERVAL_S:
             last_sleep_reminder[0] = now
             _ = get_translation()
-            print(f"\n{config.color_warning}"
-                  f"{_('Microphone asleep — Alt+W or --wake to resume.')}"
-                  f"{config.RESET}")
+            print(
+                f"\n{config.color_warning}"
+                f"{_('Microphone asleep — Alt+W or --wake to resume.')}"
+                f"{config.RESET}"
+            )
 
     def execute_manual_command(command: str):
         nonlocal full_text_log, recording
         _ = get_translation()
 
         command = command.strip()
-        if not command.startswith('/'): return
+        if not command.startswith("/"):
+            return
         cmd_parts = command[1:].split()
-        if not cmd_parts: return
+        if not cmd_parts:
+            return
         cmd_name = cmd_parts[0].lower()
 
         # Couleurs du thème depuis la configuration
-        if cmd_name == 'cancel':
-            if recording: stop_recording()
+        if cmd_name == "cancel":
+            if recording:
+                stop_recording()
             full_text_log = ""
             processor.reset_state()
             print(f"{config.color_warning}{_('Session canceled.')}{config.RESET}")
-        elif cmd_name == 'delete-word':
+        elif cmd_name == "delete-word":
             if full_text_log.strip():
-                log_parts = full_text_log.rstrip().split(' ')
+                log_parts = full_text_log.rstrip().split(" ")
                 if log_parts:
                     word_to_remove = log_parts.pop()
-                    full_text_log = ' '.join(log_parts) + (' ' if log_parts else '')
-                    for _ in range(len(word_to_remove) + 1): press_key('BackSpace')
-                    print(f"{config.color_warning}{_('Last word deleted (simulation).')}{config.RESET}")
+                    full_text_log = " ".join(log_parts) + (" " if log_parts else "")
+                    for _ in range(len(word_to_remove) + 1):
+                        press_key("BackSpace")
+                    print(
+                        f"{config.color_warning}{_('Last word deleted (simulation).')}{config.RESET}"
+                    )
             else:
                 print(f"{config.color_warning}{_('No text to modify.')}{config.RESET}")
-        elif cmd_name == 'nl':
-            to_add = '\n\n' if config.current_lang == 'fr' else '\n'
+        elif cmd_name == "nl":
+            to_add = "\n\n" if config.current_lang == "fr" else "\n"
             # /nl est une demande de dictée — en VEILLE, on réveille et on
             # démarre l'enregistrement avant d'insérer le saut.
             if sleep_event.is_set():
                 start_recording()
             if recording:
                 process_and_type(to_add)
-                print(f"{config.color_warning}{_('New paragraph inserted.')}{config.RESET}")
+                print(
+                    f"{config.color_warning}{_('New paragraph inserted.')}{config.RESET}"
+                )
             else:
                 full_text_log += to_add
                 processor.capitalize_next_word = True
-                print(f"{config.color_warning}{_('New paragraph added to buffer.')}{config.RESET}")
+                print(
+                    f"{config.color_warning}{_('New paragraph added to buffer.')}{config.RESET}"
+                )
         else:
-            print(f"{config.color_error}{_('Unknown command:')} {command}{config.RESET}")
+            print(
+                f"{config.color_error}{_('Unknown command:')} {command}{config.RESET}"
+            )
 
     def emit_low_conf_hint():
         """Indice throttlé quand la phrase d'arrêt est entendue mais sous le
@@ -226,7 +277,9 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         now = time.monotonic()
         if now - last_low_conf_hint[0] >= 2.0:
             last_low_conf_hint[0] = now
-            msg = _("Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize.")
+            msg = _(
+                "Heard the stop phrase but confidence was low. Repeat it, or use the stop hotkey / --finalize."
+            )
             print(f"\n{config.color_warning}{msg}{config.RESET}")
 
     def process_and_type(raw_text: str, keep_case: bool = False):
@@ -234,48 +287,59 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         _ = get_translation()
 
         processed_text = processor.process(raw_text, keep_case)
-        if not processed_text: return
+        if not processed_text:
+            return
 
         string_to_type = ""
-        if full_text_log and not full_text_log.endswith((' ', '\n', '\u202f', '« ')):
-            if not processed_text.startswith(('\u202f', ',', '.', ')', ']')):
-                 string_to_type = " "
+        if full_text_log and not full_text_log.endswith((" ", "\n", "\u202f", "« ")):
+            if not processed_text.startswith(("\u202f", ",", ".", ")", "]")):
+                string_to_type = " "
         string_to_type += processed_text
 
         # Couleurs du thème depuis la configuration
         if not xdotool_failed_once and not type_text(string_to_type):
             xdotool_failed_once = True
-            msg = _('Warning: xdotool failed. Switching to log-only mode.')
+            msg = _("Warning: xdotool failed. Switching to log-only mode.")
             print(f"\n{config.color_warning}{msg}{config.RESET}")
 
         full_text_log += string_to_type
         display_repr = repr(string_to_type.strip())
         if not xdotool_failed_once:
-            msg = _('Typed:')
-            print(f"\r{config.color_success}{msg} {display_repr}{config.RESET}{' ' * 20}")
+            msg = _("Typed:")
+            print(
+                f"\r{config.color_success}{msg} {display_repr}{config.RESET}{' ' * 20}"
+            )
         else:
-            msg = _('[Degraded Mode] Added:')
-            print(f"\r{config.color_success}{msg} {display_repr}{config.RESET}{' ' * 20}")
+            msg = _("[Degraded Mode] Added:")
+            print(
+                f"\r{config.color_success}{msg} {display_repr}{config.RESET}{' ' * 20}"
+            )
 
     def handle_command(command: str):
-        if command == 'TOGGLE_RECORDING':
-            if recording: stop_recording()
-            else: start_recording()
-        elif command == 'DICTATION_ON':
+        if command == "TOGGLE_RECORDING":
+            if recording:
+                stop_recording()
+            else:
+                start_recording()
+        elif command == "DICTATION_ON":
             # Aucune garde sur sleep_event ici : start_recording() sort de
             # veille de lui-même.
-            if not recording: start_recording()
-        elif command == 'DICTATION_OFF':
-            if recording: stop_recording()
-        elif command == 'FINALIZE_SESSION':
+            if not recording:
+                start_recording()
+        elif command == "DICTATION_OFF":
+            if recording:
+                stop_recording()
+        elif command == "FINALIZE_SESSION":
             finalize_session()
-        elif command == 'TOGGLE_SLEEP':
+        elif command == "TOGGLE_SLEEP":
             toggle_sleep()
-        elif command == 'SLEEP_ON':
-            if not sleep_event.is_set(): toggle_sleep()
-        elif command == 'SLEEP_OFF':
-            if sleep_event.is_set(): toggle_sleep()
-        elif command.startswith('/'):
+        elif command == "SLEEP_ON":
+            if not sleep_event.is_set():
+                toggle_sleep()
+        elif command == "SLEEP_OFF":
+            if sleep_event.is_set():
+                toggle_sleep()
+        elif command.startswith("/"):
             execute_manual_command(command)
 
     # Commandes retenues le temps que la finition rende les énoncés déjà dits,
@@ -304,10 +368,13 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                     held.append(command)
                 else:
                     handle_command(command)
-            except queue.Empty: pass
+            except queue.Empty:
+                pass
             try:
                 item = text_queue.get_nowait()
-                raw_text, words, *flags = item if isinstance(item, tuple) else (item, [])
+                raw_text, words, *flags = (
+                    item if isinstance(item, tuple) else (item, [])
+                )
                 keep_case = bool(flags and flags[0])
                 if not recording:
                     # En ÉCOUTE, le réveil est traité par le thread de
@@ -346,9 +413,11 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             except queue.Empty:
                 time.sleep(0.01)
                 continue
-    except KeyboardInterrupt: pass
+    except KeyboardInterrupt:
+        pass
     finally:
-        if not stop_event.is_set(): stop_event.set()
+        if not stop_event.is_set():
+            stop_event.set()
         # Couleurs du thème depuis la configuration
         msg = _("Stopping user interface...")
         print(f"\n{config.color_info}{msg}{config.RESET}")

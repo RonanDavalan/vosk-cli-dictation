@@ -11,7 +11,9 @@ import src.model_download as md
 
 def test_catalog_has_eight_entries_four_languages_two_sizes():
     assert len(md.CATALOG) == 8
-    assert set(md.CATALOG) == {(l, s) for l in ("en", "fr", "de", "es") for s in ("small", "big")}
+    assert set(md.CATALOG) == {
+        (l, s) for l in ("en", "fr", "de", "es") for s in ("small", "big")
+    }
 
 
 @pytest.mark.parametrize("key", sorted(md.CATALOG))
@@ -46,18 +48,27 @@ def fake_archive(tmp_path, monkeypatch):
     with zipfile.ZipFile(archive, "w") as z:
         z.write(src_dir / "am.bin", "vosk-model-test-1.0/am.bin")
     digest = hashlib.sha256(archive.read_bytes()).hexdigest()
-    entry = {"filename": archive.name, "folder": "vosk-model-test-1.0",
-             "sha256": digest, "size": archive.stat().st_size}
+    entry = {
+        "filename": archive.name,
+        "folder": "vosk-model-test-1.0",
+        "sha256": digest,
+        "size": archive.stat().st_size,
+    }
     monkeypatch.setitem(md.CATALOG, ("fr", "big"), entry)
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
-    monkeypatch.setattr(md.urllib.request, "urlretrieve",
-                        lambda url, dest: dest and open(dest, "wb").write(archive.read_bytes()))
+    monkeypatch.setattr(
+        md.urllib.request,
+        "urlretrieve",
+        lambda url, dest: dest and open(dest, "wb").write(archive.read_bytes()),
+    )
     return entry
 
 
 def test_download_big_installs_and_verifies(fake_archive, tmp_path):
     assert md.download_model("fr", "big") is True
-    assert (tmp_path / "data" / "vosk-models" / "vosk-model-test-1.0" / "am.bin").exists()
+    assert (
+        tmp_path / "data" / "vosk-models" / "vosk-model-test-1.0" / "am.bin"
+    ).exists()
 
 
 def test_download_with_wrong_digest_is_discarded(fake_archive, tmp_path):
@@ -69,8 +80,11 @@ def test_download_with_wrong_digest_is_discarded(fake_archive, tmp_path):
 def test_download_default_size_is_small(monkeypatch, tmp_path):
     monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
     asked = []
-    monkeypatch.setattr(md.urllib.request, "urlretrieve",
-                        lambda url, dest: asked.append(url) or (_ for _ in ()).throw(OSError("stop")))
+    monkeypatch.setattr(
+        md.urllib.request,
+        "urlretrieve",
+        lambda url, dest: asked.append(url) or (_ for _ in ()).throw(OSError("stop")),
+    )
     md.download_model("fr")
     assert asked and "vosk-model-small-fr" in asked[0]
 

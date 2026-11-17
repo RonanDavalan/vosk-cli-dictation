@@ -80,7 +80,9 @@ def test_force_c_numeric_locale_is_idempotent_and_safe_when_already_c():
     assert locale.localeconv()["decimal_point"] == "."
 
 
-def test_build_recognizer_forces_c_locale_before_creating_the_kaldi_recognizer(monkeypatch):
+def test_build_recognizer_forces_c_locale_before_creating_the_kaldi_recognizer(
+    monkeypatch,
+):
     # Même si Model() ou une dépendance a repositionné la locale sur une virgule,
     # build_recognizer() la neutralise AVANT d'instancier KaldiRecognizer — donc
     # avant tout Result() ultérieur.
@@ -123,9 +125,16 @@ class _LocaleSensitiveRec:
 
     def Result(self):
         i = min(self.calls - 1, len(self.texts) - 1)
-        return ('{\n  "result" : [{ ' + self._floats()
-                + ', "word" : "' + self.texts[i] + '" }],\n'
-                + '  "text" : "' + self.texts[i] + '"\n}')
+        return (
+            '{\n  "result" : [{ '
+            + self._floats()
+            + ', "word" : "'
+            + self.texts[i]
+            + '" }],\n'
+            + '  "text" : "'
+            + self.texts[i]
+            + '"\n}'
+        )
 
     def PartialResult(self):
         return json.dumps({"partial": ""})
@@ -170,7 +179,8 @@ def test_recognition_loop_guards_a_late_locale_flip(monkeypatch):
     fake = _LocaleSensitiveRec(texts)
     stop_fake = _SilentStopRec()
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: stop_fake if mode == MODE_STOP else fake,
     )
 

@@ -10,12 +10,19 @@ from vosk_cli_dictation_tray.i18n import Translator, system_language
 
 def parse_args(argv):
     parser = argparse.ArgumentParser(prog="vosk-cli-dictation-tray")
-    parser.add_argument("--version", action="version",
-                        version="vosk-cli-dictation-tray " + __version__)
-    parser.add_argument("--socket", metavar="PATH",
-                        help="control socket of the dictation to drive (default: the user's own)")
-    parser.add_argument("--dictation-command", metavar="COMMAND",
-                        help="command that launches the dictation (default: vosk-cli-dictation)")
+    parser.add_argument(
+        "--version", action="version", version="vosk-cli-dictation-tray " + __version__
+    )
+    parser.add_argument(
+        "--socket",
+        metavar="PATH",
+        help="control socket of the dictation to drive (default: the user's own)",
+    )
+    parser.add_argument(
+        "--dictation-command",
+        metavar="COMMAND",
+        help="command that launches the dictation (default: vosk-cli-dictation)",
+    )
     return parser.parse_args(argv)
 
 
@@ -44,14 +51,19 @@ def main(argv=None) -> int:
         return 1
 
     if not QSystemTrayIcon.isSystemTrayAvailable():
-        notifier.notify(APP_TITLE, translator(
-            "No notification area found. On GNOME, enable the "
-            "'AppIndicator and KStatusNotifierItem Support' extension; "
-            "desktop shortcuts on the control socket keep working."))
+        notifier.notify(
+            APP_TITLE,
+            translator(
+                "No notification area found. On GNOME, enable the "
+                "'AppIndicator and KStatusNotifierItem Support' extension; "
+                "desktop shortcuts on the control socket keep working."
+            ),
+        )
 
     client = ControlClient(socket_path)
-    tray = DictationTray(client, translator, system_language(),
-                         dictation_command=args.dictation_command)
+    tray = DictationTray(
+        client, translator, system_language(), dictation_command=args.dictation_command
+    )
     tray.show()
     client.start()
     code = app.exec()

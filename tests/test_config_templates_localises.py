@@ -13,9 +13,13 @@ import yaml
 from config.config import Config
 
 CONFIG_DIR = Path(__file__).resolve().parent.parent / "config"
-TEMPLATES = {lang: CONFIG_DIR / f"config.{lang}.yaml" for lang in Config.SUPPORTED_CONFIG_LANGS}
+TEMPLATES = {
+    lang: CONFIG_DIR / f"config.{lang}.yaml" for lang in Config.SUPPORTED_CONFIG_LANGS
+}
 
-JARGON_PATTERN = re.compile(r"chantier|\bvolet [a-h]\b|\bD[0-9]\b|\bR[0-9]\b", re.IGNORECASE)
+JARGON_PATTERN = re.compile(
+    r"chantier|\bvolet [a-h]\b|\bD[0-9]\b|\bR[0-9]\b", re.IGNORECASE
+)
 
 
 def _keys(node):
@@ -49,7 +53,9 @@ def test_template_default_model_follows_the_system(lang):
 
 def test_all_templates_share_the_same_key_structure():
     reference_lang = "en"
-    reference_keys = _keys(yaml.safe_load(TEMPLATES[reference_lang].read_text(encoding="utf-8")))
+    reference_keys = _keys(
+        yaml.safe_load(TEMPLATES[reference_lang].read_text(encoding="utf-8"))
+    )
     for lang, path in TEMPLATES.items():
         if lang == reference_lang:
             continue

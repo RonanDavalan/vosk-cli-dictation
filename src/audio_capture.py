@@ -11,6 +11,7 @@ from config.config import config
 from src.i18n import get_translation
 from src.runtime_state import runtime_state
 
+
 def put_drop_oldest(q, item) -> bool:
     """Met `item` en file ; si la file est pleine, jette d'abord son entrée
     la plus ancienne.
@@ -44,10 +45,10 @@ def open_stream(p):
     """
     return p.open(
         format=pyaudio.paInt16,
-        channels=config.audio['channels'],
-        rate=config.audio['sample_rate'],
+        channels=config.audio["channels"],
+        rate=config.audio["sample_rate"],
         input=True,
-        frames_per_buffer=config.audio['frames_per_buffer'],
+        frames_per_buffer=config.audio["frames_per_buffer"],
     )
 
 
@@ -62,11 +63,18 @@ def initialize_audio():
         return p, stream
     except Exception as e:
         # Couleurs du thème depuis la configuration
-        print(f"{config.color_error}{_('Critical error during audio initialization:')} {e}{config.RESET}")
+        print(
+            f"{config.color_error}{_('Critical error during audio initialization:')} {e}{config.RESET}"
+        )
         if "Invalid input device" in str(e) or "No Default Input Device" in str(e):
-            print(f"{config.color_info}{_('TIP: This can happen if no microphone is connected or selected.')}{config.RESET}")
-            print(f"{config.color_info}{_('Check your system audio settings (e.g., with pavucontrol).')}{config.RESET}")
+            print(
+                f"{config.color_info}{_('TIP: This can happen if no microphone is connected or selected.')}{config.RESET}"
+            )
+            print(
+                f"{config.color_info}{_('Check your system audio settings (e.g., with pavucontrol).')}{config.RESET}"
+            )
         return None, None
+
 
 def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_event):
     """
@@ -84,9 +92,9 @@ def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_e
     périmé. `wake_event` cadence symétriquement le thread de reconnaissance.
     """
     _ = get_translation()
-    buffer_size = config.audio['buffer_size']
-    releases_device = config.data.get('sleep', {}).get('releases_device', True)
-    warmup_chunks = max(1, int(0.2 * config.audio['sample_rate'] / buffer_size)) + 1
+    buffer_size = config.audio["buffer_size"]
+    releases_device = config.data.get("sleep", {}).get("releases_device", True)
+    warmup_chunks = max(1, int(0.2 * config.audio["sample_rate"] / buffer_size)) + 1
     last_overflow_warning = 0.0
 
     def drain_queue():
@@ -118,8 +126,10 @@ def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_e
                     try:
                         stream = open_stream(p)
                     except Exception as e:
-                        print(f"\n{config.color_error}"
-                              f"{_('Could not reopen the audio device:')} {e}{config.RESET}")
+                        print(
+                            f"\n{config.color_error}"
+                            f"{_('Could not reopen the audio device:')} {e}{config.RESET}"
+                        )
                         stop_event.set()
                         break
                 else:
@@ -144,17 +154,23 @@ def audio_capture_thread(p, stream, audio_queue, stop_event, sleep_event, wake_e
                 now = time.monotonic()
                 if now - last_overflow_warning >= 1.0:
                     last_overflow_warning = now
-                    print(f"\n{config.color_warning}"
-                          f"{_('Recognition is falling behind; dropping audio.')}"
-                          f"{config.RESET}")
+                    print(
+                        f"\n{config.color_warning}"
+                        f"{_('Recognition is falling behind; dropping audio.')}"
+                        f"{config.RESET}"
+                    )
         except IOError as e:
             # Couleurs du thème depuis la configuration
-            print(f"{config.color_error}{_('Audio read error (IOError):')} {e}{config.RESET}")
+            print(
+                f"{config.color_error}{_('Audio read error (IOError):')} {e}{config.RESET}"
+            )
             stop_event.set()
             break
         except Exception as e:
             # Couleurs du thème depuis la configuration
-            print(f"{config.color_error}{_('Unexpected error in audio capture:')} {e}{config.RESET}")
+            print(
+                f"{config.color_error}{_('Unexpected error in audio capture:')} {e}{config.RESET}"
+            )
             stop_event.set()
             break
 

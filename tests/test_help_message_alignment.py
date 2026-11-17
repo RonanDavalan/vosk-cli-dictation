@@ -35,7 +35,9 @@ def test_no_help_line_exceeds_80_display_columns(lang, capsys):
     set_ui_language(lang)
 
     print_help_message()
-    plain = [ANSI.sub("", line).rstrip() for line in capsys.readouterr().out.splitlines()]
+    plain = [
+        ANSI.sub("", line).rstrip() for line in capsys.readouterr().out.splitlines()
+    ]
     over = [(p, _display_width(p)) for p in plain if _display_width(p) > 80]
     assert not over, f"{lang}: lignes > 80 colonnes d'affichage: {over}"
 

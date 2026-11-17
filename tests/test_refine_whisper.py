@@ -1,5 +1,6 @@
 """Moteur de finition Whisper : choix du matériel, poids, et transcription d'un
 WAV du corpus du banc quand faster-whisper et les poids sont présents."""
+
 import os
 import re
 import wave
@@ -30,7 +31,9 @@ def test_models_dir_follows_xdg_data_home(monkeypatch):
 
 def test_is_cached_reads_the_hub_layout(tmp_path):
     assert not we.is_cached("tiny", str(tmp_path))
-    (tmp_path / "models--Systran--faster-whisper-tiny" / "snapshots" / "abc").mkdir(parents=True)
+    (tmp_path / "models--Systran--faster-whisper-tiny" / "snapshots" / "abc").mkdir(
+        parents=True
+    )
     assert we.is_cached("tiny", str(tmp_path))
     assert not we.is_cached("base", str(tmp_path))
 
@@ -113,7 +116,10 @@ def _word_errors(reference, hypothesis):
 
 
 @pytest.mark.skipif(we.missing_module() is not None, reason="faster-whisper absent")
-@pytest.mark.skipif(not os.path.exists(WAV), reason="VOSK_REFINE_TEST_CORPUS ne désigne pas le corpus du banc")
+@pytest.mark.skipif(
+    not os.path.exists(WAV),
+    reason="VOSK_REFINE_TEST_CORPUS ne désigne pas le corpus du banc",
+)
 def test_transcribes_a_corpus_wav():
     """Sur fichier, aucune instance : le WAV de la première phrase du corpus
     français. Le dossier du corpus, la taille et le dossier de poids se règlent par
@@ -129,6 +135,8 @@ def test_transcribes_a_corpus_wav():
     with open(REFERENCE, encoding="utf-8") as f:
         reference = f.readline().strip()
     rate = _word_errors(reference, text)
-    print(f"{size} {engine.device()} {engine.compute_type}: {text!r} (erreur {rate:.0%})")
+    print(
+        f"{size} {engine.device()} {engine.compute_type}: {text!r} (erreur {rate:.0%})"
+    )
     assert text
     assert rate <= (0.6 if size in ("tiny", "base") else 0.3)

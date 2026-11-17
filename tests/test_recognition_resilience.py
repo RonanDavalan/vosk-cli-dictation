@@ -92,7 +92,8 @@ def test_json_decode_error_on_a_frame_does_not_kill_the_thread(monkeypatch):
     fake = BadOnNthRec(bad_frame=3, texts=texts)
     stop_fake = SilentStopRec()
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: stop_fake if mode == MODE_STOP else fake,
     )
 
@@ -149,7 +150,8 @@ def test_repeated_decode_errors_keep_recovering(monkeypatch):
     fake = AlternatingRec(bad_frame=-1, texts=[])
     stop_fake = SilentStopRec()
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: stop_fake if mode == MODE_STOP else fake,
     )
 
@@ -203,7 +205,8 @@ def test_permanent_decode_errors_escalate_and_end_the_session(monkeypatch):
     fake = AlwaysBadRec(bad_frame=-1, texts=[])
     stop_fake = SilentStopRec()
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: stop_fake if mode == MODE_STOP else fake,
     )
 
@@ -257,7 +260,8 @@ def test_malformed_result_is_captured_to_a_file(monkeypatch, tmp_path):
     fake = RawBadRec(bad_frame=2, texts=texts)
     stop_fake = SilentStopRec()
     monkeypatch.setattr(
-        rec, "build_recognizer",
+        rec,
+        "build_recognizer",
         lambda model, mode: stop_fake if mode == MODE_STOP else fake,
     )
 
@@ -292,6 +296,7 @@ def test_malformed_result_is_captured_to_a_file(monkeypatch, tmp_path):
 
 
 # --- défaut 1, seconde couche : supervision des threads par main.py -----------
+
 
 def _blocker(hold):
     hold.wait(5.0)

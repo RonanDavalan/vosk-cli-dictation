@@ -14,8 +14,13 @@ from src.refine import NONE, RefineUnavailable
 from src.refine import whisper_engine as we
 from src.refine.pipeline import RefinePipeline
 
-DEFAULTS = {"engine": NONE, "model": "auto", "device": "auto",
-            "compute_type": "auto", "timeout_ms": 2000}
+DEFAULTS = {
+    "engine": NONE,
+    "model": "auto",
+    "device": "auto",
+    "compute_type": "auto",
+    "timeout_ms": 2000,
+}
 REPORT_INTERVAL_S = 10.0
 
 
@@ -25,8 +30,10 @@ def settings() -> dict:
 
 def valid_spec(spec) -> bool:
     return spec == NONE or (
-        isinstance(spec, str) and spec.startswith(we.SPEC_PREFIX)
-        and spec[len(we.SPEC_PREFIX):] in we.SIZES)
+        isinstance(spec, str)
+        and spec.startswith(we.SPEC_PREFIX)
+        and spec[len(we.SPEC_PREFIX) :] in we.SIZES
+    )
 
 
 def configured_spec(conf: dict):
@@ -48,12 +55,15 @@ def reason_text(error: RefineUnavailable) -> str:
     _ = get_translation()
     code, detail = error.code, error.detail
     if code == "missing-module":
-        return _("faster-whisper is not installed in this dictation (pip install faster-whisper)")
+        return _(
+            "faster-whisper is not installed in this dictation (pip install faster-whisper)"
+        )
     if code == "no-gpu":
         return _("device: cuda is set but no GPU is detected; use device: auto or cpu")
     if code == "cuda-missing":
-        return _("device: cuda is set but {lib} cannot be loaded; install it ({remedy}) or use device: cpu").format(
-            lib=we.CUBLAS_SONAME, remedy=detail)
+        return _(
+            "device: cuda is set but {lib} cannot be loaded; install it ({remedy}) or use device: cpu"
+        ).format(lib=we.CUBLAS_SONAME, remedy=detail)
     if code == "bad-size":
         return _("unknown Whisper size: {size}").format(size=detail)
     if code == "load-failed":
@@ -64,7 +74,9 @@ def reason_text(error: RefineUnavailable) -> str:
 def note_text(note: str) -> str:
     _ = get_translation()
     if note == "cpu-no-default":
-        return _("Refinement is off: no Whisper size keeps up on a processor. Choose one in refine.model or in the icon menu.")
+        return _(
+            "Refinement is off: no Whisper size keeps up on a processor. Choose one in refine.model or in the icon menu."
+        )
     return _("refine.model is not a known Whisper size; refinement is off.")
 
 
@@ -96,9 +108,11 @@ class RefineController:
             return
         self._last_report = now
         _ = get_translation()
-        print(f"\n{config.color_warning}"
-              f"{_('Refinement failed, typing the Vosk text: {error}').format(error=detail)}"
-              f"{config.RESET}")
+        print(
+            f"\n{config.color_warning}"
+            f"{_('Refinement failed, typing the Vosk text: {error}').format(error=detail)}"
+            f"{config.RESET}"
+        )
 
     # --- lancement et changement à chaud ---------------------------------------- #
 
@@ -153,17 +167,23 @@ class RefineController:
 
     def _load(self, spec, persist):
         _ = get_translation()
-        size = spec[len(we.SPEC_PREFIX):]
+        size = spec[len(we.SPEC_PREFIX) :]
         try:
-            engine = we.WhisperEngine(size, self.conf["device"], self.conf["compute_type"])
+            engine = we.WhisperEngine(
+                size, self.conf["device"], self.conf["compute_type"]
+            )
             if not we.is_cached(size):
                 self.downloading = size
-                print(f"\n{config.color_info}"
-                      f"{_('Downloading the Whisper {size} model (first use, kept in {path})...').format(size=size, path=we.models_dir())}"
-                      f"{config.RESET}")
+                print(
+                    f"\n{config.color_info}"
+                    f"{_('Downloading the Whisper {size} model (first use, kept in {path})...').format(size=size, path=we.models_dir())}"
+                    f"{config.RESET}"
+                )
             else:
-                print(f"\n{config.color_info}"
-                      f"{_('Loading the Whisper {size} model...').format(size=size)}{config.RESET}")
+                print(
+                    f"\n{config.color_info}"
+                    f"{_('Loading the Whisper {size} model...').format(size=size)}{config.RESET}"
+                )
             engine.load()
         except RefineUnavailable as e:
             text = reason_text(e)
@@ -171,21 +191,27 @@ class RefineController:
                 self.loading = False
                 self.last_error = text
             self.downloading = None
-            print(f"\n{config.color_error}"
-                  f"{_('Refinement change failed, keeping the current setting: {error}').format(error=text)}"
-                  f"{config.RESET}")
+            print(
+                f"\n{config.color_error}"
+                f"{_('Refinement change failed, keeping the current setting: {error}').format(error=text)}"
+                f"{config.RESET}"
+            )
             return
         self.downloading = None
         self._apply(engine, spec)
         if persist:
             save_selection({"refine": spec})
-        print(f"\n{config.color_success}"
-              f"{_('Refinement ready: {spec} on {device}.').format(spec=spec, device=engine.device().upper())}"
-              f"{config.RESET}")
+        print(
+            f"\n{config.color_success}"
+            f"{_('Refinement ready: {spec} on {device}.').format(spec=spec, device=engine.device().upper())}"
+            f"{config.RESET}"
+        )
         if engine.device() == "cpu" and we.gpu_detected() and not we.cublas_loadable():
-            print(f"{config.color_warning}"
-                  f"{_('A GPU is present but {lib} cannot be loaded; using the processor ({remedy}).').format(lib=we.CUBLAS_SONAME, remedy=we.CUBLAS_REMEDY)}"
-                  f"{config.RESET}")
+            print(
+                f"{config.color_warning}"
+                f"{_('A GPU is present but {lib} cannot be loaded; using the processor ({remedy}).').format(lib=we.CUBLAS_SONAME, remedy=we.CUBLAS_REMEDY)}"
+                f"{config.RESET}"
+            )
 
     def _apply(self, engine, spec):
         self.pipeline.set_engine(engine)
@@ -234,8 +260,15 @@ def diagnose_lines(selected: str = None):
     missing = we.missing_module()
     wanted = conf["engine"] == "whisper" or (valid_spec(selected) and selected != NONE)
     if missing:
-        lines.append((not wanted, "faster-whisper",
-                      _("missing (pip install faster-whisper)") if wanted else _("not installed (optional)")))
+        lines.append(
+            (
+                not wanted,
+                "faster-whisper",
+                _("missing (pip install faster-whisper)")
+                if wanted
+                else _("not installed (optional)"),
+            )
+        )
     else:
         lines.append((True, "faster-whisper", _("found")))
         gpu = we.gpu_detected()
@@ -243,13 +276,21 @@ def diagnose_lines(selected: str = None):
         device = we.probe_device(conf["device"])
         detail = device.upper()
         if gpu and not cublas:
-            detail += "  " + _("GPU present but {lib} cannot be loaded ({remedy})").format(
-                lib=we.CUBLAS_SONAME, remedy=we.CUBLAS_REMEDY)
+            detail += "  " + _(
+                "GPU present but {lib} cannot be loaded ({remedy})"
+            ).format(lib=we.CUBLAS_SONAME, remedy=we.CUBLAS_REMEDY)
         elif not gpu:
             detail += "  " + _("no GPU detected")
         lines.append((True, _("Hardware"), detail))
         cached = [s for s in we.SIZES if we.is_cached(s)]
-        lines.append((True, _("Models directory"), "{}  ({})".format(
-            we.models_dir(), ", ".join(cached) if cached else _("no model yet"))))
+        lines.append(
+            (
+                True,
+                _("Models directory"),
+                "{}  ({})".format(
+                    we.models_dir(), ", ".join(cached) if cached else _("no model yet")
+                ),
+            )
+        )
     lines.append((True, _("Typing delay limit"), "{} ms".format(conf["timeout_ms"])))
     return lines

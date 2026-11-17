@@ -25,8 +25,10 @@ class FakeServer:
         self.lang = "fr"
         self.lang_source = "config"
         self.langs = ["fr", "en", "de", "es"]
-        self.models = [{"folder": "vosk-model-small-fr-0.22", "size": "small"},
-                       {"folder": "vosk-model-fr-0.22", "size": "big"}]
+        self.models = [
+            {"folder": "vosk-model-small-fr-0.22", "size": "small"},
+            {"folder": "vosk-model-fr-0.22", "size": "big"},
+        ]
         self.model = "vosk-model-small-fr-0.22"
         self.extra = {}
         self.stop_event = threading.Event()
@@ -34,10 +36,19 @@ class FakeServer:
         self._thread = None
 
     def info(self):
-        data = {"state": self.state, "lang": self.lang, "lang_source": self.lang_source,
-                "langs": self.langs, "model": self.model, "models": self.models,
-                "refine": "none", "device": None, "correction": "none",
-                "loading": False, "last_error": None}
+        data = {
+            "state": self.state,
+            "lang": self.lang,
+            "lang_source": self.lang_source,
+            "langs": self.langs,
+            "model": self.model,
+            "models": self.models,
+            "refine": "none",
+            "device": None,
+            "correction": "none",
+            "loading": False,
+            "last_error": None,
+        }
         data.update(self.extra)
         return data
 
@@ -49,7 +60,9 @@ class FakeServer:
                 with open(self.journal, "a", encoding="utf-8") as f:
                     f.write("{} {}\n".format(time.strftime("%H:%M:%S"), raw.strip()))
             if token == "info":
-                return "OK " + json.dumps(self.info(), ensure_ascii=False, separators=(",", ":"))
+                return "OK " + json.dumps(
+                    self.info(), ensure_ascii=False, separators=(",", ":")
+                )
             if token == "toggle":
                 self.state = LISTENING if self.state == DICTATING else DICTATING
             elif token == "dictation-on":
@@ -72,8 +85,15 @@ class FakeServer:
             elif token == "quit":
                 self.stop_event.set()
                 return "OK stopping"
-            elif token not in ("status", "finalize", "cancel", "sleep-toggle",
-                               "set-model", "set-refine", "set-correction"):
+            elif token not in (
+                "status",
+                "finalize",
+                "cancel",
+                "sleep-toggle",
+                "set-model",
+                "set-refine",
+                "set-correction",
+            ):
                 return "ERR unknown-command"
             return "OK " + self.state
 
@@ -108,7 +128,9 @@ class FakeServer:
                         if not chunk:
                             break
                         data += chunk
-                    conn.sendall((self.handle(data.decode("utf-8", "replace")) + "\n").encode())
+                    conn.sendall(
+                        (self.handle(data.decode("utf-8", "replace")) + "\n").encode()
+                    )
                 except OSError:
                     pass
 
@@ -130,7 +152,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--socket", required=True)
     parser.add_argument("--journal")
-    parser.add_argument("--state", default=LISTENING, choices=(LISTENING, DICTATING, SLEEPING))
+    parser.add_argument(
+        "--state", default=LISTENING, choices=(LISTENING, DICTATING, SLEEPING)
+    )
     args = parser.parse_args()
     server = FakeServer(args.socket, args.state, args.journal).start()
     try:

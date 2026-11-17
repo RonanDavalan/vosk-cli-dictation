@@ -85,7 +85,9 @@ class ControlClient(QObject):
 
     def _poll(self) -> None:
         while not self._stop.is_set():
-            self.info_changed.emit(parse_info(request(self.path, "info", INFO_TIMEOUT_S)))
+            self.info_changed.emit(
+                parse_info(request(self.path, "info", INFO_TIMEOUT_S))
+            )
             self._stop.wait(POLL_INTERVAL_S)
 
     def send(self, command: str) -> None:

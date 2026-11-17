@@ -9,7 +9,14 @@
 import threading
 
 from config.config import config
-from config.selection import SUPPORTED_LANGS, SYSTEM, clear_selection, resolve_language, save_selection, system_language
+from config.selection import (
+    SUPPORTED_LANGS,
+    SYSTEM,
+    clear_selection,
+    resolve_language,
+    save_selection,
+    system_language,
+)
 from src.i18n import get_translation, set_ui_language
 from src.runtime_state import runtime_state
 
@@ -20,6 +27,7 @@ UNSUPPORTED_TOKENS = ("set-correction",)
 
 def default_loader(path):
     from vosk import Model
+
     return Model(path)
 
 
@@ -49,8 +57,15 @@ class EngineSwitch:
     """Contrôleur de la socket (`info`, `set-*`) et file d'échange du fil de
     reconnaissance. `loader(path)` rend l'objet modèle (un faux dans les tests)."""
 
-    def __init__(self, lang, folder, size="small", lang_source="config", loader=default_loader,
-                 refine=None):
+    def __init__(
+        self,
+        lang,
+        folder,
+        size="small",
+        lang_source="config",
+        loader=default_loader,
+        refine=None,
+    ):
         self._loader = loader
         self.refine = refine
         self._lock = threading.Lock()
@@ -75,20 +90,26 @@ class EngineSwitch:
                 "lang_source": self.lang_source,
                 "langs": sorted({m["lang"] for m in installed}),
                 "model": self.folder,
-                "models": [{"folder": m["folder"], "size": m["size"]}
-                           for m in installed if m["lang"] == self.lang],
+                "models": [
+                    {"folder": m["folder"], "size": m["size"]}
+                    for m in installed
+                    if m["lang"] == self.lang
+                ],
                 "refine": "none",
                 "refine_stats": runtime_state.snapshot()["refine"],
                 "device": None,
                 "correction": "none",
                 "loading": self.loading or bool(self.refine and self.refine.loading),
-                "last_error": self.last_error or (self.refine.last_error if self.refine else None),
+                "last_error": self.last_error
+                or (self.refine.last_error if self.refine else None),
             } | extra
 
     def request(self, token: str, arg: str):
         """Prend une requête `set-*`. Rend None si elle est acceptée, sinon la
         raison du refus (le mot qui suit « ERR »)."""
-        if token in UNSUPPORTED_TOKENS or (token == "set-refine" and self.refine is None):
+        if token in UNSUPPORTED_TOKENS or (
+            token == "set-refine" and self.refine is None
+        ):
             return "unsupported"
         with self._lock:
             if self.loading or (self.refine is not None and self.refine.loading):
@@ -108,7 +129,11 @@ class EngineSwitch:
             return "bad-argument"
         if arg == SYSTEM:
             system = system_language()
-            lang = system if system in {m["lang"] for m in config.installed_models()} else "en"
+            lang = (
+                system
+                if system in {m["lang"] for m in config.installed_models()}
+                else "en"
+            )
             source = "system"
         else:
             lang, source = arg, "selection"
@@ -127,7 +152,8 @@ class EngineSwitch:
         """Vide la sélection mémorisée et revient à ce que le lancement
         choisirait sans elle : option de config.yaml, sinon langue du système."""
         lang, source = resolve_language(
-            None, {}, config.default_model_setting, config.installed_languages())
+            None, {}, config.default_model_setting, config.installed_languages()
+        )
         target = choose_model(lang, "small")
         if target is None:
             return "no-model"
@@ -149,24 +175,31 @@ class EngineSwitch:
             self.loading = True
             self.last_error = None
         self._thread = threading.Thread(
-            target=self._load, args=(target, lang_source, updates), daemon=True)
+            target=self._load, args=(target, lang_source, updates), daemon=True
+        )
         self._thread.start()
         return None
 
     def _load(self, target, lang_source, updates):
         _ = get_translation()
-        print(f"\n{config.color_info}{_('Attempting to load model:')} {target['folder']}...{config.RESET}")
+        print(
+            f"\n{config.color_info}{_('Attempting to load model:')} {target['folder']}...{config.RESET}"
+        )
         try:
             model = self._loader(target["path"])
         except Exception as e:
             with self._lock:
                 self.loading = False
                 self.last_error = str(e)
-            print(f"\n{config.color_error}"
-                  f"{_('Model change failed, keeping the current model: {error}').format(error=e)}"
-                  f"{config.RESET}")
+            print(
+                f"\n{config.color_error}"
+                f"{_('Model change failed, keeping the current model: {error}').format(error=e)}"
+                f"{config.RESET}"
+            )
             return
-        engine = LoadedEngine(model, target["lang"], target["folder"], target["size"], lang_source)
+        engine = LoadedEngine(
+            model, target["lang"], target["folder"], target["size"], lang_source
+        )
         engine.selection_updates = updates
         with self._lock:
             self._ready = engine
@@ -192,9 +225,11 @@ class EngineSwitch:
         if engine.selection_updates:
             save_selection(engine.selection_updates)
         _ = get_translation()
-        print(f"\n{config.color_success}"
-              f"{_('Model switched: {model_name}').format(model_name=engine.folder)}"
-              f"{config.RESET}")
+        print(
+            f"\n{config.color_success}"
+            f"{_('Model switched: {model_name}').format(model_name=engine.folder)}"
+            f"{config.RESET}"
+        )
         with self._lock:
             self.lang = engine.lang
             self.folder = engine.folder

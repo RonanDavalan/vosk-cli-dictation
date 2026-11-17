@@ -17,7 +17,9 @@ RACINE = Path(__file__).resolve().parent.parent
 def _lancer(*args):
     return subprocess.run(
         [sys.executable, str(RACINE / "src" / "main.py"), *args],
-        capture_output=True, text=True, timeout=60,
+        capture_output=True,
+        text=True,
+        timeout=60,
     )
 
 
