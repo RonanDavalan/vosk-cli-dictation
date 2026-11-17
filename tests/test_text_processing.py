@@ -264,3 +264,9 @@ def test_dash_homophone_aliases_ship_by_default():
     # « trait » reste un mot ordinaire (cas refusé) : aucun tiret parasite.
     out = TextProcessor("fr").process("un trait de génie")
     assert "–" not in out
+
+
+def test_finished_text_keeps_a_url_in_one_piece():
+    config.set_language("fr")
+    out = TextProcessor("fr").process("voir https://example.org/a", keep_case=True)
+    assert "https://example.org/a" in out

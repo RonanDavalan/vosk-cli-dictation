@@ -104,11 +104,11 @@ class TextProcessor:
         """L'étape 0 colle la ponctuation au mot qui précède ; les langues dont
         la typographie veut une espace avant `?`, `!`, `:`, `;`, `»` (bloc
         `typography.space_before`) la retrouvent ici, sauf devant un chiffre
-        (« 12:30 »)."""
+        (« 12:30 ») ou une barre (« https://… »)."""
         sep = self._lead_separator()
         for symbol in self.space_before:
             text = re.sub(
-                r"(?<=[^\s" + re.escape(sep) + r"])" + re.escape(symbol) + r"(?!\d)",
+                r"(?<=[^\s" + re.escape(sep) + r"])" + re.escape(symbol) + r"(?![\d/\\])",
                 sep + symbol,
                 text,
             )
