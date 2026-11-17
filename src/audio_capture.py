@@ -1,4 +1,8 @@
 # src/audio_capture.py
+#
+# Thread de capture audio : lit le micro par PortAudio et alimente la file de
+# reconnaissance. Pourquoi : la lecture ne doit jamais attendre le décodage, et
+# le flux se ferme en VEILLE pour libérer le micro.
 
 import queue
 import time

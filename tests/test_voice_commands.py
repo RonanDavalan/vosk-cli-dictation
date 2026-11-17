@@ -96,7 +96,7 @@ def test_high_confidence_passes_default_threshold():
     assert mean_confidence(words, 0, 2) >= 0.85
 
 
-# --- empty phrase is inert ----------------------------------------------
+# --- une phrase vide est inerte -----------------------------------------
 
 def test_empty_needle_never_matches():
     assert find_phrase(normalize_tokens("anything at all"), []) == -1

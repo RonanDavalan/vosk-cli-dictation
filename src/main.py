@@ -1,4 +1,10 @@
 # src/main.py
+#
+# Point d'entrée de `vosk-cli-dictation` : options de ligne de commande,
+# sous-commandes de contrôle d'une instance en cours, puis, pour une dictée,
+# démarrage des threads (capture audio, reconnaissance, interface, clavier,
+# socket) et leur supervision jusqu'à l'arrêt. Pourquoi : un seul binaire sert
+# à lancer la dictée et à la piloter depuis les raccourcis du bureau.
 
 import sys
 import os

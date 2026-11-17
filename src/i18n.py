@@ -1,4 +1,9 @@
 # src/i18n.py
+#
+# Fonction de traduction `_` des messages de l'interface, adossée aux catalogues
+# gettext de `locales/`. Pourquoi : la langue des messages change à chaud (menu
+# de l'icône, `set-lang`), donc chaque module demande `_` par `get_translation()`
+# au moment d'afficher, jamais à l'import.
 
 import gettext
 import os
@@ -10,9 +15,10 @@ APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOCALE_DIR = os.path.join(APP_DIR, 'locales')
 
 def set_ui_language(lang: str = None) -> str:
-    """
-    Initializes or updates the UI language for gettext.
-    This function ONLY handles the UI translation function '_'.
+    """Fixe la langue des messages de l'interface (gettext).
+
+    Ne gère que la fonction de traduction `_` : la langue de reconnaissance
+    se règle ailleurs.
     """
     global _
 
@@ -43,5 +49,5 @@ def set_ui_language(lang: str = None) -> str:
     return determined_lang
 
 def get_translation():
-    """Returns the currently active translation function (_)."""
+    """Rend la fonction de traduction `_` actuellement active."""
     return _

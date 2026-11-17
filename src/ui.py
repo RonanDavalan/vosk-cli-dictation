@@ -1,4 +1,9 @@
 # src/ui.py
+#
+# Thread d'interface : consomme les textes reconnus et les commandes de contrôle,
+# tape le texte dans la fenêtre active et gère les transitions d'état.
+# Pourquoi : seul ce thread écrit dans le terminal et le presse-papiers, ce qui
+# garde l'ordre des énoncés et des commandes.
 
 import queue
 import time

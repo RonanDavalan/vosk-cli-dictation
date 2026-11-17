@@ -1,4 +1,8 @@
 # src/keyboard_listener.py
+#
+# Raccourcis globaux par pynput, en best-effort. Pourquoi : pynput ne voit que
+# les fenêtres X11 ; la socket de contrôle reste la voie universelle, et ce
+# module, quand pynput manque, le dit puis attend l'arrêt sans rien casser.
 
 import os
 import queue

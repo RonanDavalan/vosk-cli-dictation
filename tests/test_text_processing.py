@@ -62,7 +62,7 @@ EN_CASES = [
      "Hello, how are you? "),
     ("first sentence period second sentence",
      "First sentence. Second sentence"),
-    # `!` ends the sentence, so the next word is capitalized.
+    # `!` termine la phrase : le mot suivant prend une majuscule.
     ("wait exclamation mark now",
      "Wait! Now"),
 ]

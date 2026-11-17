@@ -1,4 +1,9 @@
 # config/config.py
+#
+# Chargement de `config.yaml` (cascade XDG, gabarit par langue) et accès typé à
+# ses valeurs, avec surcharges par langue. Pourquoi : tous les réglages passent
+# par un seul objet `config`, que les autres modules lisent sans connaître
+# l'emplacement du fichier.
 
 import yaml
 import os

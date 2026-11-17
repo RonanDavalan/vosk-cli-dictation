@@ -1,4 +1,9 @@
 # src/recognition.py
+#
+# Thread de reconnaissance : décode l'audio avec Vosk et pilote les trois états
+# (DICTÉE, ÉCOUTE, VEILLE). Pourquoi : le décodeur doit changer de grammaire, se
+# reconstruire après une trame malformée et échanger son modèle entre deux
+# énoncés sans jamais bloquer la capture audio ni l'interface.
 
 import collections
 import json

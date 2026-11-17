@@ -1,3 +1,10 @@
+# src/text_processing.py
+#
+# Mise en forme du texte reconnu : commandes de ponctuation parlées, majuscules
+# et espaces selon la typographie de la langue. Pourquoi : Vosk rend du texte
+# brut en minuscules ; la ponctuation et la typographie viennent des données
+# de `config.yaml`, jamais du code.
+
 import re
 import unicodedata
 from config.config import config
