@@ -223,6 +223,10 @@ Pendant que le script s'exécute dans un terminal, vous pouvez aussi saisir ces 
 
 Un clic gauche lance la dictée si elle est éteinte et la bascule sinon. Le menu du clic droit démarre ou arrête la dictée, la met en veille ou la réveille, termine et copie le texte, annule la session, et choisit la langue (suivre le système ou l'une des quatre ; une langue sans modèle est marquée « à télécharger »), le modèle (léger ou complet, avec sa taille s'il manque ; le téléchargement part du menu et une notification dit quand il finit), la finition par Whisper (proposée quand `faster-whisper` est installé, grisée avec sa raison sinon ; le premier usage d'une taille télécharge ses poids et une notification dit quand cela commence et finit) et la correction (grisée, avec sa raison, tant que la dictée en cours ne l'annonce pas), puis « Revenir à la configuration », activer la dictée vocale ou la quitter, « Lancer l'icône à l'ouverture de session » (une entrée XDG Autostart) et quitter l'icône. La dictée lancée par l'icône tourne détachée de tout terminal ; sa sortie va dans `~/.local/state/vosk-cli-dictation/instance.log`. Sur un bureau sans zone de notification (GNOME sans extension), l'icône dit une fois, par une notification de bureau, comment activer « AppIndicator and KStatusNotifierItem Support » ; les sous-commandes de contrôle ci-dessus continuent de fonctionner.
 
+<p align="center">
+  <img src="../../assets/images/menu-icone-fr.png" alt="Menu du clic droit de l'icône de la zone de notification : état de la dictée, langue, modèle, finition par Whisper, terminer et copier le texte." width="560">
+</p>
+
 Avec les paquets natifs, l'icône est un second paquet de la même version que le paquet principal :
 
 ```bash

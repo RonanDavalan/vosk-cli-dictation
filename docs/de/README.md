@@ -223,6 +223,10 @@ Solange das Skript in einem Terminal läuft, können Sie auch diese Befehle eing
 
 Ein Linksklick startet das Diktat, wenn es aus ist, und schaltet es sonst um. Das Menü des Rechtsklicks startet oder beendet das Diktat, versetzt es in den Tiefschlaf oder weckt es, beendet und kopiert den Text, bricht die Sitzung ab und wählt die Sprache (dem System folgen oder eine der vier; eine Sprache ohne Modell ist als „zum Herunterladen“ markiert), das Modell (leicht oder vollständig, mit seiner Größe, wenn es fehlt; der Download startet im Menü und eine Benachrichtigung meldet sein Ende), die Verfeinerung durch Whisper (angeboten, wenn `faster-whisper` installiert ist, sonst mit ihrem Grund ausgegraut; beim ersten Gebrauch einer Größe werden ihre Gewichte geladen, und eine Benachrichtigung meldet Anfang und Ende) und die Korrektur (ausgegraut, mit ihrem Grund, solange das laufende Diktat sie nicht ankündigt), dann „Zur Konfiguration zurückkehren“, das Sprachdiktat aktivieren oder beenden, „Symbol beim Anmelden starten“ (ein XDG-Autostart-Eintrag) und das Symbol beenden. Das vom Symbol gestartete Diktat läuft ohne Terminal; seine Ausgabe geht nach `~/.local/state/vosk-cli-dictation/instance.log`. Auf einem Desktop ohne Benachrichtigungsbereich (GNOME ohne Erweiterung) sagt das Symbol einmal per Desktop-Benachrichtigung, wie „AppIndicator and KStatusNotifierItem Support“ aktiviert wird; die obigen Steuer-Unterbefehle funktionieren weiter.
 
+<p align="center">
+  <img src="../../assets/images/menu-icone-de.png" alt="Menü des Rechtsklicks auf das Symbol im Benachrichtigungsbereich: Zustand des Diktats, Sprache, Modell, Whisper-Verfeinerung, Text abschließen und kopieren." width="560">
+</p>
+
 Mit den nativen Paketen ist das Symbol ein zweites Paket in derselben Version wie das Hauptpaket:
 
 ```bash

@@ -223,6 +223,10 @@ Mientras el script se ejecuta en un terminal, también puedes escribir estos com
 
 Un clic izquierdo inicia el dictado si está apagado y lo alterna en caso contrario. El menú del clic derecho inicia o detiene el dictado, lo pone en reposo profundo o lo despierta, termina y copia el texto, cancela la sesión, y elige el idioma (seguir el sistema o uno de los cuatro; un idioma sin modelo se marca «por descargar»), el modelo (ligero o completo, con su tamaño si falta; la descarga arranca desde el menú y una notificación avisa cuando termina), el refinado por Whisper (ofrecido cuando `faster-whisper` está instalado, en gris con su motivo si no; el primer uso de un tamaño descarga sus pesos y una notificación avisa del principio y del final) y la corrección (en gris, con su motivo, mientras el dictado en curso no la anuncie), luego «Volver a la configuración», activar el dictado por voz o salir de él, «Iniciar el icono al abrir la sesión» (una entrada XDG Autostart) y salir del icono. El dictado iniciado desde el icono corre separado de cualquier terminal; su salida va a `~/.local/state/vosk-cli-dictation/instance.log`. En un escritorio sin área de notificación (GNOME sin extensión), el icono dice una vez, con una notificación de escritorio, cómo activar «AppIndicator and KStatusNotifierItem Support»; los subcomandos de control de arriba siguen funcionando.
 
+<p align="center">
+  <img src="../../assets/images/menu-icone-es.png" alt="Menú del clic derecho del icono del área de notificación: estado del dictado, idioma, modelo, refinado con Whisper, terminar y copiar el texto." width="560">
+</p>
+
 Con los paquetes nativos, el icono es un segundo paquete de la misma versión que el principal:
 
 ```bash
