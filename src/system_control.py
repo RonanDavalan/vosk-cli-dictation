@@ -2,8 +2,8 @@
 #
 # Injection de texte et de touches dans la fenêtre active, plus retours sonores.
 #
-# Durcissement de l'injection :
-#   - `timeout=` sur tous les sous-processus : un backend figé ne fige plus l'UI.
+# Principes de l'injection :
+#   - `timeout=` sur tous les sous-processus : un backend figé ne doit pas figer l'UI.
 #   - round-trip presse-papiers confirmé (relecture) avant le collage, délai de
 #     restauration paramétrable, presse-papiers non textuel préservé (non écrasé
 #     en silence, non restauré, averti).
@@ -38,7 +38,9 @@ _last_warn = 0.0
 # Restauration différée du presse-papiers (clipboard.defer_restore).
 # On mémorise le presse-papiers d'origine — celui d'avant la première dictée
 # de la session — et on le restaure une seule fois, en fin de session
-# (src/ui.py) ou à la sortie du processus (atexit).
+# (src/ui.py) ou à la sortie du processus (atexit) : une restauration juste
+# après le collage peut précéder la lecture du presse-papiers par une
+# application GTK sous Wayland, qui collerait alors l'ancien contenu.
 _deferred_clip = {"pending": False, "value": None}
 _deferred_atexit_registered = False
 

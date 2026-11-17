@@ -12,6 +12,8 @@ vosk-cli-dictation - dictée vocale hors ligne, disponible pour tout le système
 
 vosk-cli-dictation **\--diagnose**
 
+vosk-cli-dictation **\--version**
+
 vosk-cli-dictation **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
 vosk-cli-dictation {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
@@ -43,6 +45,9 @@ raccourcis de votre environnement de bureau pour un contrôle qui marche partout
     (`en`, `fr`, `de` ou `es`), en remplaçant le choix mémorisé et la valeur de
     `default_model` du fichier de configuration. *LANG* doit correspondre au nom d'un des
     modèles déclarés sous `vosk_models` dans le fichier de configuration.
+
+**\--version**
+:   Affichez la version et quittez.
 
 **\--diagnose**
 :   Vérifiez l'environnement (type de session, backend d'injection, outils, modèles,

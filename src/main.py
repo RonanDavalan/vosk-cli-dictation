@@ -18,6 +18,7 @@ sys.path.insert(0, PROJECT_ROOT)
 from config.config import config
 from config.selection import load_selection
 from src.i18n import set_ui_language, get_translation
+from src.version import __version__
 from src.system_control import check_command_exists, injection_backend_available, injection_limited_to_xwayland
 from src.audio_capture import initialize_audio, audio_capture_thread
 from src.recognition import load_model, recognition_thread, force_c_numeric_locale, put_text
@@ -216,6 +217,11 @@ def main():
     # de construire le parseur.
     pre_lang = None
     argv = sys.argv[1:]
+    # Sortie avant l'initialisation de la langue, qui écrit une ligne sur la
+    # sortie standard : --version ne doit rendre que la version.
+    if '--version' in argv:
+        print('vosk-cli-dictation ' + __version__)
+        sys.exit(0)
     for i, token in enumerate(argv):
         if token in ('-l', '--lang') and i + 1 < len(argv):
             pre_lang = argv[i + 1]
@@ -229,6 +235,8 @@ def main():
 
     parser = argparse.ArgumentParser(description=_("A Vosk-based command-line dictation tool."))
     parser.add_argument('-l', '--lang', type=str, default=None, help=_("Force the interface and model language."))
+    parser.add_argument('--version', action='version', version='vosk-cli-dictation ' + __version__,
+                        help=_("print the version and exit"))
     ctl = parser.add_argument_group(_("control an already running session"))
     ctl.add_argument('--toggle', action='store_true', help=_("toggle dictation on/off"))
     ctl.add_argument('--dictation-on', action='store_true', help=_("start dictation"))

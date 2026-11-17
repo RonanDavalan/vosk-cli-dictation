@@ -1,6 +1,6 @@
 [project]
 name = "vosk-cli-dictation-tray"
-version = "0.1.0"
+version = "0.6.0"
 description = "Notification-area microphone icon for vosk-cli-dictation: shows the dictation state and drives it through its control socket"
 readme = "README.md"
 requires-python = ">=3.10"

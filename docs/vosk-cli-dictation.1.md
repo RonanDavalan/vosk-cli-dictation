@@ -12,6 +12,8 @@ vosk-cli-dictation - offline, system-wide voice dictation for the command line
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--version**
+
 **vosk-cli-dictation** **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
@@ -64,6 +66,9 @@ settings for control that works everywhere.
     (`en`, `fr`, `de` or `es`), overriding the remembered choice and the
     `default_model` value of the configuration file. *LANG* must match the name of one of the
     models declared under `vosk_models` in the configuration file.
+
+**\--version**
+:   Print the version and exit.
 
 **\--diagnose**
 :   Check the environment (session type, injection backend, tools, models,

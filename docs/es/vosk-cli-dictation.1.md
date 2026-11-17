@@ -12,6 +12,8 @@ vosk-cli-dictation: dictado de voz sin conexión para la línea de comandos, dis
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--version**
+
 **vosk-cli-dictation** **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
@@ -44,6 +46,9 @@ funcione en todas partes.
     (`en`, `fr`, `de` o `es`), sobrescribiendo la elección recordada y el valor de
     `default_model` del archivo de configuración. *LANG* debe coincidir con el nombre de uno de los
     modelos declarados en `vosk_models` en el archivo de configuración.
+
+**\--version**
+:   Muestre la versión y salga.
 
 **\--diagnose**
 :   Verifique el entorno (tipo de sesión, backend de inyección, herramientas, modelos,

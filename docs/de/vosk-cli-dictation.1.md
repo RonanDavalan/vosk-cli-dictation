@@ -12,6 +12,8 @@ vosk-cli-dictation - Offline-Spracherkennung für die Kommandozeile, systemweit 
 
 **vosk-cli-dictation** **\--diagnose**
 
+**vosk-cli-dictation** **\--version**
+
 **vosk-cli-dictation** **\--download-model** [*LANG*] [**\--model-size** *small*|*big*]
 
 **vosk-cli-dictation** {**\--status** | **\--toggle** | **\--dictation-on** | **\--dictation-off** | **\--finalize** | **\--cancel** | **\--sleep** | **\--wake** | **\--sleep-toggle** | **\--stop** | **\--info**}
@@ -43,6 +45,9 @@ funktioniert.
     (`en`, `fr`, `de` oder `es`), wobei die gemerkte Auswahl und der Wert `default_model` aus
     der Konfigurationsdatei überschrieben werden. *LANG* muss mit dem Namen eines
     der unter `vosk_models` in der Konfigurationsdatei definierten Modelle übereinstimmen.
+
+**\--version**
+:   Zeigen Sie die Version an und beenden Sie das Programm.
 
 **\--diagnose**
 :   Überprüfen Sie die Umgebung (Sitzungstyp, Injektions-Backend, Tools, Modelle,

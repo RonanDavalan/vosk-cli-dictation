@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Projet Vosk\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 23:20+0100\n"
+"POT-Creation-Date: 2026-11-17 01:04+0100\n"
 "PO-Revision-Date: 2026-09-04 23:16+0200\n"
 "Last-Translator: Ron & Claude\n"
 "Language: de\n"
@@ -203,7 +203,7 @@ msgstr ""
 msgid "Runtime dir writable"
 msgstr "Laufzeitverzeichnis beschreibbar"
 
-#: src/diagnose.py:149 src/main.py:409
+#: src/diagnose.py:149 src/main.py:412
 #, python-brace-format
 msgid "Config file in use: {path}"
 msgstr "Verwendete Konfigurationsdatei: {path}"
@@ -283,7 +283,7 @@ msgstr ""
 msgid "Push-to-talk listener could not start:"
 msgstr "Push-to-Talk-Listener konnte nicht gestartet werden:"
 
-#: src/main.py:56
+#: src/main.py:57
 #, python-brace-format
 msgid ""
 "Refinement: {engine} ({device}), {done} refined, {fallbacks} fell back to"
@@ -294,14 +294,14 @@ msgstr ""
 "{fallbacks} auf den Text von Vosk zurückgefallen ({timeout} zu langsam), "
 "{skipped} Befehle unverändert gelassen, durchschnittlich {ms} ms"
 
-#: src/main.py:111
+#: src/main.py:112
 #, python-brace-format
 msgid "  - Hold [{key}] to dictate; release to stop and copy."
 msgstr ""
 "  - Halten Sie [{key}] gedrückt, um zu diktieren; loslassen, um zu "
 "stoppen und zu kopieren."
 
-#: src/main.py:112
+#: src/main.py:113
 #, python-brace-format
 msgid ""
 "  - Say '{stop_phrase}' or run 'vosk-cli-dictation --finalize' to stop "
@@ -310,7 +310,7 @@ msgstr ""
 "  - Sagen Sie „{stop_phrase}“ oder führen Sie „vosk-cli-dictation "
 "--finalize“ aus, um vorzeitig zu stoppen."
 
-#: src/main.py:113 src/main.py:120 src/main.py:126
+#: src/main.py:114 src/main.py:121 src/main.py:127
 msgid ""
 "  - Hotkeys reach the focused window and miss native-Wayland windows; use"
 " --finalize."
@@ -318,12 +318,12 @@ msgstr ""
 "  - Tastenkombinationen erreichen das fokussierte Fenster und verfehlen "
 "native Wayland-Fenster; verwenden Sie --finalize."
 
-#: src/main.py:118
+#: src/main.py:119
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start."
 msgstr "  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu starten."
 
-#: src/main.py:119
+#: src/main.py:120
 #, python-brace-format
 msgid ""
 "  - Stops and copies on its own after {timeout_ms} ms of silence, or say "
@@ -334,14 +334,14 @@ msgstr ""
 "sagen Sie „{stop_phrase}“ / drücken Sie {hotkey} / führen Sie „vosk-cli-"
 "dictation --finalize“ aus, um vorzeitig zu stoppen."
 
-#: src/main.py:124
+#: src/main.py:125
 #, python-brace-format
 msgid "  - Say '{wake_phrase}' or press {hotkey} to start/stop."
 msgstr ""
 "  - Sagen Sie „{wake_phrase}“ oder drücken Sie {hotkey}, um zu "
 "starten/stoppen."
 
-#: src/main.py:125
+#: src/main.py:126
 #, python-brace-format
 msgid ""
 "  - Say '{stop_phrase}', press {hotkey}, or run 'vosk-cli-dictation "
@@ -350,7 +350,7 @@ msgstr ""
 "  - Sagen Sie „{stop_phrase}“, drücken Sie {hotkey}, oder führen Sie "
 "„vosk-cli-dictation --finalize“ aus, um zu stoppen und zu kopieren."
 
-#: src/main.py:131
+#: src/main.py:132
 #, python-brace-format
 msgid ""
 "\n"
@@ -359,11 +359,11 @@ msgstr ""
 "\n"
 "{style}  Manuelle Befehle:{reset}"
 
-#: src/main.py:132
+#: src/main.py:133
 msgid "  - '/cancel', '/delete-word', '/nl'"
 msgstr "  - '/cancel', '/delete-word', '/nl'"
 
-#: src/main.py:137
+#: src/main.py:138
 #, python-brace-format
 msgid ""
 "\n"
@@ -372,11 +372,11 @@ msgstr ""
 "\n"
 "{style}  Satzzeichen-Befehle:{reset}"
 
-#: src/main.py:170
+#: src/main.py:171
 msgid "Press Ctrl+C to exit the program."
 msgstr "Drücken Sie Strg+C, um das Programm zu beenden."
 
-#: src/main.py:192
+#: src/main.py:193
 msgid ""
 "\n"
 "Program stopped cleanly."
@@ -384,99 +384,103 @@ msgstr ""
 "\n"
 "Programm sauber beendet."
 
-#: src/main.py:230
+#: src/main.py:231
 msgid "A Vosk-based command-line dictation tool."
 msgstr "Ein Diktierwerkzeug für die Befehlszeile auf Basis von Vosk."
 
-#: src/main.py:231
+#: src/main.py:232
 msgid "Force the interface and model language."
 msgstr "Sprache der Oberfläche und des Modells erzwingen."
 
-#: src/main.py:232
+#: src/main.py:234
+msgid "print the version and exit"
+msgstr "die Version anzeigen und beenden"
+
+#: src/main.py:235
 msgid "control an already running session"
 msgstr "eine bereits laufende Sitzung steuern"
 
-#: src/main.py:233
+#: src/main.py:236
 msgid "toggle dictation on/off"
 msgstr "Diktat ein-/ausschalten"
 
-#: src/main.py:234
+#: src/main.py:237
 msgid "start dictation"
 msgstr "Diktat starten"
 
-#: src/main.py:235
+#: src/main.py:238
 msgid "stop dictation, keep listening"
 msgstr "Diktat stoppen, Zuhören fortsetzen"
 
-#: src/main.py:236
+#: src/main.py:239
 msgid "finalize the session and copy the text"
 msgstr "Sitzung abschließen und den Text kopieren"
 
-#: src/main.py:237
+#: src/main.py:240
 msgid "discard the current session buffer"
 msgstr "den aktuellen Sitzungspuffer verwerfen"
 
-#: src/main.py:238
+#: src/main.py:241
 msgid "enter deep sleep (release the microphone)"
 msgstr "in den Tiefschlaf wechseln (Mikrofon freigeben)"
 
-#: src/main.py:239
+#: src/main.py:242
 msgid "leave deep sleep"
 msgstr "den Tiefschlaf verlassen"
 
-#: src/main.py:240
+#: src/main.py:243
 msgid "toggle deep sleep"
 msgstr "Tiefschlaf umschalten"
 
-#: src/main.py:241
+#: src/main.py:244
 msgid "print the current state"
 msgstr "den aktuellen Zustand anzeigen"
 
-#: src/main.py:242
+#: src/main.py:245
 msgid "stop the running session"
 msgstr "die laufende Sitzung beenden"
 
-#: src/main.py:243
+#: src/main.py:246
 msgid "print the full state of the running session as one JSON line"
 msgstr ""
 "gibt den vollständigen Zustand der laufenden Sitzung als eine JSON-Zeile "
 "aus"
 
-#: src/main.py:244
+#: src/main.py:247
 msgid "check the environment and exit"
 msgstr "die Umgebung prüfen und beenden"
 
-#: src/main.py:246
+#: src/main.py:249
 msgid "download the model for LANG (or the current language) and exit"
 msgstr "lädt das Modell für LANG (oder die aktuelle Sprache) herunter und beendet"
 
-#: src/main.py:248
+#: src/main.py:251
 msgid "with --download-model: small (default) or big (full) model"
 msgstr ""
 "mit --download-model: kleines (Standard) oder großes (vollständiges) "
 "Modell"
 
-#: src/main.py:264
+#: src/main.py:267
 msgid "The dictation is starting; try again once the model is loaded."
 msgstr "Das Diktat startet; versuche es erneut, wenn das Modell geladen ist."
 
-#: src/main.py:267
+#: src/main.py:270
 msgid "No running vosk-cli-dictation session."
 msgstr "Keine laufende vosk-cli-dictation-Sitzung."
 
-#: src/main.py:286
+#: src/main.py:289
 msgid "A vosk-cli-dictation session is already running (see --status)."
 msgstr "Es läuft bereits eine vosk-cli-dictation-Sitzung (siehe --status)."
 
-#: src/main.py:289
+#: src/main.py:292
 msgid "Checking external dependencies..."
 msgstr "Externe Abhängigkeiten werden geprüft..."
 
-#: src/main.py:291
+#: src/main.py:294
 msgid "No text-injection backend available for this session."
 msgstr "Kein Backend für Texteingabe für diese Sitzung verfügbar."
 
-#: src/main.py:292
+#: src/main.py:295
 msgid ""
 "Install 'wtype' + 'wl-clipboard' (Wayland) or 'xdotool' (X11); 'ydotool' "
 "also works."
@@ -484,7 +488,7 @@ msgstr ""
 "Installieren Sie 'wtype' + 'wl-clipboard' (Wayland) oder 'xdotool' (X11);"
 " 'ydotool' funktioniert auch."
 
-#: src/main.py:295
+#: src/main.py:298
 msgid ""
 "On a Wayland session, 'xdotool' only types into XWayland windows; install"
 " 'ydotool' or 'wtype' for native Wayland windows."
@@ -492,25 +496,25 @@ msgstr ""
 "In einer Wayland-Sitzung tippt „xdotool“ nur in XWayland-Fenstern; "
 "installiere „ydotool“ oder „wtype“ für native Wayland-Fenster."
 
-#: src/main.py:297
+#: src/main.py:300
 msgid "'paplay' not found. Sound notifications will be disabled."
 msgstr "'paplay' nicht gefunden. Tonbenachrichtigungen werden deaktiviert."
 
-#: src/main.py:298
+#: src/main.py:301
 msgid "Dependencies checked."
 msgstr "Abhängigkeiten geprüft."
 
-#: src/main.py:300
+#: src/main.py:303
 #, python-brace-format
 msgid "Attempting to load model for language: {lang}"
 msgstr "Versuch, das Modell für die Sprache zu laden: {lang}"
 
-#: src/main.py:307
+#: src/main.py:310
 #, python-brace-format
 msgid "Failed. Attempting to load default model: {model_name}"
 msgstr "Fehlgeschlagen. Versuch, das Standardmodell zu laden: {model_name}"
 
-#: src/main.py:311
+#: src/main.py:314
 #, python-brace-format
 msgid ""
 "No speech recognition model could be loaded. Download the small model for"
@@ -519,41 +523,41 @@ msgstr ""
 "Es konnte kein Spracherkennungsmodell geladen werden. Jetzt das kleine "
 "Modell für '{lang}' herunterladen? [j/N] "
 
-#: src/main.py:318
+#: src/main.py:321
 msgid "No speech recognition model could be loaded."
 msgstr "Es konnte kein Spracherkennungsmodell geladen werden."
 
-#: src/main.py:319
+#: src/main.py:322
 #, python-brace-format
 msgid "Run 'vosk-cli-dictation --download-model {lang}' to download one."
 msgstr ""
 "Führen Sie „vosk-cli-dictation --download-model {lang}“ aus, um eines "
 "herunterzuladen."
 
-#: src/main.py:320
+#: src/main.py:323
 msgid "Please check the model paths and integrity in your config.yaml file."
 msgstr ""
 "Bitte überprüfen Sie die Modellpfade und deren Integrität in Ihrer config"
 ".yaml-Datei."
 
-#: src/main.py:386
+#: src/main.py:389
 #, python-brace-format
 msgid "Control socket: {path}"
 msgstr "Steuerungs-Socket: {path}"
 
-#: src/main.py:388
+#: src/main.py:391
 #, python-brace-format
 msgid "Could not open the control socket ({err}); CLI subcommands disabled."
 msgstr ""
 "Steuerungs-Socket konnte nicht geöffnet werden ({err}); CLI-Unterbefehle "
 "deaktiviert."
 
-#: src/main.py:408
+#: src/main.py:411
 #, python-brace-format
 msgid "Model directory: {path}"
 msgstr "Modellverzeichnis: {path}"
 
-#: src/main.py:416
+#: src/main.py:419
 #, python-brace-format
 msgid ""
 "Your config.yaml predates newer options (schema {current}); see the "
@@ -562,21 +566,21 @@ msgstr ""
 "Ihre config.yaml stammt von vor neueren Optionen (Schema {current}); im "
 "Handbuch steht, was sich geändert hat. Datei: {path}"
 
-#: src/main.py:421
+#: src/main.py:424
 #, python-brace-format
 msgid "The script is ready. Current model: {model_name}"
 msgstr "Das Skript ist bereit. Aktuelles Modell: {model_name}"
 
-#: src/main.py:433
+#: src/main.py:436
 #, python-brace-format
 msgid "The {name} thread stopped; ending the session."
 msgstr "Der {name}-Thread wurde beendet; die Sitzung wird beendet."
 
-#: src/main.py:443
+#: src/main.py:446
 msgid "Control queue full; command ignored."
 msgstr "Steuerungswarteschlange voll; Befehl ignoriert."
 
-#: src/main.py:448
+#: src/main.py:451
 msgid ""
 "\n"
 "Stop request received. Shutting down..."

@@ -106,8 +106,8 @@ def test_german(raw, expected):
 
 
 def test_german_only_capitalizes_sentence_start():
-    # "haus" (nom commun) n'est pas capitalisé en milieu de phrase : décision
-    # n°5 de la spec (pas d'analyseur morphologique).
+    # "haus" (nom commun) n'est pas capitalisé en milieu de phrase : sans
+    # analyseur morphologique, seule l'initiale de phrase prend la majuscule.
     assert fmt("de", "das haus ist gross") == "Das haus ist gross"
 
 
