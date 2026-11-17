@@ -240,7 +240,7 @@ def ui_thread(
                 if log_parts:
                     word_to_remove = log_parts.pop()
                     full_text_log = " ".join(log_parts) + (" " if log_parts else "")
-                    for _ in range(len(word_to_remove) + 1):
+                    for __ in range(len(word_to_remove) + 1):
                         press_key("BackSpace")
                     print(
                         f"{config.color_warning}{_('Last word deleted (simulation).')}{config.RESET}"

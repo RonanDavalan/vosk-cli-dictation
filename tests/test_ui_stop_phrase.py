@@ -144,3 +144,21 @@ def test_single_word_stop_phrase(monkeypatch):
 
     assert "bonjour" in _joined(copied).lower()
     assert "zut" not in _joined(copied).lower()
+
+
+def test_delete_word_command_keeps_the_ui_thread_alive(harness, monkeypatch):
+    text_q, ctrl, typed, copied = harness
+    errors = []
+    monkeypatch.setattr(
+        threading, "excepthook", lambda args: errors.append(args.exc_value)
+    )
+    text_q.put_nowait(
+        (
+            "bonjour monde",
+            [{"word": "bonjour", "conf": 0.95}, {"word": "monde", "conf": 0.95}],
+        )
+    )
+    time.sleep(0.15)
+    ctrl.put_nowait("/delete-word")
+    time.sleep(0.3)
+    assert errors == []
