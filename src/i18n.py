@@ -7,9 +7,11 @@
 
 import gettext
 import os
-import locale
 
-_ = lambda s: s
+
+def _(s):
+    return s
+
 
 APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOCALE_DIR = os.path.join(APP_DIR, "locales")

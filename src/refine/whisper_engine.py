@@ -7,7 +7,7 @@ import functools
 import glob
 import os
 
-from src.refine import RefineEngine, RefineUnavailable, SAMPLE_RATE
+from src.refine import RefineEngine, RefineUnavailable
 
 SIZES = ("tiny", "base", "small", "medium", "large-v3-turbo")
 # Taille de la finition quand un GPU sert : la plus grande dont le 95e centile

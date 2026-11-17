@@ -1,7 +1,6 @@
 # Modules sans interface : client, lanceur, démarrage de session, tailles.
 
 import stat
-import sys
 import time
 
 from vosk_cli_dictation_tray import autostart, launcher

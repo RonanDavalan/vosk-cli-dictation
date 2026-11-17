@@ -37,5 +37,5 @@ def test_numero_de_version_bien_forme():
 def test_aide_de_l_option_dans_chaque_langue(lang):
     r = _lancer("--lang", lang, "--help")
     assert r.returncode == 0
-    ligne = next(l for l in r.stdout.splitlines() if "--version" in l)
+    ligne = next(ln for ln in r.stdout.splitlines() if "--version" in ln)
     assert ligne.strip() != "--version"

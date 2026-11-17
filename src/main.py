@@ -21,29 +21,31 @@ import vosk
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from config.config import config
-from config.selection import load_selection
-from src.i18n import set_ui_language, get_translation
-from src.version import __version__
-from src.system_control import (
+# E402 : ces imports suivent l'ajout de la racine du projet au chemin de
+# recherche, nécessaire pour lancer le script depuis un clone.
+from config.config import config  # noqa: E402
+from config.selection import load_selection  # noqa: E402
+from src.i18n import set_ui_language, get_translation  # noqa: E402
+from src.version import __version__  # noqa: E402
+from src.system_control import (  # noqa: E402
     check_command_exists,
     injection_backend_available,
     injection_limited_to_xwayland,
 )
-from src.audio_capture import initialize_audio, audio_capture_thread
-from src.recognition import (
+from src.audio_capture import initialize_audio, audio_capture_thread  # noqa: E402
+from src.recognition import (  # noqa: E402
     load_model,
     recognition_thread,
     force_c_numeric_locale,
     put_text,
 )
-from src.refine.control import RefineController, settings as refine_settings
-from src.ui import ui_thread
-from src.keyboard_listener import keyboard_listener_thread
-from src.text_processing import TextProcessor
-from src.engine_switch import EngineSwitch
-from src import instance_lock
-from src.control_socket import (
+from src.refine.control import RefineController, settings as refine_settings  # noqa: E402
+from src.ui import ui_thread  # noqa: E402
+from src.keyboard_listener import keyboard_listener_thread  # noqa: E402
+from src.text_processing import TextProcessor  # noqa: E402
+from src.engine_switch import EngineSwitch  # noqa: E402
+from src import instance_lock  # noqa: E402
+from src.control_socket import (  # noqa: E402
     start_control_server,
     send_control_command,
     socket_path,
@@ -584,10 +586,9 @@ def main():
     # Socket de contrôle. Non bloquant si le bind échoue : l'outil reste
     # utilisable en interactif, seules les sous-commandes CLI sont
     # indisponibles.
-    control_server = None
     if config.data.get("control_socket", True):
         try:
-            control_server = start_control_server(control_queue, stop_event, switch)
+            start_control_server(control_queue, stop_event, switch)
             print_status(
                 _("Control socket: {path}").format(path=socket_path()),
                 config.color_info,

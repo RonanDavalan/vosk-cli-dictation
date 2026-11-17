@@ -14,7 +14,6 @@ from src.i18n import set_ui_language
 from src.text_processing import TextProcessor
 from src.runtime_state import (
     runtime_state,
-    STATE_LISTENING,
     STATE_DICTATING,
     STATE_SLEEPING,
 )

@@ -70,10 +70,7 @@ fi
 
 # --- Étape 4 : Lancer la compilation ---
 echo "[4/4] Lancement de la compilation des fichiers .po en .mo..."
-pybabel compile -d "$LOCALES_DIR"
-
-# Vérifier le code de sortie de la commande précédente
-if [ $? -eq 0 ]; then
+if pybabel compile -d "$LOCALES_DIR"; then
     echo -e "\n${GREEN}SUCCÈS : Les fichiers de traduction ont été compilés avec succès !${NC}"
 else
     echo -e "\n${RED}ÉCHEC : Une erreur est survenue lors de la compilation.${NC}"

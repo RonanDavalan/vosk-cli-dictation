@@ -10,7 +10,6 @@ import queue
 import threading
 import time
 
-import pytest
 
 import src.recognition as rec
 from config.config import config

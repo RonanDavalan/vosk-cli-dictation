@@ -149,7 +149,6 @@ class TextProcessor:
         # si le mot déclencheur la précède immédiatement ; le déclencheur est
         # alors consommé. Sinon les mots sont émis littéralement.
         explicit = self.punctuation_mode == "explicit"
-        trigger = self.punctuation_trigger
 
         tokens = []
         i = 0

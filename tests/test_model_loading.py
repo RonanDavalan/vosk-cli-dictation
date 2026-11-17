@@ -6,7 +6,6 @@
 # `pytest` reste vert sur une clone nue.
 
 import json
-import os
 
 import pytest
 

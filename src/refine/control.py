@@ -8,7 +8,7 @@ import threading
 import time
 
 from config.config import config
-from config.selection import load_selection, save_selection
+from config.selection import save_selection
 from src.i18n import get_translation
 from src.refine import NONE, RefineUnavailable
 from src.refine import whisper_engine as we

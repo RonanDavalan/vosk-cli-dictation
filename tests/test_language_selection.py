@@ -43,7 +43,8 @@ def make_config(
     cfg = tmp_path / "config.yaml"
     body = {
         "vosk_models": [
-            {"name": l, "path_relative": "vosk-model/" + names[l]} for l in models
+            {"name": code, "path_relative": "vosk-model/" + names[code]}
+            for code in models
         ]
     }
     if default_model is not None:

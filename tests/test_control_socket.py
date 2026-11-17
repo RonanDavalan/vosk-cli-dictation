@@ -1,5 +1,6 @@
 # Couche IPC : socket Unix de contrôle.
 
+import json
 import os
 import queue
 import stat
@@ -105,8 +106,6 @@ def test_busy_queue_reports_err_busy(runtime_dir):
 
 
 # --- Jetons à argument et `info` ---------------------------------------------
-
-import json
 
 
 class FakeController:

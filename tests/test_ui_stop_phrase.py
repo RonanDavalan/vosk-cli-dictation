@@ -10,7 +10,7 @@ import pytest
 import src.ui as ui
 from config.config import config
 from src.text_processing import TextProcessor
-from src.runtime_state import runtime_state, STATE_LISTENING
+from src.runtime_state import runtime_state
 
 
 @pytest.fixture

@@ -9,7 +9,7 @@ la dictée annonce : refaire le menu toutes les 250 ms fermerait un menu ouvert.
 import os
 import signal
 
-from PySide6.QtCore import QProcess, QProcessEnvironment, Qt
+from PySide6.QtCore import QProcess
 from PySide6.QtGui import QAction, QActionGroup
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 

@@ -17,7 +17,7 @@ from src.system_control import (
     flush_deferred_clipboard,
     ensure_clipboard_text,
 )
-from src.i18n import get_translation, set_ui_language
+from src.i18n import get_translation
 from src.text_processing import TextProcessor
 from src.runtime_state import (
     runtime_state,

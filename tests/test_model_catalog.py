@@ -12,7 +12,7 @@ import src.model_download as md
 def test_catalog_has_eight_entries_four_languages_two_sizes():
     assert len(md.CATALOG) == 8
     assert set(md.CATALOG) == {
-        (l, s) for l in ("en", "fr", "de", "es") for s in ("small", "big")
+        (lang, s) for lang in ("en", "fr", "de", "es") for s in ("small", "big")
     }
 
 
