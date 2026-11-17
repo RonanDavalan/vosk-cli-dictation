@@ -11,7 +11,7 @@ STOP = phrase_tokens("stop dictée")
 WAKE = phrase_tokens("active dictée")
 
 
-# --- correspondance sur phrase entière, plus de sous-chaîne ------------------
+# --- correspondance sur phrase entière, jamais sur sous-chaîne ----------------
 
 def test_isolated_words_do_not_trigger():
     # "stop" seul, "dictée" seul, séparés : aucune correspondance.

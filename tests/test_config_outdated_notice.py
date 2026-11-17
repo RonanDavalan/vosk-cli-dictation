@@ -1,4 +1,4 @@
-# Notice de schéma de config obsolète (CONFIG_PUBLIQUE_ET_LOCALISATION.md §2.4) :
+# Notice de schéma de config obsolète :
 # Config.config_is_outdated ne vaut True que pour le fichier
 # utilisateur XDG réel, et seulement s'il est en retard sur
 # Config.CURRENT_CONFIG_VERSION. Un fichier de développement (chargé en

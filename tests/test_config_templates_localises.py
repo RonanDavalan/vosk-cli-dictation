@@ -1,4 +1,4 @@
-# Les quatre gabarits config.<lang>.yaml livrés (CONFIG_PUBLIQUE_ET_LOCALISATION.md)
+# Les quatre gabarits config.<lang>.yaml livrés
 # doivent rester structurellement identiques -- seuls les commentaires et
 # default_model varient par langue -- et exempts de vocabulaire de pilotage
 # interne (voir JARGON_PATTERN ci-dessous), qui n'a rien à faire dans un

@@ -116,7 +116,7 @@ def injection_backend_available() -> bool:
 
 
 def ydotool_disponible() -> bool:
-    """Compat : conservé pour un appelant historique. Voir _detect_caps()."""
+    """Vrai si ydotool est présent et son démon joignable (voir _detect_caps())."""
     return _detect_caps()["ydotool"]
 
 
@@ -180,7 +180,7 @@ def _clipboard_is_text() -> bool:
             return any(t in out for t in ("UTF8_STRING", "STRING", "text/plain",
                                           "TEXT"))
         return True
-    return True  # pas d'outil de sonde : on suppose du texte (comportement d'avant)
+    return True  # pas d'outil de sonde : on suppose du texte
 
 
 def _clipboard_get() -> str:

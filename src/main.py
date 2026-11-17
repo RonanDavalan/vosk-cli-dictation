@@ -204,7 +204,7 @@ def main():
     # avant chaque KaldiRecognizer.
     force_c_numeric_locale()
 
-    # Coupe les LOG (VoskAPI...) au boot — le bruit de Vosk s'affichait après
+    # Coupe les LOG (VoskAPI...) au boot : leur bruit s'afficherait après
     # « Appuyez sur Ctrl+C pour quitter » (démarrage des threads après l'aide).
     # --diagnose n'a pas besoin de ces logs.
     vosk.SetLogLevel(-1)
@@ -462,8 +462,8 @@ def main():
 
         # Attendre la sortie effective des threads *avant* de fermer le flux et
         # de terminer PortAudio : sinon audio_capture_thread peut être encore
-        # dans stream.read() quand p.terminate() passe, ce qui faisait sortir
-        # le démon en code 1 sur --stop.
+        # dans stream.read() quand p.terminate() passe, et le démon sortirait
+        # en code 1 sur --stop.
         for t in threads:
             if t is not threading.current_thread():
                 t.join(timeout=2.0)

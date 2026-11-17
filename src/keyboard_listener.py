@@ -27,9 +27,8 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
     universelle reste la socket Unix et ses sous-commandes CLI (--toggle /
     --finalize / --sleep-toggle / --status).
 
-    Le garde qui limitait l'écoute aux sessions X11 est retiré : il écartait
-    le cas XWayland qui fonctionnait déjà. `hotkeys.pynput_enabled: false`
-    coupe toujours l'écoute, désormais sur tout type de session.
+    `hotkeys.pynput_enabled: false` coupe l'écoute, quel que soit le type de
+    session.
     """
     _ = get_translation()
 
@@ -47,7 +46,7 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
 
     try:
         from pynput.keyboard import GlobalHotKeys, Key, KeyCode, Listener
-    except Exception as exc:  # ImportError, or an Xlib backend failure at import
+    except Exception as exc:  # ImportError, ou échec du backend Xlib à l'import
         _notice(_('Global hotkeys via pynput are not available on this session; use the CLI subcommands bound to your desktop shortcuts.'))
         print(f"{config.color_info}  ({exc}){config.RESET}")
         stop_event.wait()
@@ -134,7 +133,7 @@ def keyboard_listener_thread(control_queue: queue.Queue, stop_event):
     # Mode appui-pour-parler : GlobalHotKeys ne rend jamais le relâchement
     # d'une touche ; un Listener bas niveau dédié le fait, actif seulement si
     # interaction.mode == 'maintenue'. Cohabite avec le raccourci de bascule
-    # ci-dessus (aucune fonctionnalité existante retirée).
+    # ci-dessus.
     ptt_listener = None
     if config.interaction_mode == 'maintenue':
         key_name = config.hotkeys.get('push_to_talk')

@@ -2,11 +2,10 @@
 #
 # Détection tokenisée des phrases de déclenchement.
 #
-# Remplace l'ancien test de sous-chaîne `config.STOP_WORD in raw_text_lower`
-# (src/ui.py) par une correspondance sur la suite de tokens : la phrase-clé ne
-# se déclenche que si ses mots apparaissent, dans l'ordre, comme une sous-suite
-# contiguë du texte reconnu. Fonctions pures, sans dépendance au reste de
-# l'application — testables directement.
+# Correspondance sur la suite de tokens, jamais sur une sous-chaîne : la
+# phrase-clé ne se déclenche que si ses mots apparaissent, dans l'ordre, comme
+# une sous-suite contiguë du texte reconnu. Fonctions pures, sans dépendance
+# au reste de l'application — testables directement.
 
 import re
 import unicodedata
@@ -47,8 +46,7 @@ def find_phrase(tokens: list, needle: list) -> int:
 
 
 def ends_with_phrase(tokens: list, needle: list) -> bool:
-    """La phrase-clé est-elle exactement la fin de la suite de tokens ?
-    Utilisé sur les résultats partiels en ÉCOUTE (réveil à faible latence)."""
+    """La phrase-clé est-elle exactement la fin de la suite de tokens ?"""
     if not needle or len(needle) > len(tokens):
         return False
     return tokens[-len(needle):] == needle
@@ -81,8 +79,7 @@ def strip_one_repetition(text: str, needle: list) -> str:
 
 
 def remove_phrase_and_after(text: str, needle: list) -> str:
-    """Texte situé *avant* la phrase-clé (le reste est jeté, comme le faisait
-    l'ancien `raw_text.split(STOP_WORD, 1)[0]`)."""
+    """Texte situé *avant* la phrase-clé ; le reste est jeté."""
     n = len(needle)
     if n == 0:
         return text.strip()

@@ -89,8 +89,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         recording = False
         runtime_state.set_state(STATE_LISTENING)
         display_partials_event.clear()
-        # Correctif de collage : fin de session de dictée -> on rend le
-        # presse-papiers d'origine si clipboard.defer_restore l'a mis de côté.
+        # Fin de session de dictée : on rend le presse-papiers d'origine si
+        # clipboard.defer_restore l'a mis de côté.
         flush_deferred_clipboard()
         # Couleurs du thème depuis la configuration
         print(f"\n{config.color_error}{_('Recording paused.')}{config.RESET}")
@@ -106,16 +106,15 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
         recording = False
         runtime_state.set_state(STATE_LISTENING)
         display_partials_event.clear()
-        # Correctif de collage : rendre le presse-papiers d'origine (mode
-        # clipboard.defer_restore) avant d'y copier le texte de session.
+        # Rendre le presse-papiers d'origine (mode clipboard.defer_restore)
+        # avant d'y copier le texte de session.
         flush_deferred_clipboard()
         text_to_copy = full_text_log.strip()
         # Sur une session sans presse-papiers accessible (SSH nu, pas de
         # DISPLAY, pas de xclip/xsel/wl-clipboard), pyperclip.copy lève une
-        # exception qui remontait hors du thread UI et le tuait. On la capture :
+        # exception qui sortirait du thread UI et le tuerait. On la capture :
         # le texte est imprimé sur stdout et la finalisation se poursuit
-        # normalement. pyperclip reste le mécanisme de copie (acquis
-        # technique), non remplacé.
+        # normalement.
         copied = True
         if text_to_copy:
             try:
@@ -258,8 +257,8 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
             if recording: stop_recording()
             else: start_recording()
         elif command == 'DICTATION_ON':
-            # Plus de garde `not sleep_event` ici — start_recording()
-            # sort de veille de lui-même.
+            # Aucune garde sur sleep_event ici : start_recording() sort de
+            # veille de lui-même.
             if not recording: start_recording()
         elif command == 'DICTATION_OFF':
             if recording: stop_recording()
@@ -330,11 +329,10 @@ def ui_thread(text_queue: queue.Queue, control_queue: queue.Queue, stop_event, p
                         finalize_session()
                     else:
                         # Confiance insuffisante -> la phrase et ce qui la suit
-                        # sont ABSORBÉS (ni finalisation, ni frappe). L'ancien
-                        # code la tapait dans le document — seul résultat
-                        # qu'une commande d'arrêt ne doit jamais produire.
-                        # L'utilisateur répète, ou passe par --finalize / le
-                        # raccourci.
+                        # sont ABSORBÉS (ni finalisation, ni frappe) : une
+                        # commande d'arrêt ne doit jamais être tapée dans le
+                        # document. L'utilisateur répète, ou passe par
+                        # --finalize / le raccourci.
                         emit_low_conf_hint()
                     continue
 

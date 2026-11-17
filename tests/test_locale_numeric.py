@@ -1,7 +1,7 @@
 # Vosk/Kaldi sérialise les flottants de SetWords(True) avec le séparateur
 # décimal de LC_NUMERIC. Sous fr_FR.UTF-8 (locale à virgule), Result() rend
 # « "conf" : 1,000000 » et json.loads casse à chaque final avec mots. Le
-# correctif force LC_NUMERIC du processus à « C » au démarrage (src/main.py)
+# démarrage force LC_NUMERIC du processus à « C » (src/main.py)
 # et défensivement dans build_recognizer().
 #
 # Ces tests exigent qu'une locale à virgule décimale soit installée sur la
@@ -50,7 +50,7 @@ def _restore_numeric_locale():
 
 def test_the_captured_comma_locale_string_is_really_invalid_json():
     # La chaîne exacte capturée en conditions réelles (virgule décimale) n'est pas
-    # du JSON — c'est ce que le correctif de locale empêche Vosk de produire.
+    # du JSON — c'est ce que le forçage de la locale empêche Vosk de produire.
     raw = (
         '{\n  "result" : [{\n      "conf" : 1,000000,\n'
         '      "end" : 11,370000,\n      "start" : 10,710000,\n'

@@ -1,7 +1,5 @@
-# Garde de démarrage du listener pynput (COMPATIBILITE_WAYLAND.md §5). Le garde
-# `XDG_SESSION_TYPE == "x11"` est retiré : le listener est un confort
-# best-effort qui démarre dès qu'un serveur X est joignable, sur tout type de
-# session, et se tait si `DISPLAY` est absent, si `hotkeys.pynput_enabled` est
+# Garde de démarrage du listener pynput : un confort best-effort qui démarre
+# dès qu'un serveur X est joignable, sur tout type de session, et se tait si `DISPLAY` est absent, si `hotkeys.pynput_enabled` est
 # false, ou si le backend pynput est indisponible.
 #
 # Ces tests couvrent la matrice (DISPLAY présent/absent × XDG_SESSION_TYPE ×

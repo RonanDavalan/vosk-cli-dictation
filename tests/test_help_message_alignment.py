@@ -1,8 +1,8 @@
 # Lisibilité de la sortie de démarrage — la colonne de droite du
 # tableau de ponctuation de print_help_message() est alignée sur une seule
-# abscisse dans les quatre langues. Régression : le calcul de largeur se faisait
-# avec len() (points de code), alors qu'un terminal rend « „ » « — » « … » sur
-# deux cellules, ce qui décalait la seconde colonne en escalier en de/fr.
+# abscisse dans les quatre langues. Le calcul de largeur ne se fait pas avec
+# len() (points de code) : un terminal rend « „ » « — » « … » sur deux
+# cellules, ce qui décalerait la seconde colonne en escalier en de/fr.
 
 import re
 

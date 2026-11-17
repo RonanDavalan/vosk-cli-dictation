@@ -21,7 +21,7 @@ class TextProcessor:
         # viennent du bloc `typography` par langue.
         self.no_space_after = {'(', '[', '« ', '„', '¿', '¡'}
         self.no_space_before = {',', '.', ')', ']', '?', '!', ':', ';', '»', '…', '“'}
-        # Add state to handle capitalization contextually.
+        # Majuscule contextuelle : le mot suivant ouvre-t-il une phrase.
         self.capitalize_next_word = True
         self.update_language(language_code)
 
@@ -65,7 +65,7 @@ class TextProcessor:
     def process(self, raw_text: str, keep_case: bool = False) -> str:
         """
         Met en forme une chaîne brute reconnue.
-        Le drapeau `is_first_word_of_sentence` est désormais géré en interne.
+        Le drapeau `is_first_word_of_sentence` est géré en interne.
         `keep_case` : texte d'un moteur de finition, dont la casse et la
         ponctuation sont gardées (Vosk rend tout en minuscules).
         """

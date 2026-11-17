@@ -20,8 +20,8 @@ from src.voice_commands import (
 MODE_FULL = "full"
 MODE_LISTENING = "listening"
 
-# Reprise bornée sur trame malformée : une trame malformée ne tue plus le
-# thread, on reconstruit le recognizer. Mais si la reconstruction ne rétablit
+# Reprise bornée sur trame malformée : une trame malformée ne tue pas le
+# thread, on reconstruit le recognizer. Si la reconstruction ne rétablit
 # rien — cas observé sur un Raspberry Pi, json.JSONDecodeError à chaque trame,
 # Reset() sans effet — on ne boucle pas indéfiniment : au-delà de
 # DECODE_ERROR_MAX_CONSECUTIVE trames en échec d'affilée, le thread pose
@@ -213,9 +213,9 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
     - En DICTÉE : les résultats finaux (texte + confiance par mot) vont au
       thread UI, qui gère la phrase d'arrêt et la frappe.
     - En ÉCOUTE : la phrase de réveil est appariée sur un résultat final avec
-      garde de confiance — le réveil à faible latence sur résultats partiels
-      est retiré : sous grammaire restreinte, les partiels forcent la phrase
-      sur de l'audio ambigu et réveillaient sur « active » seul. Un appariement
+      garde de confiance — jamais sur un résultat partiel : sous grammaire
+      restreinte, les partiels forcent la phrase sur de l'audio ambigu et
+      réveilleraient sur « active » seul. Un appariement
       demande au thread UI le passage en DICTÉE et réinitialise le recognizer
       pour ne pas réémettre la phrase.
     - En VEILLE : le thread attend sur wake_event ; au réveil il reconstruit
@@ -233,9 +233,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
 
     chunk_audio_s = config.audio['buffer_size'] / config.audio['sample_rate']
     last_rtf_warning = 0.0
-    # Cadence fixe du log d'erreur de décodage. Une trame malformée ne tue
-    # plus le thread ; on la journalise au plus une fois toutes les
-    # DECODE_ERROR_THROTTLE_S secondes.
+    # Cadence fixe du log d'erreur de décodage : une trame malformée est
+    # journalisée au plus une fois toutes les DECODE_ERROR_THROTTLE_S secondes.
     last_decode_error_warning = 0.0
     DECODE_ERROR_THROTTLE_S = 5.0
     # Trames en échec de décodage consécutives (remis à zéro par tout décodage
@@ -568,10 +567,8 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                         idx = find_phrase(tokens, wake_tokens)
                         if idx != -1:
                             # Le garde de confiance s'applique dans TOUS les
-                            # modes. Avant, sous grammaire restreinte, un final
-                            # quelconque réveillait sans garde — et le chemin
-                            # des partiels (supprimé ci-dessous) réveillait sur
-                            # « active » seul.
+                            # modes : sous grammaire restreinte, un final
+                            # quelconque réveillerait sinon sans garde.
                             conf = mean_confidence(words, idx, len(wake_tokens))
                             if conf >= conf_threshold:
                                 try:
@@ -599,9 +596,9 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
                     if voice_mark is None and utterance_audio:
                         voice_mark = len(utterance_audio) - 1
 
-                # Plus de réveil sur les partiels. La grammaire restreinte force
+                # Aucun réveil sur les partiels : la grammaire restreinte force
                 # la phrase de réveil sur de l'audio ambigu (« active » seul
-                # réveillait la dictée) et aucun garde de confiance n'existe
+                # réveillerait la dictée) et aucun garde de confiance n'existe
                 # sur un partiel. Le réveil se fait uniquement sur un final
                 # avec confiance (bloc ci-dessus).
 
@@ -623,7 +620,7 @@ def recognition_thread(model, recognizer, audio_queue: queue.Queue, text_queue: 
             continue
         except Exception as e:
             # Une erreur sur une trame — au premier chef une json.JSONDecodeError
-            # sur Result()/PartialResult() — ne termine plus le décodage. On
+            # sur Result()/PartialResult() — ne termine pas le décodage. On
             # reconstruit le recognizer : Reset() seul s'est montré sans effet
             # sur un Raspberry Pi (erreur à chaque trame). Si les échecs
             # s'enchaînent au-delà de DECODE_ERROR_MAX_CONSECUTIVE, la

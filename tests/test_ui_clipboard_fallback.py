@@ -1,4 +1,4 @@
-# finalize_session() ne tue plus le thread UI quand pyperclip.copy lève
+# finalize_session() ne tue pas le thread UI quand pyperclip.copy lève
 # (SSH nu, pas de presse-papiers) : le texte est imprimé sur stdout, l'état
 # repasse en ÉCOUTE, le thread survit.
 

@@ -123,8 +123,8 @@ def _drain(q):
 
 
 def test_wake_phrase_on_partial_never_wakes(monkeypatch):
-    # Un partiel ne déclenche plus le réveil — c'était la porte du faux
-    # positif « active » seul sous grammaire restreinte.
+    # Un partiel ne déclenche jamais le réveil : sous grammaire restreinte il
+    # laisserait passer le faux positif « active » seul.
     script = [("partial", {"partial": "active dictée"}),
               ("partial", {"partial": "active dictée"})]
     _text, ctrl, fake = _run_thread(script, STATE_LISTENING, monkeypatch)
@@ -175,7 +175,7 @@ def test_wake_on_final_needs_confidence_when_grammar_is_full(monkeypatch):
 
 def test_wake_on_final_needs_confidence_with_restricted_grammar(monkeypatch):
     # Sous grammaire restreinte (défaut fr), le garde de confiance s'applique
-    # aussi — avant, un final quelconque sous restreinte réveillait sans garde.
+    # aussi : sans lui, un final quelconque sous restreinte réveillerait.
     low = [{"word": "active", "conf": 0.30}, {"word": "dictée", "conf": 0.20}]
     script = [("final", {"text": "active dictée", "result": low})]
     _text, ctrl, _fake = _run_thread(script, STATE_LISTENING, monkeypatch)

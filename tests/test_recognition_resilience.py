@@ -342,5 +342,5 @@ def test_supervise_threads_silent_when_stop_already_requested():
     dead = threading.Thread(target=lambda: None, daemon=True)
     dead.start()
     dead.join()
-    # Arrêt déjà demandé : une mort de thread n'est plus un incident à signaler.
+    # Arrêt déjà demandé : une mort de thread n'est pas un incident à signaler.
     assert appmain.supervise_threads({"ui": dead}, stop) is None

@@ -1,6 +1,6 @@
-# On ne peut plus ouvrir une DICTÉE fantôme en VEILLE : toute demande de
+# Aucune DICTÉE fantôme ne s'ouvre en VEILLE : toute demande de
 # dictée (TOGGLE_RECORDING, DICTATION_ON, /nl) sort d'abord de veille, puis
-# démarre. Plus un retour périodique honnête tant que la VEILLE dure.
+# démarre. Un rappel périodique honnête tant que la VEILLE dure.
 
 import queue
 import threading

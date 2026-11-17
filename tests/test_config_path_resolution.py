@@ -1,5 +1,4 @@
-# Résolution du fichier de configuration : cascade XDG de _get_config_path
-# (DOCUMENTATION_MULTILINGUE.md §10.2, CONFIG_PUBLIQUE_ET_LOCALISATION.md §2.3).
+# Résolution du fichier de configuration : cascade XDG de _get_config_path.
 #
 # Le repli du niveau 4 sur le config.<lang>.yaml embarqué couvre l'installation
 # depuis le tarball des sources : un `git archive` n'a pas de .git (le niveau

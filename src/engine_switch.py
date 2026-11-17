@@ -13,7 +13,7 @@ from config.selection import SUPPORTED_LANGS, SYSTEM, clear_selection, resolve_l
 from src.i18n import get_translation, set_ui_language
 from src.runtime_state import runtime_state
 
-# Aucun moteur de correction n'existe encore ; `set-refine` n'est refusé que
+# Jetons toujours refusés (ERR unsupported). `set-refine` n'est refusé que
 # sans contrôleur de finition.
 UNSUPPORTED_TOKENS = ("set-correction",)
 

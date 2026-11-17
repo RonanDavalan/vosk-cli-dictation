@@ -14,9 +14,9 @@ ARCHIVE_BYTES = {
 }
 
 
-# Mémoire vive en Mo après chargement, mesurée sur ada (banc des moteurs,
-# `VAL_mesurer-moteurs.md`). Le complet anglais ne tient pas dans 8 Go : le banc a
-# arrêté la mesure après plus de 5 Go consommés.
+# Mémoire vive en Mo après chargement, mesurée au banc des moteurs sur un poste
+# de 8 Go. Le complet anglais n'y tient pas : la mesure a été arrêtée après plus
+# de 5 Go consommés.
 MEMORY_MB = {
     ("fr", "small"): 171, ("en", "small"): 178, ("de", "small"): 225, ("es", "small"): 156,
     ("fr", "big"): 3251, ("de", "big"): 4434, ("es", "big"): 3409,

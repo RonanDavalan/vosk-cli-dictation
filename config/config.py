@@ -68,8 +68,7 @@ class Config:
     @staticmethod
     def _get_config_path(project_root=None,
                          system_template_dir='/usr/share/vosk-cli-dictation'):
-        """Localise config.yaml via la cascade XDG (DOCUMENTATION_MULTILINGUE.md §10.2,
-        CONFIG_PUBLIQUE_ET_LOCALISATION.md §2.3).
+        """Localise config.yaml via la cascade XDG.
 
         Premier niveau concordant gagne :
 
@@ -265,10 +264,9 @@ class Config:
     def typography(self, lang_code: str = None) -> dict:
         """Profil typographique d'une langue.
 
-        Remplacement piloté par les données de l'ancienne branche française en
-        dur dans text_processing. Les clés manquantes replient sur un profil
-        neutre (pas d'espace fine, majuscule en début de phrase, guillemets
-        ASCII).
+        Piloté par les données du bloc `typography` de la langue. Les clés
+        manquantes replient sur un profil neutre (pas d'espace fine,
+        majuscule en début de phrase, guillemets ASCII).
         """
         lang_code = lang_code or self.current_lang
         raw = self.language_settings.get(lang_code, {}).get('typography', {})
@@ -282,7 +280,7 @@ class Config:
         }
 
     def model_search_roots(self, path_relative: str) -> list[str]:
-        """Liste ordonnée des racines cherchées pour un dossier de modèle (§10.3), pour les messages d'erreur."""
+        """Liste ordonnée des racines cherchées pour un dossier de modèle, pour les messages d'erreur."""
         nom_dossier = os.path.basename(path_relative)
         xdg_data_home = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -295,7 +293,7 @@ class Config:
     def get_model_path_by_name(self, model_name: str) -> str | None:
         """
         Résout le chemin complet d'un répertoire de modèle Vosk via la cascade
-        multi-racines (DOCUMENTATION_MULTILINGUE.md §10.3) : un chemin absolu
+        multi-racines : un chemin absolu
         explicite dans config.yaml gagne d'office ; sinon le premier répertoire
         existant parmi $XDG_DATA_HOME/vosk-models/, /usr/share/vosk-models/ et
         le ./vosk-model/ de développement d'un clone git.

@@ -121,7 +121,7 @@ def test_silence_mode_does_not_finalize_an_empty_session(monkeypatch):
 
 
 def test_toggle_mode_never_auto_finalizes_on_silence(monkeypatch):
-    # Non-régression : le mode par défaut ne doit jamais finaliser tout seul.
+    # Le mode par défaut ne doit jamais finaliser tout seul.
     script = [("final", {"text": "bonjour", "result": [{"word": "bonjour", "conf": 0.9}]})]
     ctrl, _text = _run_silence(monkeypatch, script, mode="toggle", timeout_ms=50)
     assert "FINALIZE_SESSION" not in _drain(ctrl)
